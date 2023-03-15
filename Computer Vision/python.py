@@ -108,20 +108,6 @@ cv.circle(img, tuple(random_point_3),10,(255,0,255),thickness = 3)
 cv.imshow('new hori', img)
 
 
-# newArray  = []
-# for i in positions:
-   
-#     if i[0,0]> min_y_point[0] and i[0,0] < max_x_point[0] and i[0,1] > min_y_point[1] and i[0,1] < max_y_point[1]:
-#         continue
-#     else:
-#         newArray.append(i)
-
-
-        
-# newArray = np.array(newArray)
-# # newArray = newArray.reshape((-1, 1, 2))
-# cv.drawContours(img, [newArray], -1, (0, 255, 0), 3)
-
 
 
 
