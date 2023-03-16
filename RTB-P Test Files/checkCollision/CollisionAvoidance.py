@@ -17,7 +17,7 @@ def GetLinkTransform(robot,q):
 def isTouchGround(robot,q):
     T = GetLinkTransform(robot,q)
     height = [T[i].A[2,3] for i in range(2,6)]
-    if min(height) > 0.05:
+    if min(height) > 0.1:
         return False
     else: 
         return True
@@ -31,16 +31,16 @@ def isCollision(robot,q,obstacle):
 
 # function to move robot using jtraj
 count = 1
-def Move_robot_raw(robot, q_end):
+def Move_back(robot, qpath):
     print('Unsafe movement!')
-    path =rtb.jtraj(robot.q,q_end,t=50)
-    for q in path.q:
+    
+    for q in reversed(qpath):
         robot.q = q
         env.step(0.05)
 
 def Move_robot(robot, q_end):
     global count
-    path =rtb.jtraj(robot.q,q_end,t=100)
+    path =rtb.jtraj(robot.q,q_end,t=50)
     for i in range(len(path)):
         # check each link
         if not isTouchGround(robot,path.q[i]) and not isCollision(robot,path.q[i],obstacle):
@@ -50,14 +50,13 @@ def Move_robot(robot, q_end):
         elif isTouchGround(robot,path.q[i]) and not isCollision(robot,path.q[i],obstacle):
             count = count + 1
             print(count,'.May touch ground, another path!')
-            Move_robot_raw(robot,path.q[i-1])
+            Move_back(robot,path.q[int(0.75*i):i])
             break
         elif isCollision(robot,path.q[i],obstacle):
             count = count + 1
             print(count,'.Get collision, another path!')
-            Move_robot_raw(robot,path.q[i-1])
+            Move_back(robot,path.q[int(0.75*i):i])
             break
-
 
 
 env = swift.Swift()
@@ -75,3 +74,12 @@ env.add(obstacle)
 while True:
     q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])   
     Move_robot(robot,q_rand)
+
+# q_end = robot.qr
+# path = rtb.jtraj(robot.q, q_end,50)
+
+# for q in path.q:
+#     robot.q = q
+#     env.step(0.05)
+
+# Move_back(robot,path.q[35:49])
