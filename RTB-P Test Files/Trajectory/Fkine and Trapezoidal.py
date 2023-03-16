@@ -14,7 +14,8 @@ def GetLinkTransform(robot,q):
 
 # function to move robot using jtraj
 def Move_robot(robot, q_end):
-    path =rtb.trapezoidal(robot.q,q_end,t=50)
+    #path =rtb.trapezoidal(robot.q,q_end,t =50)
+    path =rtb.mtraj(tfunc = rtb.trapezoidal,q0 = robot.q, qf = q_end,t=50)
     for q in path.q:
         # check height condition for each link
         height = [GetLinkTransform(robot,q)[i].A[2,3] for i in range(2,6)]
