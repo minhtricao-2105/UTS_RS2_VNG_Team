@@ -33,29 +33,34 @@ def isCollision(robot,q,obstacle):
 count = 1
 def Move_back(robot, qpath):
     print('Unsafe movement!')
-    
     for q in reversed(qpath):
-        robot.q = q
-        env.step(0.05)
+            robot.q = q
+            env.step(0.05)
+    
 
 def Move_robot(robot, q_end):
     global count
-    path =rtb.jtraj(robot.q,q_end,t=50)
+    #path =rtb.jtraj(robot.q,q_end,t=50)
+    path = rtb.mtraj(tfunc = rtb.trapezoidal,q0 = robot.q, qf = q_end,t=60)
     for i in range(len(path)):
         # check each link
-        if not isTouchGround(robot,path.q[i]) and not isCollision(robot,path.q[i],obstacle):
-            print('Move normal!')
+        touchGround= isTouchGround(robot,path.q[i])
+        touchObject = isCollision(robot,path.q[i],obstacle)
+        if not touchGround and not touchObject:
+            #print('Move normal!')
             robot.q = path.q[i]
             env.step(0.05)
-        elif isTouchGround(robot,path.q[i]) and not isCollision(robot,path.q[i],obstacle):
+        elif touchGround and not touchObject:
             count = count + 1
             print(count,'.May touch ground, another path!')
-            Move_back(robot,path.q[int(0.75*i):i])
+            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
+            else: break
             break
-        elif isCollision(robot,path.q[i],obstacle):
+        elif touchObject:
             count = count + 1
             print(count,'.Get collision, another path!')
-            Move_back(robot,path.q[int(0.75*i):i])
+            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
+            else: break
             break
 
 
