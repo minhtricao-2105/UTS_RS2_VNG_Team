@@ -5,6 +5,8 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 from math import pi
+from spatialmath import SE3
+import roboticstoolbox as rtb 
 import time
 
 # Initialize the moveit_commander and rospy nodes
@@ -29,28 +31,19 @@ current_joint_values = arm.get_current_joint_values()
 #Set the home of the robot:
 joint_home = [1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0]
 
+#robot clone
+robotClone = rtb.models.UR3()
+robotClone.q = joint_home
 
-# Set the joint target positions (in radians)
-# Set the joint target positions (in radians)
-joint_goal1 = [1.57, -1.57, 1.57, 0, 0, 0]
-joint_goal2 = [-1.57, -1.57, 1.57, 1.57, 0.6, 0.7]
-joint_goal3 = [0, -1.57, 1.57, 0, 0, 0]
-joint_goal4 = [1.57, 0, 1.57, 0, 0, 0]
-joint_goal5 = [-1.57, -0.5, 1.57, 0, 0, 0]
-joint_goals = [joint_goal1, joint_goal2, joint_goal3, joint_goal4, joint_goal5]
+# #destination
+T = SE3(0.3, 0.2, 0.2) * SE3.Rx(-pi/2) * SE3.Ry(pi/4)
+joint_end = robotClone.ikine_LM(T,q0 = robot.q).q
+path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = joint_home, qf = joint_end, t = 100)
 
 # move the robot to the home position
 arm.go(joint_home, wait=True)
 
-# loop through each joint goal and move the robot to it
-while True:
-    for goal in joint_goals:
-        arm.go(goal)
-
-# move the robot back to the home position
-arm.go(joint_home, wait=True)
-
-    
-
+for q in path.q:
+    arm.go(q,wait = True)    
 
 moveit_commander.roscpp_shutdown()
