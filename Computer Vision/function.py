@@ -4,7 +4,7 @@ import math
 from math import sqrt, pow
 
 # Rescale Function:
-def rescaleFrame(frame, scale = 0.7):
+def rescaleFrame(frame, scale):
     width     = int(frame.shape[1] * scale)
     height    = int(frame.shape[0] * scale)
     dimension = (width, height)
@@ -74,10 +74,10 @@ def findCordinate(positions, img):
 
 #Draw a rectangle for 4 points
 def drawRec(img, array):
-    cv.line(img, tuple(array[0]), tuple(array[1]), (0, 255, 0), 3)
-    cv.line(img, tuple(array[1]), tuple(array[2]), (0, 255, 0), 3)
-    cv.line(img, tuple(array[2]), tuple(array[3]), (0, 255, 0), 3)
-    cv.line(img, tuple(array[3]), tuple(array[0]), (0, 255, 0), 3)
+    cv.line(img, tuple(array[0]), tuple(array[1]), (235, 97, 35), 3)
+    cv.line(img, tuple(array[1]), tuple(array[2]), (235, 97, 35), 3)
+    cv.line(img, tuple(array[2]), tuple(array[3]), (235, 97, 35), 3)
+    cv.line(img, tuple(array[3]), tuple(array[0]), (235, 97, 35), 3)
     
 
 #Displace 4 points:
@@ -118,7 +118,7 @@ def findEdgeNear(edge, point, img, array):
             closest_contour = contour
     # Draw the closest contour on the original image
     if closest_contour is not None:
-        cv.drawContours(img, [closest_contour], -1, (255, 0, 0), 4)
+        cv.drawContours(img, [closest_contour], -1, (255, 0, 0), 6)
     else: drawRec(img,array)
     
 

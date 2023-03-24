@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import copy
 import rospy
@@ -6,13 +7,19 @@ import moveit_commander
 import moveit_msgs.msg
 from math import pi
 import time
+import random
 from onrobot_rg_control.msg import OnRobotRGOutput
 
-# Initialize the moveit_commander and rospy nodes
-moveit_commander.roscpp_initialize(sys.argv)
-rospy.init_node('ur3e_set_joint_position', anonymous=True)
+# Create a ros node
+rospy.init_node('OnRobotRGSimpleController', anonymous=True)
 
 pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
+
+#for UR3E
+# Initialize the moveit_commander and rospy nodes
+moveit_commander.roscpp_initialize(sys.argv)
+
+
 
 # Initialize the MoveIt planning scene, robot commander, and arm group
 scene = moveit_commander.PlanningSceneInterface()
@@ -28,23 +35,17 @@ arm.set_max_velocity_scaling_factor(0.5)
 
 # Get the current joint values
 current_joint_values = arm.get_current_joint_values()
-current_pose_values = arm.get_current_pose().pose
 
-print(current_pose_values)
 #Set the home of the robot:
 joint_home = [1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0]
 
 
 # Set the joint target positions (in radians)
 # Set the joint target positions (in radians)
-joint_goal1 = [1.57, -1.57, 1.57, 0, 0, 0]
-joint_goal2 = [-1.57, -1.57, 1.57, 1.57, 0.6, 0.7]
-joint_goal3 = [0, -1.57, 1.57, 0, 0, 0]
-joint_goal4 = [1.57, -1.57, 1.57, 0, 0, 0]
-joint_goal5 = [-1.57, -1.57, 1.57, 0, 0, 0]
-joint_job = [46.87*pi/180, -78.77*pi/180, 89.39*pi/180, -101.42*pi/180, -89.38*pi/180, 319.51*pi/180]
+joint_goal1 = [1.7708, -1.5708, 1.7708, -1.8708, -1.5708, 0]
 
-joint_goals = [joint_job,joint_home, joint_goal1, joint_goal2, joint_goal3, joint_goal4, joint_goal5]
+joint_goals = [joint_goal1] 
+
 
 # Create a command to open the gripper
 command_open = OnRobotRGOutput()
@@ -70,23 +71,18 @@ pub.publish(command_close)
 rospy.sleep(1)
 
 
-# move the robot to the home position
-arm.go(joint_home)
+# Keep publishing the close command to the gripper topic to keep the gripper closed
+while not rospy.is_shutdown():
+    pub.publish(command_open)
+    break
 
-done = True
-# loop through each joint goal and move the robot to it
-while True:
-    for goal in joint_goals:
-        arm.go(goal)
-        rospy.sleep(1)
-        if done: 
-            pub.publish(command_close)
-            done = False
+arm.go(joint_home, wait = True)
 
-# move the robot back to the home position
-arm.go(joint_home, wait=True)
-
+while not rospy.is_shutdown():
     
+    pub.publish(command_close)
+    rospy.sleep(0.1)
 
+    break
 
-moveit_commander.roscpp_shutdown()
+rospy.is_shutdown()

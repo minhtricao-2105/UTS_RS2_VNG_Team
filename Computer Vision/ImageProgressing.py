@@ -7,11 +7,18 @@ from math import sqrt, pow
 from function import*
 
 #Import picture:
-img = cv.imread('Photo/photo4.PNG')
+img = cv.imread('WebCam/pic2.jpg')
 
+#Get the height of the figure => so that we can calculate the scale
+
+#Scale the figure down for good resolution:
+scale = 1-((img.shape[0]-336)/img.shape[0])
 #Formating the img
 
-img = rescaleFrame(img)
+img = rescaleFrame(img,scale)
+
+print("Height: ", img.shape[0])
+print("Width: ", img.shape[1])
 
 cv.imshow('news',img)
 
@@ -39,31 +46,20 @@ canny = cv.Canny(gray, 100,250)
 # Find non-zero pixel positions
 positions = cv.findNonZero(canny)
 
+# Find 4 coordinate point of a figure:
+findCordinate(positions, img)
 
-#Find 4 position of an edge:
-point_edge = findCordinate(positions, img)
+# Draw a rectangle for 4 coorditane
+drawRec(img, findCordinate(positions, img))
 
-#Find and edge:
-# drawRec(img, point_edge[0],point_edge[1],point_edge[2],point_edge[3])
+#The function findCordinate() is store the value of 4 specific points
+array = findCordinate(positions, img)
 
-#Displace points
-displacePoints(img, point_edge[0],point_edge[1],point_edge[2],point_edge[3])
+# findEdgeNear(canny, array[0], img, array)
+for point in array:
+    print(point)
 
-#find midpoint
-midpoint = arrayMidPoint(point_edge)
-
-displacePoints(img, midpoint[0], midpoint[1], midpoint[2], midpoint[3])
-
-displacePoint(img,findMiddle(midpoint[0],midpoint[2]))
-
-#find the edge inside start here:
-displacePoint(img, findnNear(positions, findMiddle(midpoint[0],findMiddle(midpoint[0],midpoint[2]))))
-
-
-#Show the firgue:
-findEdgeNear(canny, findMiddle(midpoint[0],midpoint[2]),img, point_edge)
-cv.imshow('new', canny)
-
-
+cv.imshow('new horisan', img)
+cv.imshow('hello', canny)
 cv.waitKey(0)
 cv.destroyAllWindows()
