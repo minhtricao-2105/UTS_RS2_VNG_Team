@@ -24,39 +24,42 @@ def isTouchGround(robot,q):
         return True
 
 # check for self collision at a joint coordinate q, see self-collision text file
-def isSelfCollision_UR3(robot,q):
-    qHolder = robot.q
-    robot.q = q
+roboClone = rtb.models.UR3() #make a clone for self collision check
+def isSelfCollision_UR3(q):
+    global roboClone
+    roboClone.q = q
     for i in reversed(range(8)[1:8]):
         stopCheck = False
-        for j in reversed(range(i - 1)[1:i]):
-            isCollide = robot.links[i].iscollided(shape = robot.links[j].collision[0], skip =True)
+        if i == 2 :break
+        for j in reversed(range(i - 1)[1:i-1]):
+            isCollide = roboClone.links[i].iscollided(shape = roboClone.links[j].collision[0])
             if isCollide: 
                 stopCheck = True
-                robot.q = qHolder
+                print("--COLLISION DETECT:",roboClone.links[i].name," will collide with ",roboClone.links[j].name)
                 break    
         if stopCheck: break
-    robot.q = qHolder
     return stopCheck
 
 #function to move robot back
 count = 1
 def Move_back(robot, qpath):
-    print('Unsafe movement!')
+    print('--Unsafe movement!')
     for q in reversed(qpath):
             robot.q = q
-            env.step(0.05)
+            env.step(0.07)
 
 # move UR3/e robot with self-collsion detect incorporate
 def MoveUR3(robot,qEnd):
+    print("**TRY TO MOVE ALONG PATH:")
     global count
+    global stopLoop
     # path = rtb.jtraj(q0 = robot.q, qf = qEnd,t=60)
     path = rtb.mtraj(tfunc=rtb.trapezoidal,q0 = robot.q,qf=qEnd,t =60)
     pathFinished = True
     for i in range(len(path)):
         # check each link
         touchGround= isTouchGround(robot,path.q[i])
-        touchSelf = isSelfCollision_UR3(robot,path.q[i])
+        touchSelf = isSelfCollision_UR3(path.q[i])
         
         if not touchGround and not touchSelf:
             #print('Move normal!')
@@ -64,19 +67,17 @@ def MoveUR3(robot,qEnd):
             env.step(0.05)
         elif touchGround and not touchSelf:
             count = count + 1
-            print(count,'.May touch ground, another path!')
-            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
-            else:
-                print("i=",i,"Stuck!") 
-                break
+            print(count,'.May touch ground at step', i ,', another path!')
+            pathFinished = False 
+            if i >= 2: Move_back(robot,path.q[int(0.8*i):i])
+            elif i==1: stopLoop = True
             break
         elif touchSelf:
             count = count + 1
-            print(count,'.Get self collision, another path!')
-            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
-            else:
-                print("i=",i,"Stuck!") 
-                break
+            print(count,'.Get self collision at step', i ,', another path!')
+            pathFinished = False 
+            if i >= 2: Move_back(robot,path.q[int(0.8*i):i])
+            elif i==1: stopLoop = True
             break
 
     print("Path finished:", pathFinished)
@@ -90,18 +91,25 @@ env = swift.Swift()
 env.launch(realtime=True)
 env.add(robot)
 
+stopLoop = False
+
 # run the robot randomly
 while True:
+    if stopLoop:
+        print("Can't recover. Stop moving!")
+        break
+
     q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])   
-    selfCo = isSelfCollision_UR3(robot,q_rand)
+    selfCo = isSelfCollision_UR3(q_rand)
     groundCo = isTouchGround(robot,q_rand)
-    print("Self collision: ",selfCo," and Ground collision:",groundCo)    
+    print("---Self collision: ",selfCo,"; Ground collision:",groundCo)    
     if selfCo or groundCo:
-        print("Regenerate final q!")
+        print("->Regenerate final q!")
         continue
     else: 
         MoveUR3(robot,q_rand)
+    print("----\n\n")
 
 
-
+env.hold()
 
