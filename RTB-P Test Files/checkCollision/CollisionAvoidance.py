@@ -29,13 +29,13 @@ def isCollision(robot,q,obstacle):
     else:
         return False
 
-# function to move robot using jtraj
+# function to move robot back
 count = 1
 def Move_back(robot, qpath):
     print('Unsafe movement!')
     for q in reversed(qpath):
             robot.q = q
-            env.step(0.05)
+            env.step(0.07)
     
 
 def Move_robot(robot, q_end):
@@ -77,7 +77,10 @@ env.add(obstacle)
 
 # run the robot randomly
 while True:
-    q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])   
+    q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
+
+    if isCollision(robot,q_rand,obstacle) or isTouchGround(robot,q_rand): continue
+    
     Move_robot(robot,q_rand)
 
 # q_end = robot.qr
