@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- <node name="rg_hardware_interface_node" pkg="rg_controller" type="rg_hardware_interface" output="screen" /> -->
+
+  <arg name="robot_ip" default="192.168.1.2" />
+  <arg name="robot_description_file" default="$(find ur3e_rg2_moveit_config)/launch/load_robot.launch" />
+  <arg name="kinematics_config" default="$(find ur_description)/config/ur3e/default_kinematics.yaml" doc="Kinematics config file used for calibration correction. This will be used to verify the robot's calibration is matching the robot_description."/>
+  <arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller force_torque_sensor_controller robot_status_controller rg_controller" />
+  <include file="$(find ur_robot_driver)/launch/ur3e_bringup.launch" pass_all_args="true" />
+
+  <!-- <rosparam command="load" file="$(find rg_controller)/config/controllers.yaml" />
+  <node name="controller_spawner_2" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="rg_controller" /> -->
+</launch>

@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ""
+    relative_path: /home/selimon/ur_ws/src/ur3e_with_onrobot_rg2.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/ur3e_with_onrobot_rg2.srdf
+  CONFIG:
+    author_name: hamyy
+    author_email: oudy_1999@hotmail.com
+    generated_timestamp: 1677209649

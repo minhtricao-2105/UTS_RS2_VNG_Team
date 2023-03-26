@@ -1,0 +1,8 @@
+prefix=/home/selimon/ur_ws/src/moveit_control/build/devel
+
+Name: moveit_control
+Description: Description of moveit_control
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="ur3e_with_onrobot_rg2" >
+
+  
+  <!-- ur3e -->
+  <xacro:include filename="$(find ur_description)/urdf/inc/ur3e_macro.xacro"/>
+  <xacro:ur3e_robot prefix="" />
+  <!-- gripper -->
+  <xacro:include filename="$(find rg2_description)/urdf/rg2.urdf.xacro"/>
+  <xacro:rg2 prefix="rg2_" />
+
+  
+  <!-- attach gripper -->
+  <joint name="ur3e_rg2_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 -${pi/2} ${pi/2}" />
+    <parent link="tool0" />
+    <child link="rg2_base_link" />
+  </joint>
+
+
+</robot>

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/selimon/ur_ws/src/moveit_control/build/devel/setup.sh

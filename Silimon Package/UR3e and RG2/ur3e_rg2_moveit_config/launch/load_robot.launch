@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="kinematics_params" default="$(find ur_description)/config/ur3e/default_kinematics.yaml"/>
+    <param name="robot_description" command="$(find xacro)/xacro '/home/selimon/ur_ws/src/ur3e_with_onrobot_rg2.urdf.xacro'" />
+</launch>   
