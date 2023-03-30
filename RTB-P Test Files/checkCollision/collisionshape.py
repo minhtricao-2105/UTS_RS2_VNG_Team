@@ -13,7 +13,7 @@ from math import pi
 #         robot.q = q
 #         env.step(0.05)
 
-robot = rtb.models.UR10()
+robot = rtb.models.Panda()
 # print(type(robot.links[0]))
 # a = type(robot.links[0].collision)
 # print(a)
