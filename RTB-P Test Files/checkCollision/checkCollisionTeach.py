@@ -49,7 +49,7 @@ for link in robot.links:
 
 qref = [None]*robot.n
 count = 1
-def updateCollsionStatus():  
+def update_collision_status():  
     global qref
     global count
     if robot.iscollided(robot.q,obstacle,True):
@@ -68,5 +68,5 @@ while True:
 
     # Update the environment with the new robot pose
     env.step(0)
-    updateCollsionStatus()
+    update_collision_status()
     time.sleep(0.01)

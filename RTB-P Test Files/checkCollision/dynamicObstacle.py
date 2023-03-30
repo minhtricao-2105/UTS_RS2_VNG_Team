@@ -10,15 +10,15 @@ import threading
 
 #### ROBOT MOVE #####################################################
 # return an list include <class 'spatialmath.pose3d.SE3'> object as transform of each link given joint state
-def GetLinkTransform(robot,q):
+def get_link_transform(robot,q):
     T = [] # Tranforms array of link
     for i in range(len(q)):
         T.append(robot.fkine(q,end = robot.links[i].name)) 
     return T
 
 # check whether the robot touches the ground
-def isTouchGround(robot,q):
-    T = GetLinkTransform(robot,q)
+def is_touch_ground(robot,q):
+    T = get_link_transform(robot,q)
     height = [T[i].A[2,3] for i in range(2,6)]
     if min(height) > 0.1:
         return False
@@ -27,7 +27,7 @@ def isTouchGround(robot,q):
 
 # check for self collision at a joint coordinate q, see self-collision text file
 roboClone = rtb.models.UR3() #make a clone for self collision check
-def isSelfCollision_UR3(q):
+def is_self_collision_UR3(q):
     global roboClone
     roboClone.q = q
     for i in reversed(range(8)[1:8]):
@@ -43,7 +43,7 @@ def isSelfCollision_UR3(q):
     return stopCheck
 
 # check collision with the obstacle list
-def isCollisionObstacle(robot,q,obstacleList):
+def is_collision_obstacle(robot,q,obstacleList):
     isCollide = False
     for obstacle in obstacleList:
         if robot.iscollided(q,obstacle,True):
@@ -53,7 +53,7 @@ def isCollisionObstacle(robot,q,obstacleList):
 
 # move UR3/e robot with self-collsion detect incorporate
 count = 1
-def MoveRobot(robot,qEnd,obstacleList):
+def move_robot(robot,qEnd,obstacleList):
     print("**TRY TO MOVE ALONG PATH:")
     global stopLoop
     global count
@@ -62,9 +62,9 @@ def MoveRobot(robot,qEnd,obstacleList):
     pathFinished = True
     for i in range(len(path)):
         # check each link
-        touchGround= isTouchGround(robot,path.q[i])
-        touchSelf = isSelfCollision_UR3(path.q[i])
-        touchObstacle = isCollisionObstacle(robot,path.q[i],obstacleList) 
+        touchGround= is_touch_ground(robot,path.q[i])
+        touchSelf = is_self_collision_UR3(path.q[i])
+        touchObstacle = is_collision_obstacle(robot,path.q[i],obstacleList) 
         if not touchGround and not touchSelf and not touchObstacle:
             #print('Move normal!')
             robot.q = path.q[i]
@@ -76,8 +76,8 @@ def MoveRobot(robot,qEnd,obstacleList):
             
             count = count + 1
             pathFinished = False 
-            # if i >= 2: MoveBack(robot,path.q[int(0.8*i):i])
-            # elif i==1: stopLoop = True
+            if i >= 2: move_back(robot,path.q[int(0.8*i):i])
+            elif i==1: stopLoop = True
             if i == 1 : stopLoop = True
             break
                  
@@ -85,7 +85,7 @@ def MoveRobot(robot,qEnd,obstacleList):
     return pathFinished
 
 # function to move robot back
-def MoveBack(robot, qpath):
+def move_back(robot, qpath):
     print('Unsafe movement!')
     for q in reversed(qpath):
             robot.q = q
@@ -94,33 +94,30 @@ def MoveBack(robot, qpath):
 
 # Randomly move the robot
 stopLoop = False
-def RunRobotRandom(obstacleList):
+def run_robot_random(obstacleList):
     while True:
         if stopLoop:
             print("Can't recover. Stop moving!")
             break
         q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
         
-        selfCo = isSelfCollision_UR3(q_rand)
-        groundCo = isTouchGround(robot,q_rand)
-        # obCo = isCollisionObstacle(robot,q_rand,obstacleList)
+        selfCo = is_self_collision_UR3(q_rand)
+        groundCo = is_touch_ground(robot,q_rand)
+        # obCo = is_collision_obstacle(robot,q_rand,obstacleList)
         
         print("---Self collision: ",selfCo,"; Ground collision:",groundCo) 
         if selfCo or groundCo:
             print("->Goal may touch ground or lead to self-collision! Regenerate final q!")
             continue
         else: 
-            MoveRobot(robot,q_rand,obstacleList)
+            move_robot(robot,q_rand,obstacleList)
         print("----\n\n")
 
 #### OBJECT MOVE ####################################
 # create a point lists for a circle
-def Circle():
-    # Define the radius of the circle
-    radius = 0.3
-
-    # Define the distance from the z-axis
-    distanceZ = 0.3
+def circle(radius = 0.3,distanceZ = 0.5):
+    # Input the radius of the circle
+    # Input the distance from the z-axis
 
     # Define the number of points to generate
     num_points = 300
@@ -139,15 +136,15 @@ def Circle():
     return points
 
 # draw that circle
-def CircleDisplay():
-    points = Circle()  
+def circle_display(radius,distanceZ):
+    points = circle(radius,distanceZ)  
     for p in points:
         dot = collisionObj.Sphere(radius=0.003,pose = SE3(p),color = (0.5,0.2,0.2,1))
         env.add(dot)
 
 # move the input obstacle along the circular trajectory
-def CircleMove(obstacle):
-    trajectory = Circle()
+def circle_move(obstacle,radius,distanceZ):
+    trajectory = circle(radius,distanceZ)
     while True:
         for p in trajectory:
             obstacle.T = SE3(p)
@@ -166,10 +163,10 @@ env.launch(realtime= "True")
 env.add(obstacle)
 env.add(robot)
 
-CircleDisplay()
+circle_display(radius=0.3,distanceZ=0.4)
 
-t1 = threading.Thread(target = RunRobotRandom, args = (osbtacleList,))
-t2 = threading.Thread(target = CircleMove, args = (obstacle,))
+t1 = threading.Thread(target = run_robot_random, args = (osbtacleList,))
+t2 = threading.Thread(target = circle_move, args = (obstacle,0.3,0.4,))
 
 t1.start()
 t2.start()

@@ -7,15 +7,15 @@ import random
 import spatialgeometry.geom as collisionObj
 
 # return an list include <class 'spatialmath.pose3d.SE3'> object as transform of each link given joint state
-def GetLinkTransform(robot,q):
+def get_link_transform(robot,q):
     T = [] # Tranforms array of link
     for i in range(len(q)):
         T.append(robot.fkine(q,end = robot.links[i].name)) 
     return T
 
 # check whether the robot touches the ground
-def isTouchGround(robot,q):
-    T = GetLinkTransform(robot,q)
+def is_touch_ground(robot,q):
+    T = get_link_transform(robot,q)
     height = [T[i].A[2,3] for i in range(2,6)]
     if min(height) > 0.1:
         return False
@@ -23,7 +23,7 @@ def isTouchGround(robot,q):
         return True
 
 # check collision with the obstacle
-def isCollision(robot,q,obstacle):
+def is_collision(robot,q,obstacle):
     if robot.iscollided(q,obstacle,True):
         return True
     else:
@@ -31,21 +31,21 @@ def isCollision(robot,q,obstacle):
 
 # function to move robot back
 count = 1
-def Move_back(robot, qpath):
+def move_back(robot, qpath):
     print('Unsafe movement!')
     for q in reversed(qpath):
             robot.q = q
             env.step(0.07)
     
 
-def Move_robot(robot, q_end):
+def move_robot(robot, q_end):
     global count
     #path =rtb.jtraj(robot.q,q_end,t=50)
     path = rtb.mtraj(tfunc = rtb.trapezoidal,q0 = robot.q, qf = q_end,t=60)
     for i in range(len(path)):
         # check each link
-        touchGround= isTouchGround(robot,path.q[i])
-        touchObject = isCollision(robot,path.q[i],obstacle)
+        touchGround= is_touch_ground(robot,path.q[i])
+        touchObject = is_collision(robot,path.q[i],obstacle)
         if not touchGround and not touchObject:
             #print('Move normal!')
             robot.q = path.q[i]
@@ -53,13 +53,13 @@ def Move_robot(robot, q_end):
         elif touchGround and not touchObject:
             count = count + 1
             print(count,'.May touch ground, another path!')
-            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
+            if i > 2: move_back(robot,path.q[int(0.8*i):i])
             else: break
             break
         elif touchObject:
             count = count + 1
             print(count,'.Get collision, another path!')
-            if i > 2: Move_back(robot,path.q[int(0.8*i):i])
+            if i > 2: move_back(robot,path.q[int(0.8*i):i])
             else: break
             break
 
@@ -79,9 +79,9 @@ env.add(obstacle)
 while True:
     q_rand = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
 
-    if isCollision(robot,q_rand,obstacle) or isTouchGround(robot,q_rand): continue
+    if is_collision(robot,q_rand,obstacle) or is_touch_ground(robot,q_rand): continue
     
-    Move_robot(robot,q_rand)
+    move_robot(robot,q_rand)
 
 # q_end = robot.qr
 # path = rtb.jtraj(robot.q, q_end,50)
@@ -90,4 +90,4 @@ while True:
 #     robot.q = q
 #     env.step(0.05)
 
-# Move_back(robot,path.q[35:49])
+# move_back(robot,path.q[35:49])

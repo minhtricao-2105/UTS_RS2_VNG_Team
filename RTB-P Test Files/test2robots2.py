@@ -6,7 +6,7 @@ from numpy import pi
 import threading
 
 # convert poses to joints path
-def PtJ(r,path):
+def poses_to_joints(r,path):
     q_list = np.empty((len(path),6))
     q_list = np.empty((len(path),6))
     for i in range(len(path)):
@@ -30,7 +30,7 @@ initial_joints = np.array([0,-pi/2,pi/4,0,0,0])
 
 # import robots and set position
 r1 = rtb.models.UR3()
-r2 = rtb.models.Panda()
+r2 = rtb.models.UR3()
 
 r1.q = initial_joints
 r2.q = initial_joints
@@ -54,8 +54,8 @@ path_1 = rtb.ctraj(r1_start_T, r1_final_T, 50)
 path_2 = rtb.ctraj(r2_start_T, r2_final_T, 50)
 
 # joint trajectory
-q_list1 = PtJ(r1,path_1)
-q_list2 = PtJ(r2,path_2)
+q_list1 = poses_to_joints(r1,path_1)
+q_list2 = poses_to_joints(r2,path_2)
 
 # run 2 threads
 t1 = threading.Thread(target=move_robot, args=(r1, q_list1))

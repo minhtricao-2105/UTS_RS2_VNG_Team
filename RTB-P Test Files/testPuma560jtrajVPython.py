@@ -10,7 +10,6 @@ env.launch(realtime=True)
 env.add(p560)
 
 qt = rtb.tools.trajectory.jtraj(p560.qz, p560.qr, 50)
-
 for q in qt.q:
     p560.q = q
     env.step(0.05)
