@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import copy
 import rospy
@@ -7,6 +8,7 @@ import moveit_msgs.msg
 from math import pi
 import time
 from onrobot_rg_control.msg import OnRobotRGOutput
+from sensor_msgs.msg import JointState
 
 # Initialize the moveit_commander and rospy nodes
 moveit_commander.roscpp_initialize(sys.argv)
@@ -26,16 +28,42 @@ arm.set_end_effector_link("ee_link")
 # Set the maximum velocity scaling factor
 arm.set_max_velocity_scaling_factor(0.5)
 
+# Create a function to get infor fro joint state:
+joint_positions = []
+joint_velocity = []
+joint_name = []
+def get_joint_positions(msg):
+    global joint_positions
+    global joint_velocity
+    global joint_name
+    joint_positions = msg.position
+    joint_velocity = msg.velocity
+    joint_name = msg.name
+
+sub = rospy.Subscriber("/joint_states", JointState, get_joint_positions)
+
+def get_data():
+    rospy.sleep(0.5)
+    global joint_positions
+    global joint_velocity
+    global joint_name
+    joint_positions = list(joint_positions)
+    joint_velocity = list(joint_velocity)
+    joint_name = list(joint_name)
+
+get_data()
+
+print(f"Joint name is: {joint_name}")
+print(f"Joint position is: {joint_positions}")
+print(f"Joint velocity is: {joint_velocity}")
+
 # Get the current joint values
 current_joint_values = arm.get_current_joint_values()
 current_pose_values = arm.get_current_pose().pose
 
-print(current_pose_values)
 #Set the home of the robot:
 joint_home = [1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0]
 
-
-# Set the joint target positions (in radians)
 # Set the joint target positions (in radians)
 joint_goal1 = [1.57, -1.57, 1.57, 0, 0, 0]
 joint_goal2 = [-1.57, -1.57, 1.57, 1.57, 0.6, 0.7]
@@ -78,10 +106,13 @@ done = True
 while True:
     for goal in joint_goals:
         arm.go(goal)
-        rospy.sleep(1)
-        if done: 
-            pub.publish(command_close)
-            done = False
+        get_data()
+        print(f"Joint name is: {joint_name}")
+        print(f"Joint position is: {joint_positions}")
+        print(f"Joint velocity is: {joint_velocity}")
+        # if done: 
+        #     pub.publish(command_close)
+        #     done = False
 
 # move the robot back to the home position
 arm.go(joint_home, wait=True)
