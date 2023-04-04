@@ -59,7 +59,11 @@ array = findCordinate(positions, img)
 for point in array:
     print(point)
 
-cv.imshow('new horisan', img)
-cv.imshow('hello', canny)
-cv.waitKey(0)
+
+# Exit if the 'q' key is pressed
+while True:
+    cv.imshow('new horisan', img)
+    cv.imshow('hello', canny)
+    if cv.waitKey(1) == ord('q'):
+        break
 cv.destroyAllWindows()
