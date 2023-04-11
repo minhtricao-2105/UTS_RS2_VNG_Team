@@ -5,13 +5,13 @@ The problem statement for the Robothon Competition is centred around the issue o
 
 The Technical Statement of the Robothon Competition is to develop an autonomous robotic solution for handling electronic waste and make the disassembly and sorting of electronic waste more efficient and sustainable through automated recycling. The increase in electronic waste is a significant environmental concern due to hazardous materials, which can endanger human health and the planet's well-being. Robot platforms are necessary to ensure workers' safety and develop innovative and sustainable solutions for dealing with increased electronic waste.
 
-## 
+## Contents of the project
 
 This project will be divided into three main programs:
 
-1. Controlling the UR3e Robot by using the Robotic Toolbox for Python.
-2. Communicate between the Robotic Toolbox and ROS using action-client command.
-3. Computer Vision using the OpenCV Library and the Intel D435 RealSense Camera. 
+1. Controlling the UR3e Robot by using the Robotic Toolbox for Python. (Please find in RTB -P Test Files)
+2. Communicate between the Robotic Toolbox and ROS using action-client command. (Please find in ActionClientFeedback)
+3. Computer Vision using the OpenCV Library and the Intel D435 RealSense Camera. (Please find in Realsense and ComputerVision)
 
 ## Installation
 
