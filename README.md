@@ -119,3 +119,76 @@ roslaunch ur5_moveit_config moveit_rviz.launch
 
 Note: replace ur5 to your appropriate robot platform(ur3, ur3e, ur10,...)
 
+### Usage with Gazebo Simulation
+
+To bring up the simulated robot in Gazebo, run:
+
+```
+roslaunch ur_gazebo ur5_bringup.launch
+```
+
+MoveIt! with a simulated robot Again, you can use MoveIt! to control the simulated robot.
+
+For setting up the MoveIt! nodes to allow motion planning run:
+
+```
+roslaunch ur5_moveit_config moveit_planning_execution.launch sim:=true
+```
+
+For starting up RViz with a configuration including the MoveIt! Motion Planning plugin run:
+
+```
+roslaunch ur5_moveit_config moveit_rviz.launch
+```
+
+## OnRobot_RG2_Gripper Driver
+
+This package was written by Harada Laboratory from Osaka University, if you have some question, please ask them and here is the link of their github: https://github.com/Osaka-University-Harada-Laboratory/onrobot
+
+### Dependency
++ pymodbus==2.5.3
++ roboticsgroup/roboticsgroup_upatras_gazebo_plugins
+
+Note: the pymodbus version is really important. please make sure you have a correct version.
+
+### Installation
+```
+cd catkin_ws/src
+git clone https://github.com/takuya-ki/onrobot.git --depth 1
+git clone https://github.com/roboticsgroup/roboticsgroup_upatras_gazebo_plugins.git --depth 1
+cd ../
+sudo rosdep install --from-paths ./src --ignore-packages-from-source --rosdistro noetic -y --os=ubuntu:focal -y
+sudo apt install ros-noetic-ros-control ros-noetic-ros-controllers
+catkin build -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+
+### Usage: send motion command:
+Interactive mode
+```
+roslaunch onrobot_rg_control bringup.launch gripper:=[rg2/rg6] ip:=XXX.XXX.XXX.XXX
+rosrun onrobot_rg_control OnRobotRGSimpleController.py
+```
+
+ROS service call:
+```
+roslaunch onrobot_rg_control bringup.launch gripper:=[rg2/rg6] ip:=XXX.XXX.XXX.XXX
+rosrun onrobot_rg_control OnRobotRGSimpleControllerServer.py
+rosservice call /onrobot_rg/set_command c
+rosservice call /onrobot_rg/set_command o
+rosservice call /onrobot_rg/set_command '!!str 300'
+rosservice call /onrobot_rg/restart_power
+```
+### Simulation
+
+#### Display models
+```
+roslaunch onrobot_rg_description disp_rg6_model.launch
+roslaunch onrobot_rg_description disp_rg2_model.launch
+```
+#### Gazebo simulation
+```
+roslaunch onrobot_rg_gazebo bringup_rg6_gazebo.launch
+rostopic pub -1 /onrobot_rg6/joint_position_controller/command std_msgs/Float64 "data: 0.5"
+roslaunch onrobot_rg_gazebo bringup_rg2_gazebo.launch
+rostopic pub -1 /onrobot_rg2/joint_position_controller/command std_msgs/Float64 "data: 0.5"
+```
