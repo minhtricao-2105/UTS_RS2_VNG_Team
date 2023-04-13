@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../Modules')
 from ur3module import *
+from pathgenerator import *
 
 # create environment and robot
 env = swift.Swift()
@@ -21,17 +22,19 @@ q_goal = solve_for_valid_ik(robot=robot,obj_pose=SE3(goal_obj.T),relative_pose =
 # obstacles:
 obstacle_list = []
 obstacle_list.append(collisionObj.Sphere(radius = 0.07, pose = SE3(0.2,0.1,0.4),color = (0.1,0.1,0.5,1)))
-# obstacle_list.append(collisionObj.Sphere(radius = 0.07, pose = SE3(0.2,0.43,0.4),color = (0.1,0.1,0.5,1)))
+obstacle_list.append(collisionObj.Sphere(radius = 0.07, pose = SE3(0.2,0.43,0.4),color = (0.3,0.1,0.5,1)))
 for obstacle in obstacle_list:
    env.add(obstacle)
 
 # generate path to goal
 if not np.array_equal(q_goal,robot.q):
-   path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = robot.q, qf = q_goal, t = 50)
-   path_valid,all_valid = get_valid_path(robot, path, obstacle_list)
-   show_path(robot,path_valid,env)
+   path = gen_path(robot,q_goal,obstacle_list)
+#    path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = robot.q, qf = q_goal, t = 50)
+#    path_valid,all_valid = get_valid_path(robot, path, obstacle_list)
+   show_path(robot,path,env)
 
-for q in path_valid:
+
+for q in path:
    robot.q = q
    env.step(0.05)
 

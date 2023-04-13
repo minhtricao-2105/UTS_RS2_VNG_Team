@@ -113,6 +113,17 @@ def is_elbow_up(robot, q):
         return True
     else: return False
 
+def is_joint_valid(robot,q,obstacle_list = None):
+    
+    touch_ground= is_touch_ground(robot,q)
+    touch_self = is_self_collision_UR3(q)
+    if obstacle_list: touch_obstacle = is_collision_obstacle(robot,q,obstacle_list,is_swift = False)
+    else: touch_obstacle = False 
+    
+    if not touch_ground and not touch_self and not touch_obstacle:
+        return True,touch_ground,touch_self,touch_obstacle
+    else:
+        return False,touch_ground,touch_self,touch_obstacle
 
 def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_request = False)-> np.array:
     """
@@ -265,7 +276,7 @@ def get_valid_path(robot,path,obstacle_list = None):
     
     path_valid = []
     all_valid = False
-    
+
     for i in range(len(path)):
         touch_ground= is_touch_ground(robot,path.q[i])
         touch_self = is_self_collision_UR3(path.q[i])
@@ -278,14 +289,14 @@ def get_valid_path(robot,path,obstacle_list = None):
             break
 
     if len(path_valid) == len(path): 
-        print("Whole path is valid!") 
+        print("---->Whole path is valid!") 
         all_valid = True
     else: 
-        print("Only ",100*len(path_valid)/len(path),"% path is valid!")
+        print("---->Only ",100*len(path_valid)/len(path),"% path is valid!")
     print("--PATH CHECKING DONE!")
     return path_valid, all_valid
 
 def show_path(robot,path,env):
     for q in path:
-        env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(q),color = (0.5,0.1,0.1,1)))
+        env.add(collisionObj.Sphere(radius=0.002, pose = robot.fkine(q),color = (0.5,0.1,0.1,1)))
 
