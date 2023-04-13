@@ -20,8 +20,8 @@ def get_link_transform(robot,q)->bool:
     Computes SE3 object for each link of the input robot 
     """
     transform_list = [] # Tranforms array of link
-    for i in range(len(q)):
-        transform_list.append(robot.fkine(q,end = robot.links[i+2].name)) 
+    for i in range(len(q)+1): # one is added because link 0 is the world frame
+        transform_list.append(robot.fkine(q,end = robot.links[i].name)) 
     return transform_list
 
 def is_touch_ground(robot,q)->bool:
@@ -38,27 +38,32 @@ def is_touch_ground(robot,q)->bool:
  
     """
     T = get_link_transform(robot,q)
-    height = [T[i].A[2,3] for i in range(2,6)]
-    if min(height) > T[1].A[2,3]:
+    height = [T[i].A[2,3] for i in range(2,robot.n)]
+    # print(height, T[1].A[2,3])
+    if min(height) > T[1].A[2,3]: # at position 1 is the robot base
         return False
     else: 
         return True
 
-def is_collision_obstacle(robot,q,obstacle_list)->bool:
+def is_collision_obstacle(robot,q,obstacle_list,is_swift=True)->bool:
     """
     Check whether any self collision happens in an UR3 robot. 
 
     :param robot: Manipulator 
     :type robot: URDF model
+    :param q: joint state 
+    :type q: array like
     :param obstacle_list: list of obstacles 
     :type obstacle_list: list of objects of Shape class
+    :param is_swift: whether the Swift environment is used, default is True
+    :type is_swift: bool
     :return: whether any self-collision happens for a UR3 robot at the given joint state 
     :rtype: bool value
  
     """
     is_collide = False
     for obstacle in obstacle_list:
-        if robot.iscollided(q,obstacle,True):
+        if robot.iscollided(q,obstacle,is_swift):
             is_collide = True
             break
     return is_collide
@@ -103,7 +108,9 @@ def is_elbow_up(robot, q):
  
     """
     T = get_link_transform(robot,q)
-    if T[2].A[2,3] > T[5].A[2,3]: return True
+    if T[4].A[2,3] > T[-1].A[2,3]: # at position 4 is the elbow 
+        # print(T[4].A[2,3],T[-1].A[2,3]) 
+        return True
     else: return False
 
 
@@ -127,6 +134,7 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
     :rtype: list of joint state
  
     """
+    print("--SOLVING INVERSED KINEMATICS:")
     MAX_ITERATION =  100 
     TOLERANCE = 0.05 # tolerance, within 5cm from the goal
     
@@ -148,7 +156,8 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
             ground_touch = is_touch_ground(robot,pick_joint_config.q)
             self_collision = is_self_collision_UR3(pick_joint_config.q)
             if ground_touch or self_collision:
-                print("Touch ground or self collision at this step:")
+                print("     -Touch ground or self collision at step", it_solve_possible)
+                if ground_touch: print("        -TOUCH GROUND!")
                 continue
             else:
                 # if the solution doesnt touch ground or self collision, check whether it is within goal tolerance:
@@ -156,27 +165,28 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
                 if np.linalg.norm(pose_diff[:3,3]) <= TOLERANCE:
                     if elbow_up_request: # when there is a request for elbow up config, check it
                         if is_elbow_up(robot,pick_joint_config.q):
-                            print("Valid solution found!")
+                            print("     ->Valid solution found!")
                             valid_solution = True
                             break
                         else:
-                            print("NOOOOO!") 
+                            print("     -Solution found but elbow up condition doesnt match! Re-iterate...") 
                             continue
-                    print("Valid solution found!")
+                    print("     ->Valid solution found!")
                     valid_solution = True   
                 else:
-                    print("Get solution but error is larger than tolerance. Keep finding!") 
+                    print("     -Get solution but error is larger than tolerance. Keep finding!") 
                     continue
         else:
             if it_solve_not_possible > MAX_ITERATION : break 
             it_solve_not_possible += 1
-            print("Can't find solution at this step!")
-    
-    if valid_solution: return pick_joint_config.q
+            print("     -Can't find solution at this step!")
+    if valid_solution: 
+        print("--SOLVING DONE!")
+        return pick_joint_config.q
     else:
-        print('Cannot find valid solution!')
-        return np.empty((1, 6))
-    
+        print('     ->Cannot find valid solution!')
+        print("--SOLVING DONE!")
+        return robot.q
 
 def move_robot_with_object(robot, path, env, obj = None, relative_pose = None, show_path = True):
     """
@@ -242,10 +252,40 @@ def move_robot_insurance(robot, q_end, env, obstacle_list = None, show_path = Tr
             robot.q = path.q[i]
             env.step(0.05)
         else:
-            if touch_ground: print('.May touch ground at step', i ,', another path!')
-            if touch_obstacle:  print('.May touch obstacle at step', i ,', another path!')
-            if touch_obstacle: print('.Get self collision at step', i ,', another path!')
+            if touch_ground: print('-May touch ground at step', i ,', another path!')
+            if touch_obstacle:  print('-May touch obstacle at step', i ,', another path!')
+            if touch_self: print('-Get self collision at step', i ,', another path!')
+            path_finished = False
             break               
     print("Path finished:", path_finished)
     return path_finished
+
+def get_valid_path(robot,path,obstacle_list = None):
+    print("--CHECK VALIDITY OF PATH:")
+    
+    path_valid = []
+    all_valid = False
+    
+    for i in range(len(path)):
+        touch_ground= is_touch_ground(robot,path.q[i])
+        touch_self = is_self_collision_UR3(path.q[i])
+        if obstacle_list: touch_obstacle = is_collision_obstacle(robot,path.q[i],obstacle_list, is_swift = False)
+        else: touch_obstacle = False 
+        
+        if not touch_ground and not touch_self and not touch_obstacle:
+            path_valid.append(path.q[i])
+        else:
+            break
+
+    if len(path_valid) == len(path): 
+        print("Whole path is valid!") 
+        all_valid = True
+    else: 
+        print("Only ",100*len(path_valid)/len(path),"% path is valid!")
+    print("--PATH CHECKING DONE!")
+    return path_valid, all_valid
+
+def show_path(robot,path,env):
+    for q in path:
+        env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(q),color = (0.5,0.1,0.1,1)))
 

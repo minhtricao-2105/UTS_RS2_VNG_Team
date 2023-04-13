@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/quangngo/Desktop/RTB-P Test files/Modules')
+sys.path.append('../Modules')
 from ur3module import rtb,collisionObj,swift,SE3,solve_for_valid_ik, move_robot_insurance, np, pi
 # from ur3module import *
 # from spatialmath import SE3
