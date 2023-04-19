@@ -28,6 +28,7 @@ def move_robot(robot, path, obj = None, relative_pose = None):
     # print('Unsafe movement!')
     for q in path:
             robot.q = q
+            env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q),color = (0.5,0.1,0.1,1)))
             if obj and relative_pose:
                 pick = SE3(obj.T)
                 pick = SE3(robot.fkine(q).A)* relative_pose.inv() 
