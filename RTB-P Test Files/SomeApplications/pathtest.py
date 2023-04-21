@@ -28,15 +28,15 @@ for obstacle in obstacle_list:
 
 # generate path to goal
 if not np.array_equal(q_goal,robot.q):
-   path = gen_path(robot,q_goal,obstacle_list)
+   path, success = gen_path(robot,q_goal,obstacle_list)
 #    path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = robot.q, qf = q_goal, t = 50)
 #    path_valid,all_valid = get_valid_path(robot, path, obstacle_list)
+   
+if success: 
    show_path(robot,path,env)
-
-
-for q in path:
-   robot.q = q
-   env.step(0.05)
+   for q in path:
+      robot.q = q
+      env.step(0.05)
 
 # move_robot_insurance(robot,q_goal,env,obstacle_list,show_path=False)
 env.hold()

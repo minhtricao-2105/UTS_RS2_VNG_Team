@@ -14,7 +14,8 @@ def gen_path(robot,q_goal,obstacle_list = None):
     print("--GENERATING PATH!")
     while iteration_path < 500:
         # path from current joint state to goal
-        path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = current_joint_state, qf = q_goal, t = 60)
+        # path = rtb.mtraj(tfunc = rtb.trapezoidal, q0 = current_joint_state, qf = q_goal, t = 60)
+        path = rtb.jtraj(q0=current_joint_state,qf=q_goal,t=60)
         path_valid, all_valid = get_valid_path(robot,path,obstacle_list)
         final_path += path_valid
 
@@ -54,7 +55,9 @@ def gen_path(robot,q_goal,obstacle_list = None):
         
     if np.linalg.norm(final_path[-1]- q_goal) <= 0.05: 
         print("--GENERATE SUCCESSFULL!")
+        success = True
     else: 
         print("--GENERATE NOT SUCCESSFULL!")
+        success = False
         
-    return final_path
+    return final_path,success
