@@ -1,8 +1,0 @@
-prefix=/home/minhtricao/catkin_ws/src/my_package/build/devel
-
-Name: my_package
-Description: Description of my_package
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

@@ -1,0 +1,14 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/minhtricao/drone_ws/devel/lib/python3/dist-packages",
+        "/home/minhtricao/ure_ws/devel/lib/python3/dist-packages",
+        "/home/minhtricao/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/minhtricao/drone_ws/devel/lib/python3/dist-packages",
+        "/home/minhtricao/ure_ws/devel/lib/python3/dist-packages",
+        "/home/minhtricao/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}
