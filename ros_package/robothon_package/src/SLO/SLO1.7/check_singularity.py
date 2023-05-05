@@ -2,13 +2,18 @@
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from sensor_msgs.msg import JointState
+import roboticstoolbox as rtb 
+from spatialmath import SE3
+from math import pi
 from math import degrees
+import numpy as np
 import actionlib
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+import swift
 import time
 
+import sys
 from ur3module import *
-from pathgenerator import *
 
 # Create a ros node:
 rospy.init_node('execute_trajectory')
@@ -47,47 +52,65 @@ duration_seconds = 5
 # client = actionlib.SimpleActionClient('eff_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 client = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
-
-# create environment 
-# env = swift.Swift()
-# env.launch(realtime=True)
-
+start_time = time.perf_counter()
+# create robot and environment
+# start_time = time.perf_counter()
 robot = rtb.models.UR3()
-q_ini = [42,-28,61,-123,-87,0]
-q_ini = [x*pi/180 for x in q_ini]
+q_deg = [31.24, -50.72, -5.51, -140.39, -38.79, 200.26]
+robot.q = [x*pi/180 for x in q_deg]
 
-q_end = [-60,-28,61,-123,-87,0]
-q_end = [x*pi/180 for x in q_end]
-# create a goal object 
-goal_obj = collisionObj.Sphere(radius = 0.02, pose = robot.fkine(q_end),color = (0.5,0.1,0.1,1))
-# env.add(goal_obj)
+env = swift.Swift()
+env.launch(realtime=True)
+env.add(robot)
 
-robot.q = q_ini
-# env.add(robot)
+# manipulability threshold
+thresh_hold = 0.0097
 
-path_obj = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/Robothon_Assembly_Box - Robothon_Assembly_Box.STEP-1 Robothon Box.STEP-1.STL"
-box = collisionObj.Mesh(filename=path_obj,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = (0.2,0.3,0.1,1))
+# pose robot try to reach
+final_pose_1 = robot.fkine(robot.q)*SE3.Tx(-0.25)
 
-# correct position
-box_pose = SE3.Rx(pi/2)*SE3.Ry(pi/2)*SE3(box.T)
-box_pose = SE3(0,-0.17,-0.12)*box_pose
-box.T = box_pose.A
+# RMRC implementation with singularity check
+path_1 = []
+arrived = False
+dt = 0.05
+while not arrived:    
+    v, arrived = rtb.p_servo(robot.fkine(robot.q), final_pose_1, 0.5)
+    robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v
+    env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q),color = (0.1,0.5,0.1,1)))
+    env.step(dt)
 
-# env.add(box)
+    maniplty = robot.manipulability(robot.q,axes='trans')
+    print(">",maniplty,'<\n')
+    path_1.append(robot.q)
+    if maniplty <= thresh_hold: 
+        print("Close to singularity!")
+        break
 
-# create collision free path
-total_path,success = gen_path(robot=robot,q_goal=q_end,obstacle_list=[box])
+# if the singularity happen, try to finish the path with other method
 
-# if success: 
-#     show_path(robot,path,env)
-#     # move robot along path
-#     for q in path:
-#         robot.q = q
-#         env.step(0.05)
+flag = True
 
-flag = False
+if not arrived:
+    q_end = solve_for_valid_ik(robot,obj_pose=final_pose_1)
+    path = rtb.jtraj(robot.q, q_end,50).q
+    for q in path:
+        robot.q = q
+        env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q),color = (0.5,0.1,0.1,1)))
+        env.step(0.05)
+        
 
-while flag == False:
+total_path = []
+
+for q in path_1:
+    total_path.append(q)
+
+for q in path:
+    total_path.append(q)
+arrived = True
+end_time = time.perf_counter()
+execution_time = end_time - start_time
+
+while arrived == True:
     # print(total_path)
     print("Im fking done!")
     for i in range(len(total_path)):
@@ -98,7 +121,7 @@ while flag == False:
 
         # Calculate the time stamp based on the duration from the current time
        
-        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path)))
+        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
 
         goal.trajectory.points.append(point)
 
@@ -115,8 +138,3 @@ while flag == False:
     print(result)
 
     break
-
-
-
-rospy.is_shutdown() 
-# env.hold()

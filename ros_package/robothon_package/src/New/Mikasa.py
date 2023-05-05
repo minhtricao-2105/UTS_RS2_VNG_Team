@@ -1,14 +1,17 @@
+
 #!/usr/bin/env python3
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from sensor_msgs.msg import JointState
+import roboticstoolbox as rtb 
+from spatialmath import SE3
+from math import pi
 from math import degrees
+import numpy as np
 import actionlib
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+import swift
 import time
-
-from ur3module import *
-from pathgenerator import *
 
 # Create a ros node:
 rospy.init_node('execute_trajectory')
@@ -46,46 +49,85 @@ duration_seconds = 5
 # Call the client
 # client = actionlib.SimpleActionClient('eff_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 client = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
+# DO THE TRAJECTORY PATH HERE:::
+joint_positions = []
+
+def get_joint_positions(msg):
+    global joint_positions
+    joint_positions = msg.position
+
+# Subscribe to the joint states topic to get current joint positions
+sub = rospy.Subscriber("/joint_states", JointState, get_joint_positions)
 
 
-# create environment 
-# env = swift.Swift()
-# env.launch(realtime=True)
 
+# start_time = time.perf_counter()
 robot = rtb.models.UR3()
-q_ini = [42,-28,61,-123,-87,0]
-q_ini = [x*pi/180 for x in q_ini]
+start_time = time.perf_counter()
 
-q_end = [-60,-28,61,-123,-87,0]
-q_end = [x*pi/180 for x in q_end]
-# create a goal object 
-goal_obj = collisionObj.Sphere(radius = 0.02, pose = robot.fkine(q_end),color = (0.5,0.1,0.1,1))
-# env.add(goal_obj)
 
-robot.q = q_ini
-# env.add(robot)
 
-path_obj = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/Robothon_Assembly_Box - Robothon_Assembly_Box.STEP-1 Robothon Box.STEP-1.STL"
-box = collisionObj.Mesh(filename=path_obj,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = (0.2,0.3,0.1,1))
 
-# correct position
-box_pose = SE3.Rx(pi/2)*SE3.Ry(pi/2)*SE3(box.T)
-box_pose = SE3(0,-0.17,-0.12)*box_pose
-box.T = box_pose.A
 
-# env.add(box)
+def get_data():
+    rospy.sleep(0.5)
+    global joint_positions
+    joint_positions = list(joint_positions)
+    swap = joint_positions[0]
+    joint_positions[0] = joint_positions[2]
+    joint_positions[2] = swap
+    robot.q = joint_positions
 
-# create collision free path
-total_path,success = gen_path(robot=robot,q_goal=q_end,obstacle_list=[box])
+get_data()
 
-# if success: 
-#     show_path(robot,path,env)
-#     # move robot along path
-#     for q in path:
-#         robot.q = q
-#         env.step(0.05)
+print(joint_positions)
 
-flag = False
+degrees_list = [degrees(r) for r in joint_positions]
+
+print(degrees_list)
+
+
+# Generate the trajectory
+
+print(robot.q)
+q1  = robot.q
+q2 = [-pi/2,-pi/2, pi/3, 0, 0, 0]
+traj = rtb.jtraj(q1, q2, 100)
+
+env = swift.Swift()
+env.launch(realtime=True)
+env.add(robot)
+
+for q in traj.q:
+    robot.q = q
+    env.step(0.05)
+
+robot.q = q2
+arrived = False
+final_pose =  SE3.Tz(-0.2)* robot.fkine(q2)
+flag = True
+path = []
+while not arrived:
+    v, arrived = rtb.p_servo(robot.fkine(robot.q), final_pose, 0.8)
+    robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v
+    env.step(0.05)
+    path.append(robot.q)
+
+
+
+total_path = []
+
+for q in traj.q:
+    total_path.append(q)
+
+for q in path:
+    total_path.append(q)
+
+
+if arrived: flag = False
+end_time = time.perf_counter()
+execution_time = end_time - start_time
+print(execution_time)
 
 while flag == False:
     # print(total_path)
@@ -98,7 +140,7 @@ while flag == False:
 
         # Calculate the time stamp based on the duration from the current time
        
-        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path)))
+        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(traj.q))) + rospy.Duration.from_sec(execution_time + 1)
 
         goal.trajectory.points.append(point)
 
@@ -117,6 +159,3 @@ while flag == False:
     break
 
 
-
-rospy.is_shutdown() 
-# env.hold()
