@@ -52,6 +52,10 @@ def batteries_callback(data):
 
         flag +=1
 
+        # Detect the container to store the batteries first:
+        colour_detection()
+
+        # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
 
 def canny_edge(img):
@@ -62,26 +66,26 @@ def canny_edge(img):
 
     # grey = cv.GaussianBlur(grey, (5,5),1)
 
-    grey = crop(grey,1.7)
+    grey = crop(grey,1.8)
 
     T, thresh = cv.threshold(grey, 40, 255, 0)
 
     # Perform Canny edge detection
-    edges = cv.Canny(grey, 75, 200)
+    edges = cv.Canny(grey, 70, 200)
 
     return edges
 
-# @brief: Crop Image function:
-# @detail: This function will crop the middle of the figure and then combine it with the a black blank space so that it will have the same size of the initial image
-# @input: image -> a image
-# @input: factor -> the size of the crop image
+## \brief: Crop Image function:
+## \detail: This function will crop the middle of the figure and then combine it with the a black blank space so that it will have the same size of the initial image
+## \input: image -> a image
+## \input: factor -> the size of the crop image
 
 def crop(img,factor):
     # Get the dimensions of the image
     height, width = img.shape[:2]
 
     # Calculate the dimensions of the rectangle to crop
-    w = int(width / (factor*2.3))
+    w = int(width / (factor*2.2))
     h = int(height / (factor))
 
 
@@ -144,20 +148,21 @@ def compare_two_image():
         perimeter = cv.arcLength(contour,True)
         
         area = cv.contourArea(contour)
-        
-        if(area > 35 and perimeter > 150):
-            # cv.circle(image_1, center, radius, (255,0,0), 5)
-            
+
+        if(area > 30 and perimeter > 150):
+
             for (x, y, r, index) in coordinates:
                 dx = abs(x1 - x)
                 dy = abs(y1 - y)
+
                 if(dx < 15 and dy < 15):
                     if(r<20):
-                        result.append((x1,y1,0,index))
+                        result.append((x1,y1,0
+                                       ,index))
                     elif(r>20):
                         result.append((x1,y,1,index))
 
-    return  result
+    return result
 
 def perform_computervision():
     
@@ -169,7 +174,7 @@ def perform_computervision():
     for (x,y,r,i) in compare_two_image():
         for(x1,y1,r1,i1) in find_first_position():
             if i == i1:
-                final = np.vstack((final, [x1, y1, r]))
+                final = np.vstack((final, [x1, y1, 0.2]))
 
     final = np.unique(final, axis=0)
   
@@ -177,15 +182,15 @@ def perform_computervision():
 
     publisher_2.publish(message)
 
-    for(x,y,r) in final:
-        # print(x, y, r)
+    # for(x,y,r,i) in final:
+    #     # print(x, y, r)
         
-        if r == 1:
-            print("AA Batery at position:",x,y)
-            cv.circle(image_1, (x, y), 6, (0, 0, 255), -9)
-        if r == 0:
-            cv.circle(image_1, (x, y), 6, (0, 0, 0), -9)
-            print("AAA Batery at position:",x,y)
+    #     if r == 1:
+    #         print("AA Batery at position:",x,y)
+    #         cv.circle(image_1, (x, y), 6, (0, 0, 255), -9)
+    #     if r == 0:
+    #         cv.circle(image_1, (x, y), 6, (0, 0, 0), -9)
+    #         print("AAA Batery at position:",x,y)
 
     print('DONE THE CV')
 
@@ -196,7 +201,59 @@ def perform_computervision():
     # cv.destroyAllWindows()
     input("Done The Vision Part, Remove the Cable to Continue .... \n")
 
-        
+def colour_detection():
+
+    #Create an array to store the center of each color:
+
+    # Yellow Array to store the AAA Batteries Containers
+    yellow_array = np.empty((0,2),int)
+
+    # Orange Array to store the AA Batteries Containers
+    orange_array = np.empty((0,2),int)
+
+    # Yellow Dectection start from here:
+    for cnt in yellow_detection(image):
+        area = cv.contourArea(cnt)
+        if area > 4000: # Adjust the threshold value as needed
+            x,y,w,h = cv.boundingRect(cnt)
+            cv.rectangle(image,(x,y),(x+w,y+h),(0,0,255),5)
+
+            #Find the center of the contour:
+            M = cv.moments(cnt)
+            if M["m00"] != 0:
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+                
+                yellow_array = np.vstack((yellow_array, [cx,cy]))
+    
+    # Now send the data to the robot nodes:
+    message = Float32MultiArray(data = yellow_array.flatten())
+
+    # Publish the message on the topic
+    publisher_3.publish(message)
+
+    # Orange Detection start from here:
+    for cnt in orange_detection(image):
+        area = cv.contourArea(cnt)
+        if area > 6500: # Adjust the threshold value as needed
+            x,y,w,h = cv.boundingRect(cnt)
+            cv.rectangle(image,(x,y),(x+w,y+h),(0,255,255),7)
+
+            #Find the center of the contour:
+            M = cv.moments(cnt)
+            if M["m00"] != 0:
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+
+                #Append to orange array:
+                orange_array = np.vstack((orange_array, [cx,cy]))
+
+    # Now send the data to the robot nodes:
+    message = Float32MultiArray(data = orange_array.flatten())
+
+    # Publish the message on the topic
+    publisher_3.publish(message)
+    
 ###########################################################################################
 ################################ BELONG TO COMPUTER VISION ################################  
 
@@ -205,10 +262,13 @@ rospy.init_node('Realsense')
 rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
 
 # Create a first publisher to publish a message to a robot nodes
-sub_1 = publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size=20)
+sub_1 = publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)
 
 # A secondary publisher will be established to transmit data obtained after performing computer vision tasks.
-publisher_2 = rospy.Publisher('Image_Data',Float32MultiArray, queue_size=20)
+publisher_2 = rospy.Publisher('Image_Data',Float32MultiArray, queue_size = 20)
+
+# A third publisher will be establisted to transmit data for colour detection:
+publisher_3 = rospy.Publisher('Color_data', Float32MultiArray, queue_size = 20)
 
 input("Press any key to capture a second image\n")
 

@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: moveit_control
-Description: Description of moveit_control
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

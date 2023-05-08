@@ -210,30 +210,61 @@ def find_first_position():
     coordinates = []
 
     # Apply the position of each hole
-    #position 1
-    coordinates.append((286,146,16,1))
+    #position 1 (AA Battery)
+    coordinates.append((265,135,23,1))
     #position 2
-    coordinates.append((286,202,16,2))
+    coordinates.append((260,205,16,2))
     #position 3
-    coordinates.append((286,260,16,3))
-    #position 4
-    coordinates.append((286,303,16,4))
+    coordinates.append((260,268,16,3))
+    #position 4 (AA Battery)
+    coordinates.append((265,340,23,4))
     #position 5
-    coordinates.append((329,146,16,5))
-    #position 6
-    coordinates.append((329,203,23,6))
-    #position 7
-    coordinates.append((329,260,23,7))
+    coordinates.append((314,137,16,5))
+    #position 6 (AA Battery)
+    coordinates.append((314,205,23,6))
+    #position 7 (AA Battery)
+    coordinates.append((314,270,23,7))
     #position 8
-    coordinates.append((329,303,16,8))
+    coordinates.append((313,333,16,8))
     #position 9
-    coordinates.append((375,146,23,9))
+    coordinates.append((363,134,16,9))
     #position 10
-    coordinates.append((375,203,16,10))
+    coordinates.append((366,204,16,10))
     #position 11
-    coordinates.append((375,260,16,11))
+    coordinates.append((366,270,16,11))
     #position 12
-    coordinates.append((375,303,16,12))
+    coordinates.append((363,334,16,12))
 
     # Return a list to store the coordinates of the centers of detected circular edges   
     return coordinates
+
+import numpy as np
+
+def transfer_local(locations):
+    # camera intrinsic parameters
+    fx = 617.306
+    fy = 617.714
+    cx = 327.984
+    cy = 242.966
+
+    # camera extrinsic parameters
+    camera_height = 0.2  # height of camera above ground
+    R = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])  # identity rotation matrix
+    t = np.array([0.0, 0.0, 0.0])  # zero translation vector
+
+    # convert pixel coordinates to normalized image coordinates
+    x = (locations[:, 0] - cx) / fx
+    y = (locations[:, 1] - cy) / fy
+
+        # convert normalized image coordinates to camera coordinates
+    Xc = x * camera_height / fx
+    Yc = y * camera_height / fy
+    Zc = camera_height * np.ones_like(x)
+    
+    # transform camera coordinates to local camera frame
+    Rt = np.hstack((R, t[:, np.newaxis]))
+    Rt = np.vstack((Rt, [0, 0, 0, 1]))
+    locations_cam = np.hstack((Xc[:, np.newaxis], Yc[:, np.newaxis], Zc[:, np.newaxis], np.ones_like(x)[:, np.newaxis]))
+    locations_local = np.dot(Rt, locations_cam.T).T[:, :3]
+
+    return locations_local
