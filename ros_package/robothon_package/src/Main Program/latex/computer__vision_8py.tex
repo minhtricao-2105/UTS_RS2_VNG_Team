@@ -1,0 +1,198 @@
+\hypertarget{computer__vision_8py}{}\doxysection{computer\+\_\+vision.\+py File Reference}
+\label{computer__vision_8py}\index{computer\_vision.py@{computer\_vision.py}}
+
+
+This script is used for computer vision.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{computer__vision_8py_a00931f67cb5bcd1dfb49a1cfeb1dddfb}{computer\+\_\+vision.\+depth\+\_\+callback}} (data)
+\begin{DoxyCompactList}\small\item\em Callback function for processing depth image messages. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{computer__vision_8py_a746ddb43e02e9f3bc5cc472d3505861f}{computer\+\_\+vision.\+batteries\+\_\+callback}} (data)
+\begin{DoxyCompactList}\small\item\em @\+Brief Callback function for processing battery images This function is a callback for processing battery images received from a R\+OS node. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{computer__vision_8py_af4631601c56fdd784edacba6cf24a498}{computer\+\_\+vision.\+canny\+\_\+edge}} (img)
+\begin{DoxyCompactList}\small\item\em Apply Canny edge detection on an image This function takes an input image and applies Canny edge detection to find edges within the image. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{computer__vision_8py_ac9d29d203d323e912819ad03f59cd026}{computer\+\_\+vision.\+crop}} (img, factor)
+\begin{DoxyCompactList}\small\item\em Crop an image to a rectangle in the center of the image. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{computer__vision_8py_a41d2d06bb09b8e620cd49e14257db867}{computer\+\_\+vision.\+compare\+\_\+two\+\_\+image}} ()
+\begin{DoxyCompactList}\small\item\em Compare two images using Canny edge detection and contour analysis. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{computer__vision_8py_abacf921499324602d16790d890bb3370}\label{computer__vision_8py_abacf921499324602d16790d890bb3370}} 
+def \mbox{\hyperlink{computer__vision_8py_abacf921499324602d16790d890bb3370}{computer\+\_\+vision.\+perform\+\_\+computervision}} ()
+\begin{DoxyCompactList}\small\item\em Perform computer vision to detect the position of objects in an image. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{computer__vision_8py_a29096813d15fce2650170ccb9680fe65}{computer\+\_\+vision.\+colour\+\_\+detection}} ()
+\begin{DoxyCompactList}\small\item\em Detects the color of battery containers in an image using Open\+CV. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{computer__vision_8py_a28c09575c749bbd057a17abf5e99cd98}\label{computer__vision_8py_a28c09575c749bbd057a17abf5e99cd98}} 
+{\bfseries computer\+\_\+vision.\+bridge} = Cv\+Bridge()
+\item 
+\mbox{\Hypertarget{computer__vision_8py_a147f4c6446b4611ed9e6df22eb42753e}\label{computer__vision_8py_a147f4c6446b4611ed9e6df22eb42753e}} 
+{\bfseries computer\+\_\+vision.\+bridge\+\_\+1} = Cv\+Bridge()
+\item 
+\mbox{\Hypertarget{computer__vision_8py_a0c7607b2ca2f01f19eca050c4303732b}\label{computer__vision_8py_a0c7607b2ca2f01f19eca050c4303732b}} 
+{\bfseries computer\+\_\+vision.\+image} = None
+\item 
+\mbox{\Hypertarget{computer__vision_8py_af09cf565f8da4b4c093900faf7dabf50}\label{computer__vision_8py_af09cf565f8da4b4c093900faf7dabf50}} 
+{\bfseries computer\+\_\+vision.\+image\+\_\+1} = None
+\item 
+\mbox{\Hypertarget{computer__vision_8py_a28a52d28c5030844b082ed2dcbcaa029}\label{computer__vision_8py_a28a52d28c5030844b082ed2dcbcaa029}} 
+int {\bfseries computer\+\_\+vision.\+flag} = 1
+\item 
+\mbox{\Hypertarget{computer__vision_8py_acbc7afe49764a9a286fc360db398ea6a}\label{computer__vision_8py_acbc7afe49764a9a286fc360db398ea6a}} 
+{\bfseries computer\+\_\+vision.\+sub\+\_\+1} = rospy.\+Publisher(\textquotesingle{}Computer\+\_\+\+Vision\textquotesingle{}, String, queue\+\_\+size = 20)
+\item 
+\mbox{\Hypertarget{computer__vision_8py_ae0e23affe5a6e28be4db531a8d9bb3a9}\label{computer__vision_8py_ae0e23affe5a6e28be4db531a8d9bb3a9}} 
+{\bfseries computer\+\_\+vision.\+publisher\+\_\+2} = rospy.\+Publisher(\textquotesingle{}Image\+\_\+\+Data\textquotesingle{},Float32\+Multi\+Array, queue\+\_\+size = 20)
+\item 
+\mbox{\Hypertarget{computer__vision_8py_ae68850c320a38df405e9bfbfac4e3a56}\label{computer__vision_8py_ae68850c320a38df405e9bfbfac4e3a56}} 
+{\bfseries computer\+\_\+vision.\+publisher\+\_\+3} = rospy.\+Publisher(\textquotesingle{}Color\+\_\+data\textquotesingle{}, Float32\+Multi\+Array, queue\+\_\+size = 20)
+\item 
+\mbox{\Hypertarget{computer__vision_8py_a08c6f5199e5294d6145fe889465fa126}\label{computer__vision_8py_a08c6f5199e5294d6145fe889465fa126}} 
+{\bfseries computer\+\_\+vision.\+sub\+\_\+2} = rospy.\+Subscriber(\char`\"{}/camera/color/image\+\_\+raw\char`\"{}, Image, batteries\+\_\+callback)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This script is used for computer vision. 
+
+It imports various libraries and functions necessary for computer vision, such as rospy, cv2, numpy, etc.
+
+It defines the following functions\+:
+
+
+\begin{DoxyItemize}
+\item depth\+\_\+callback\+: Callback function for the first image
+\item batteries\+\_\+callback\+: Callback function for the batteries image
+\item canny\+\_\+edge\+: Perform Canny edge detection
+\item crop\+: Crop an image to a rectangle in the center of the image
+\item compare\+\_\+two\+\_\+image\+: Compare two images and find the differences
+\end{DoxyItemize}
+
+\begin{DoxySeeAlso}{See also}
+function.\+py 
+
+\mbox{\hyperlink{colorLibrary_8py}{color\+Library.\+py}} 
+
+sensor\+\_\+msgs/\+Image 
+
+std\+\_\+msgs/\+String 
+
+std\+\_\+msgs/\+Float32\+Multi\+Array
+\end{DoxySeeAlso}
+\begin{DoxyAuthor}{Author}
+Minh Tri Cao 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+May 9, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{computer__vision_8py_a746ddb43e02e9f3bc5cc472d3505861f}\label{computer__vision_8py_a746ddb43e02e9f3bc5cc472d3505861f}} 
+\index{computer\_vision.py@{computer\_vision.py}!batteries\_callback@{batteries\_callback}}
+\index{batteries\_callback@{batteries\_callback}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{batteries\_callback()}{batteries\_callback()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+batteries\+\_\+callback (\begin{DoxyParamCaption}\item[{}]{data }\end{DoxyParamCaption})}
+
+
+
+@\+Brief Callback function for processing battery images This function is a callback for processing battery images received from a R\+OS node. 
+
+It converts the R\+OS image message to an Open\+CV image, detects the container to store the batteries, and then detects the location and type of the batteries using computer vision techniques. 
+\begin{DoxyParams}{Parameters}
+{\em data} & The image data received from the R\+OS node \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+None 
+\end{DoxyReturn}
+\mbox{\Hypertarget{computer__vision_8py_af4631601c56fdd784edacba6cf24a498}\label{computer__vision_8py_af4631601c56fdd784edacba6cf24a498}} 
+\index{computer\_vision.py@{computer\_vision.py}!canny\_edge@{canny\_edge}}
+\index{canny\_edge@{canny\_edge}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{canny\_edge()}{canny\_edge()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+canny\+\_\+edge (\begin{DoxyParamCaption}\item[{}]{img }\end{DoxyParamCaption})}
+
+
+
+Apply Canny edge detection on an image This function takes an input image and applies Canny edge detection to find edges within the image. 
+
+The function returns the resulting image with the edges highlighted. 
+\begin{DoxyParams}{Parameters}
+{\em img} & The input image to apply Canny edge detection on \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The resulting image with edges highlighted 
+\end{DoxyReturn}
+\mbox{\Hypertarget{computer__vision_8py_a29096813d15fce2650170ccb9680fe65}\label{computer__vision_8py_a29096813d15fce2650170ccb9680fe65}} 
+\index{computer\_vision.py@{computer\_vision.py}!colour\_detection@{colour\_detection}}
+\index{colour\_detection@{colour\_detection}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{colour\_detection()}{colour\_detection()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+colour\+\_\+detection (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Detects the color of battery containers in an image using Open\+CV. 
+
+This function detects the color of battery containers in an input image using Open\+CV. The function first creates two arrays, {\ttfamily yellow\+\_\+array} and {\ttfamily orange\+\_\+array}, to store the center of each color. The function then applies contour analysis on the yellow and orange contours detected in the image using {\ttfamily yellow\+\_\+detection} and {\ttfamily orange\+\_\+detection} functions. The contour with an area greater than a certain threshold value is considered a battery container, and its center is added to the corresponding array. The function then flattens the arrays and sends the data to robot nodes via a R\+OS topic using {\ttfamily Float32\+Multi\+Array} messages.
+
+\begin{DoxyReturn}{Returns}
+None 
+\end{DoxyReturn}
+\mbox{\Hypertarget{computer__vision_8py_a41d2d06bb09b8e620cd49e14257db867}\label{computer__vision_8py_a41d2d06bb09b8e620cd49e14257db867}} 
+\index{computer\_vision.py@{computer\_vision.py}!compare\_two\_image@{compare\_two\_image}}
+\index{compare\_two\_image@{compare\_two\_image}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{compare\_two\_image()}{compare\_two\_image()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+compare\+\_\+two\+\_\+image (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Compare two images using Canny edge detection and contour analysis. 
+
+This function compares two input images using Canny edge detection and contour analysis. The function takes two images, {\ttfamily image} and {\ttfamily image\+\_\+1}, and applies Canny edge detection to each image. The absolute difference between the edge maps is computed and thresholded to create a binary mask. The function then performs contour analysis on the binary mask to extract contours. Contours with an area less than 20 are discarded. The function then compares each contour to a set of predefined coordinates, stored in the {\ttfamily coordinates} variable, and returns a list of tuples containing the x and y coordinates of the center of the contour, the radius of the contour, and an index corresponding to the predefined coordinates that the contour is closest to.
+
+\begin{DoxyReturn}{Returns}
+A list of tuples containing the x and y coordinates of the center of the contour, the radius of the contour, and an index corresponding to the predefined coordinates that the contour is closest to. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{computer__vision_8py_ac9d29d203d323e912819ad03f59cd026}\label{computer__vision_8py_ac9d29d203d323e912819ad03f59cd026}} 
+\index{computer\_vision.py@{computer\_vision.py}!crop@{crop}}
+\index{crop@{crop}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{crop()}{crop()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+crop (\begin{DoxyParamCaption}\item[{}]{img,  }\item[{}]{factor }\end{DoxyParamCaption})}
+
+
+
+Crop an image to a rectangle in the center of the image. 
+
+This function crops an input image to a rectangle in the center of the image. The size of the rectangle is determined by the {\ttfamily factor} input, which should be a positive integer. The function returns the cropped image as a new image with the same dimensions as the original image.
+
+
+\begin{DoxyParams}{Parameters}
+{\em img} & The input image to be cropped \\
+\hline
+{\em factor} & The factor used to calculate the size of the rectangle to crop \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{computer__vision_8py_a00931f67cb5bcd1dfb49a1cfeb1dddfb}\label{computer__vision_8py_a00931f67cb5bcd1dfb49a1cfeb1dddfb}} 
+\index{computer\_vision.py@{computer\_vision.py}!depth\_callback@{depth\_callback}}
+\index{depth\_callback@{depth\_callback}!computer\_vision.py@{computer\_vision.py}}
+\doxysubsubsection{\texorpdfstring{depth\_callback()}{depth\_callback()}}
+{\footnotesize\ttfamily def computer\+\_\+vision.\+depth\+\_\+callback (\begin{DoxyParamCaption}\item[{}]{data }\end{DoxyParamCaption})}
+
+
+
+Callback function for processing depth image messages. 
+
+This function is called every time an image message is received. The function converts the R\+OS image message to an Open\+CV image, and sets the global image variable to the converted image. The function also sets the flag to 1 when the first message is received, indicating that the image has been initialized.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The depth image message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+None 
+\end{DoxyReturn}

@@ -1,3 +1,26 @@
+## @file
+# @brief This script is used for computer vision.
+#
+# It imports various libraries and functions necessary for computer vision, such as rospy, cv2, numpy, etc.
+#
+# @details
+# It defines the following functions:
+#
+# - depth_callback: Callback function for the first image
+# - batteries_callback: Callback function for the batteries image
+# - canny_edge: Perform Canny edge detection
+# - crop: Crop an image to a rectangle in the center of the image
+# - compare_two_image: Compare two images and find the differences
+#
+# @see function.py
+# @see colorLibrary.py
+# @see sensor_msgs/Image
+# @see std_msgs/String
+# @see std_msgs/Float32MultiArray
+#
+# @author Minh Tri Cao
+# @date May 9, 2023
+
 #!/usr/bin/env python3
 # THESE LIBRARY IS USED FOR COMPUTER VISION:
 import rospy
@@ -12,10 +35,6 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
 
-###########################################################################################
-###########################################################################################
-################################ BELONG TO COMPUTER VISION ################################ 
-
 # Create a CvBridge object to convert ROS messages to OpenCV Images
 bridge = CvBridge()
 bridge_1 = CvBridge()
@@ -27,8 +46,17 @@ image_1 = None
 #Setting the flag so that the image only take once time only
 flag = 1
 
-# Callback function for the first image
+## @brief Callback function for processing depth image messages
+#
+# This function is called every time an image message is received. 
+# The function converts the ROS image message to an OpenCV image, and sets the global image variable to the converted image. 
+# The function also sets the flag to 1 when the first message is received, indicating that the image has been initialized.
+#
+# @param data The depth image message
+# @return None
+
 def depth_callback(data):
+    
     global image
     global flag
     global red_flag
@@ -40,8 +68,15 @@ def depth_callback(data):
         
         flag +=1
 
-# Callback function for the batteries image
+##  @Brief Callback function for processing battery images
+#   This function is a callback for processing battery images received from a ROS node. 
+#   It converts the ROS image message to an OpenCV image, detects the container to store the batteries, and then detects the location and type of the batteries using computer vision techniques.
+#   @param  data The image data received from the ROS node
+#   @return None
+
+
 def batteries_callback(data):
+
     global image_1
     global flag
     
@@ -57,6 +92,11 @@ def batteries_callback(data):
 
         # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
+
+##  @brief  Apply Canny edge detection on an image
+#   This function takes an input image and applies Canny edge detection to find edges within the image. The function returns the resulting image with the edges highlighted.
+#   @param img The input image to apply Canny edge detection on
+#   @return The resulting image with edges highlighted
 
 def canny_edge(img):
 
@@ -75,10 +115,14 @@ def canny_edge(img):
 
     return edges
 
-## \brief: Crop Image function:
-## \detail: This function will crop the middle of the figure and then combine it with the a black blank space so that it will have the same size of the initial image
-## \input: image -> a image
-## \input: factor -> the size of the crop image
+
+## @brief Crop an image to a rectangle in the center of the image
+#
+# This function crops an input image to a rectangle in the center of the image. The size of the rectangle is determined by the `factor` input, which should be a positive integer. The function returns the cropped image as a new image with the same dimensions as the original image.
+#
+# @param img The input image to be cropped
+# @param factor The factor used to calculate the size of the rectangle to crop
+#
 
 def crop(img,factor):
     # Get the dimensions of the image
@@ -106,6 +150,12 @@ def crop(img,factor):
     black[y_offset:y_offset+h, x_offset:x_offset+w] = cropped
 
     return black
+
+## @brief Compare two images using Canny edge detection and contour analysis
+#
+# This function compares two input images using Canny edge detection and contour analysis. The function takes two images, `image` and `image_1`, and applies Canny edge detection to each image. The absolute difference between the edge maps is computed and thresholded to create a binary mask. The function then performs contour analysis on the binary mask to extract contours. Contours with an area less than 20 are discarded. The function then compares each contour to a set of predefined coordinates, stored in the `coordinates` variable, and returns a list of tuples containing the x and y coordinates of the center of the contour, the radius of the contour, and an index corresponding to the predefined coordinates that the contour is closest to.
+#
+# @return A list of tuples containing the x and y coordinates of the center of the contour, the radius of the contour, and an index corresponding to the predefined coordinates that the contour is closest to.
 
 def compare_two_image():
     #Calling the global variable:
@@ -164,6 +214,15 @@ def compare_two_image():
 
     return result
 
+## @brief Perform computer vision to detect the position of objects in an image
+
+# This function performs computer vision to detect the position of batteries in an image. 
+# It first calls the `compare_two_image()` function to compare two input images using Canny edge detection and contour analysis. 
+# It then compares the resulting contours with a set of predefined coordinates, stored in the `find_first_position()` function, to determine the position of the batteries
+# Finally, the function displays the image with detected objects using `cv.imshow()`, waits for user input, and returns.
+
+# @return None
+
 def perform_computervision():
     
     # Canny Edge Detection when we have the figure:
@@ -200,6 +259,16 @@ def perform_computervision():
 
     # cv.destroyAllWindows()
     input("Done The Vision Part, Remove the Cable to Continue .... \n")
+
+## @brief Detects the color of battery containers in an image using OpenCV
+#
+# This function detects the color of battery containers in an input image using OpenCV. 
+# The function first creates two arrays, `yellow_array` and `orange_array`, to store the center of each color. 
+# The function then applies contour analysis on the yellow and orange contours detected in the image using `yellow_detection` and `orange_detection` functions. 
+# The contour with an area greater than a certain threshold value is considered a battery container, and its center is added to the corresponding array. 
+# The function then flattens the arrays and sends the data to robot nodes via a ROS topic using `Float32MultiArray` messages.
+#
+# @return None
 
 def colour_detection():
 
@@ -254,8 +323,6 @@ def colour_detection():
     # Publish the message on the topic
     publisher_3.publish(message)
     
-###########################################################################################
-################################ BELONG TO COMPUTER VISION ################################  
 
 rospy.init_node('Realsense')
 

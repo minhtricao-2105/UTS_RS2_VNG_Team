@@ -1,0 +1,66 @@
+\hypertarget{colorLibrary_8py}{}\doxysection{color\+Library.\+py File Reference}
+\label{colorLibrary_8py}\index{colorLibrary.py@{colorLibrary.py}}
+
+
+This file provides functions for detecting different colors in an image.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{colorLibrary_8py_a2b070657fcb188234e3acaa42e19e948}{color\+Library.\+yellow\+\_\+detection}} (img)
+\begin{DoxyCompactList}\small\item\em Detect yellow contours in an image This function changes the brightness of the input image, converts it to H\+SV format, creates a threshold for yellow color, creates a mask, and finds contours in the mask. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{colorLibrary_8py_a72e1db0d4ae180e79d8334ba674974b6}{color\+Library.\+orange\+\_\+detection}} (img)
+\begin{DoxyCompactList}\small\item\em Detect orange contours in an image This function changes the brightness of the input image, converts it to H\+SV format, creates a threshold for orange color, creates a mask, and finds contours in the mask. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file provides functions for detecting different colors in an image. 
+
+It provides functions for detecting yellow, orange, and green colors, as well as detecting batteries in an image. These functions use Open\+CV to convert images to the H\+SV color space and apply thresholds to isolate the desired color. Contours are then found in the resulting mask to identify the object(s) of interest.
+
+\begin{DoxyAuthor}{Author}
+Minh Tri Cao 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+May 9, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{colorLibrary_8py_a72e1db0d4ae180e79d8334ba674974b6}\label{colorLibrary_8py_a72e1db0d4ae180e79d8334ba674974b6}} 
+\index{colorLibrary.py@{colorLibrary.py}!orange\_detection@{orange\_detection}}
+\index{orange\_detection@{orange\_detection}!colorLibrary.py@{colorLibrary.py}}
+\doxysubsubsection{\texorpdfstring{orange\_detection()}{orange\_detection()}}
+{\footnotesize\ttfamily def color\+Library.\+orange\+\_\+detection (\begin{DoxyParamCaption}\item[{}]{img }\end{DoxyParamCaption})}
+
+
+
+Detect orange contours in an image This function changes the brightness of the input image, converts it to H\+SV format, creates a threshold for orange color, creates a mask, and finds contours in the mask. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em img} & The input image \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of contours 
+\end{DoxyReturn}
+\mbox{\Hypertarget{colorLibrary_8py_a2b070657fcb188234e3acaa42e19e948}\label{colorLibrary_8py_a2b070657fcb188234e3acaa42e19e948}} 
+\index{colorLibrary.py@{colorLibrary.py}!yellow\_detection@{yellow\_detection}}
+\index{yellow\_detection@{yellow\_detection}!colorLibrary.py@{colorLibrary.py}}
+\doxysubsubsection{\texorpdfstring{yellow\_detection()}{yellow\_detection()}}
+{\footnotesize\ttfamily def color\+Library.\+yellow\+\_\+detection (\begin{DoxyParamCaption}\item[{}]{img }\end{DoxyParamCaption})}
+
+
+
+Detect yellow contours in an image This function changes the brightness of the input image, converts it to H\+SV format, creates a threshold for yellow color, creates a mask, and finds contours in the mask. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em img} & The input image \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of contours 
+\end{DoxyReturn}

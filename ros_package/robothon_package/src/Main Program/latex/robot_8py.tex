@@ -1,0 +1,81 @@
+\hypertarget{robot_8py}{}\doxysection{robot.\+py File Reference}
+\label{robot_8py}\index{robot.py@{robot.py}}
+
+
+This file provides functions for controlling the robot.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{robot_8py_aa7d1b5d8c835e98108835da8cf573dca}{robot.\+callback\+\_\+2}} (msg)
+\begin{DoxyCompactList}\small\item\em Callback function for receiving data from a R\+OS message. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{robot_8py_ae36d314e719fc2967cf88bc60bca8f95}{robot.\+callback\+\_\+3}} (msg)
+\begin{DoxyCompactList}\small\item\em Callback function to receive color data from CV nodes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{robot_8py_a7f1b956f6013f581f2b96bbfd99489bf}\label{robot_8py_a7f1b956f6013f581f2b96bbfd99489bf}} 
+list {\bfseries robot.\+colour\+\_\+array\+\_\+yellow} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{robot_8py_aaf8d97a8f1c7808c4f6fcfbf4b65d364}\label{robot_8py_aaf8d97a8f1c7808c4f6fcfbf4b65d364}} 
+list {\bfseries robot.\+colour\+\_\+array\+\_\+orange} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{robot_8py_aa29198fd71a1d2672cd54135f3433522}\label{robot_8py_aa29198fd71a1d2672cd54135f3433522}} 
+list {\bfseries robot.\+location\+\_\+array} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{robot_8py_a4218acced85c16c747bc5b2bfce006c5}\label{robot_8py_a4218acced85c16c747bc5b2bfce006c5}} 
+list {\bfseries robot.\+transfer} = \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{robot_8py_a46b8cb01ecd1c6071aa047fe1facc3bd}\label{robot_8py_a46b8cb01ecd1c6071aa047fe1facc3bd}} 
+{\bfseries robot.\+subscriber\+\_\+2} = rospy.\+Subscriber(\textquotesingle{}Image\+\_\+\+Data\textquotesingle{}, Float32\+Multi\+Array, callback\+\_\+2)
+\item 
+\mbox{\Hypertarget{robot_8py_a45d7bb669cf5fb16f1047dcda0c1df9a}\label{robot_8py_a45d7bb669cf5fb16f1047dcda0c1df9a}} 
+{\bfseries robot.\+subscriber\+\_\+3} = rospy.\+Subscriber(\textquotesingle{}Color\+\_\+data\textquotesingle{}, Float32\+Multi\+Array, callback\+\_\+3)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file provides functions for controlling the robot. 
+
+\begin{DoxyAuthor}{Author}
+Minh Tri Cao 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+May 9, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{robot_8py_aa7d1b5d8c835e98108835da8cf573dca}\label{robot_8py_aa7d1b5d8c835e98108835da8cf573dca}} 
+\index{robot.py@{robot.py}!callback\_2@{callback\_2}}
+\index{callback\_2@{callback\_2}!robot.py@{robot.py}}
+\doxysubsubsection{\texorpdfstring{callback\_2()}{callback\_2()}}
+{\footnotesize\ttfamily def robot.\+callback\+\_\+2 (\begin{DoxyParamCaption}\item[{}]{msg }\end{DoxyParamCaption})}
+
+
+
+Callback function for receiving data from a R\+OS message. 
+
+This function is called when a R\+OS message is received by the subscriber. The data from the message is stored in a global variable, and a pixel-\/to-\/local-\/frame transfer value is also calculated and stored in another global variable.
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg} & The R\+OS message containing data to be processed. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{robot_8py_ae36d314e719fc2967cf88bc60bca8f95}\label{robot_8py_ae36d314e719fc2967cf88bc60bca8f95}} 
+\index{robot.py@{robot.py}!callback\_3@{callback\_3}}
+\index{callback\_3@{callback\_3}!robot.py@{robot.py}}
+\doxysubsubsection{\texorpdfstring{callback\_3()}{callback\_3()}}
+{\footnotesize\ttfamily def robot.\+callback\+\_\+3 (\begin{DoxyParamCaption}\item[{}]{msg }\end{DoxyParamCaption})}
+
+
+
+Callback function to receive color data from CV nodes. 
+
+This function receives color data from CV nodes and stores them in global variables. The first data received will be stored in the yellow color array, and the second data will be stored in the orange color array. 
+\begin{DoxyParams}{Parameters}
+{\em msg} & A message containing color data received from CV nodes. \\
+\hline
+\end{DoxyParams}
