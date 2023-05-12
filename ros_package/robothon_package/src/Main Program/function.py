@@ -228,6 +228,45 @@ def show_circle():
 
     return image
 
+def control_robot():
+
+    # store it in the vector:
+    coordinates = []
+
+    # Apply the position of each hole
+
+    ## DONE
+    #position 1
+    coordinates.append((600,500,16,1))
+    #position 2
+    coordinates.append((500,500,16,2))
+    #position 3
+    coordinates.append((400,500,16,3))
+    #position 4
+    coordinates.append((300,500,16,4))
+
+    ##
+    #position 5
+    coordinates.append((600,430,16,5))
+    #position 6 (AA Battery)
+    coordinates.append((500,430,23,6))
+    #position 7 (AA Battery)
+    coordinates.append((400,430,23,7))
+    #position 8
+    coordinates.append((300,430,16,8))
+
+    #position 9 (AA Battery)
+    coordinates.append((600,360,26,9))
+    #position 10
+    coordinates.append((500,360,16,10))
+    #position 11
+    coordinates.append((400,360,16,11))
+    #position 12(AA Battery)
+    coordinates.append((300,360,26,12))
+
+    # Return a list to store the coordinates of the centers of detected circular edges   
+    return coordinates
+
 def find_first_position():
 
     # store it in the vector:
@@ -302,3 +341,27 @@ def transfer_local(locations):
     locations_local = np.dot(Rt, locations_cam.T).T[:, :3]
 
     return locations_local
+
+def cam_move(cam,robot,T):
+    cam.T = robot.fkine(robot.q)*T
+
+def cam_to_global(pixel_x, pixel_y):
+    # Define the camera parameters
+    pixel_width = 640  # Width of the image in pixels
+    pixel_height = 480  # Height of the image in pixels
+    focal_length = 848  # Focal length of the camera in pixels
+    
+    # Compute the normalized coordinates of the point
+    normalized_x = (pixel_x - pixel_width / 2) / focal_length
+    normalized_y = (pixel_height / 2 - pixel_y) / focal_length
+
+    # Compute the distance from the camera to the global point
+    distance = 0.18  # Distance from the camera to the global point in meters
+
+    # Compute the position of the point in the camera frame
+    camera_position = np.array([distance * normalized_x, distance * normalized_y, distance, 1])
+
+    # Map the point from the camera frame to the global frame
+    global_position = np.matmul(camera_transform, camera_position)
+
+    return global_position
