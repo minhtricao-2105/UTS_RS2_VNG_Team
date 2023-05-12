@@ -1,0 +1,87 @@
+\hypertarget{gripperFunction_8py}{}\doxysection{gripper\+Function.\+py File Reference}
+\label{gripperFunction_8py}\index{gripperFunction.py@{gripperFunction.py}}
+
+
+This file contains the necessary functions for controlling the Onrobot R\+G2 gripper.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{gripperFunction_8py_a66dfe4697d27b01b7a13680b8736b491}{gripper\+Function.\+open\+Gripper}} (force)
+\begin{DoxyCompactList}\small\item\em Function to open the robot\textquotesingle{}s gripper to maximum width. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{gripperFunction_8py_aaf76187cff3537df459ca9489f2f3858}{gripper\+Function.\+close\+Gripper}} (force)
+\begin{DoxyCompactList}\small\item\em Function to close the robot\textquotesingle{}s gripper. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{gripperFunction_8py_ad371a70e9a9e1bec98485c7a6911164a}{gripper\+Function.\+move\+Gripper\+To\+Position}} (force, position)
+\begin{DoxyCompactList}\small\item\em Moves the gripper to a specific position with a given force. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file contains the necessary functions for controlling the Onrobot R\+G2 gripper. 
+
+\begin{DoxyAuthor}{Author}
+Minh Tri Cao 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+last revised May 12, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{gripperFunction_8py_aaf76187cff3537df459ca9489f2f3858}\label{gripperFunction_8py_aaf76187cff3537df459ca9489f2f3858}} 
+\index{gripperFunction.py@{gripperFunction.py}!closeGripper@{closeGripper}}
+\index{closeGripper@{closeGripper}!gripperFunction.py@{gripperFunction.py}}
+\doxysubsubsection{\texorpdfstring{closeGripper()}{closeGripper()}}
+{\footnotesize\ttfamily def gripper\+Function.\+close\+Gripper (\begin{DoxyParamCaption}\item[{}]{force }\end{DoxyParamCaption})}
+
+
+
+Function to close the robot\textquotesingle{}s gripper. 
+
+The close\+Gripper function takes in a force parameter in Newtons and creates a On\+Robot\+R\+G\+Output command with the appropriate values to close the gripper. 
+\begin{DoxyParams}{Parameters}
+{\em force} & The force to be applied by the gripper in Newtons. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An On\+Robot\+R\+G\+Output command to close the gripper with the specified force. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{gripperFunction_8py_ad371a70e9a9e1bec98485c7a6911164a}\label{gripperFunction_8py_ad371a70e9a9e1bec98485c7a6911164a}} 
+\index{gripperFunction.py@{gripperFunction.py}!moveGripperToPosition@{moveGripperToPosition}}
+\index{moveGripperToPosition@{moveGripperToPosition}!gripperFunction.py@{gripperFunction.py}}
+\doxysubsubsection{\texorpdfstring{moveGripperToPosition()}{moveGripperToPosition()}}
+{\footnotesize\ttfamily def gripper\+Function.\+move\+Gripper\+To\+Position (\begin{DoxyParamCaption}\item[{}]{force,  }\item[{}]{position }\end{DoxyParamCaption})}
+
+
+
+Moves the gripper to a specific position with a given force. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em force} & the force in Newton. ~\newline
+ \\
+\hline
+{\em position} & the position to move the gripper to. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+On\+Robot\+R\+G\+Output the command to move the gripper to the specified position with the given force. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{gripperFunction_8py_a66dfe4697d27b01b7a13680b8736b491}\label{gripperFunction_8py_a66dfe4697d27b01b7a13680b8736b491}} 
+\index{gripperFunction.py@{gripperFunction.py}!openGripper@{openGripper}}
+\index{openGripper@{openGripper}!gripperFunction.py@{gripperFunction.py}}
+\doxysubsubsection{\texorpdfstring{openGripper()}{openGripper()}}
+{\footnotesize\ttfamily def gripper\+Function.\+open\+Gripper (\begin{DoxyParamCaption}\item[{}]{force }\end{DoxyParamCaption})}
+
+
+
+Function to open the robot\textquotesingle{}s gripper to maximum width. 
+
+This function takes in a force in Newtons and returns a command to open the robot\textquotesingle{}s gripper to maximum width, with the given force applied to the fingers. 
+\begin{DoxyParams}{Parameters}
+{\em force} & The force to be applied to the fingers in Newtons. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The command to open the gripper. 
+\end{DoxyReturn}

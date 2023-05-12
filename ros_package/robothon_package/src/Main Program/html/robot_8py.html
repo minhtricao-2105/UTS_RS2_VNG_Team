@@ -101,10 +101,58 @@ list&#160;</td><td class="memItemRight" valign="bottom"><b>robot.transfer</b> = 
 <tr class="memitem:a45d7bb669cf5fb16f1047dcda0c1df9a"><td class="memItemLeft" align="right" valign="top"><a id="a45d7bb669cf5fb16f1047dcda0c1df9a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>robot.subscriber_3</b> = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)</td></tr>
 <tr class="separator:a45d7bb669cf5fb16f1047dcda0c1df9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a475098636be2f7ca5ee1c985bf9a87e1"><td class="memItemLeft" align="right" valign="top"><a id="a475098636be2f7ca5ee1c985bf9a87e1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.gripper_pub</b> = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)</td></tr>
+<tr class="separator:a475098636be2f7ca5ee1c985bf9a87e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed098dccd37b482028e4bf916095e641"><td class="memItemLeft" align="right" valign="top"><a id="aed098dccd37b482028e4bf916095e641"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="robot_8py.html#aed098dccd37b482028e4bf916095e641">robot.joint_traj</a> = JointTrajectory()</td></tr>
+<tr class="memdesc:aed098dccd37b482028e4bf916095e641"><td class="mdescLeft">&#160;</td><td class="mdescRight">BELONG TO THE ROBOT OVER HERE ###########################. <br /></td></tr>
+<tr class="separator:aed098dccd37b482028e4bf916095e641"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34a3c3c10660b818ed6676470d8768d5"><td class="memItemLeft" align="right" valign="top"><a id="a34a3c3c10660b818ed6676470d8768d5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.frame_id</b></td></tr>
+<tr class="separator:a34a3c3c10660b818ed6676470d8768d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45b34588e621a044ca0764ec04cd0841"><td class="memItemLeft" align="right" valign="top"><a id="a45b34588e621a044ca0764ec04cd0841"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.joint_names</b></td></tr>
+<tr class="separator:a45b34588e621a044ca0764ec04cd0841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f35d270b3567632b2fd70c7f940801c"><td class="memItemLeft" align="right" valign="top"><a id="a4f35d270b3567632b2fd70c7f940801c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.goal</b> = FollowJointTrajectoryGoal()</td></tr>
+<tr class="separator:a4f35d270b3567632b2fd70c7f940801c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0abd53724b44f2b94400b9b7b9199543"><td class="memItemLeft" align="right" valign="top"><a id="a0abd53724b44f2b94400b9b7b9199543"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.seq</b></td></tr>
+<tr class="separator:a0abd53724b44f2b94400b9b7b9199543"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0d78d93f383c681a5075a101292d5b1"><td class="memItemLeft" align="right" valign="top"><a id="af0d78d93f383c681a5075a101292d5b1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.stamp</b></td></tr>
+<tr class="separator:af0d78d93f383c681a5075a101292d5b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3edac003e42f8e89de2a09d952cbc111"><td class="memItemLeft" align="right" valign="top"><a id="a3edac003e42f8e89de2a09d952cbc111"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.goal_time_tolerance</b></td></tr>
+<tr class="separator:a3edac003e42f8e89de2a09d952cbc111"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc5c4dceec728b22a619c4f6e4459eb6"><td class="memItemLeft" align="right" valign="top"><a id="abc5c4dceec728b22a619c4f6e4459eb6"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>robot.buffer_seconds</b> = 1</td></tr>
+<tr class="separator:abc5c4dceec728b22a619c4f6e4459eb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad10fda597b6c644b098a81003ec504c0"><td class="memItemLeft" align="right" valign="top"><a id="ad10fda597b6c644b098a81003ec504c0"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>robot.duration_seconds</b> = 5</td></tr>
+<tr class="separator:ad10fda597b6c644b098a81003ec504c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2e486d3fbe84780e80586eb9566805c"><td class="memItemLeft" align="right" valign="top"><a id="ac2e486d3fbe84780e80586eb9566805c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.client</b> = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)</td></tr>
+<tr class="separator:ac2e486d3fbe84780e80586eb9566805c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fdc7725d635d2dce7b6e8c558b49254"><td class="memItemLeft" align="right" valign="top"><a id="a1fdc7725d635d2dce7b6e8c558b49254"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.start_time</b> = time.perf_counter()</td></tr>
+<tr class="separator:a1fdc7725d635d2dce7b6e8c558b49254"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eb5621686c16ec95674f1604961b7ab"><td class="memItemLeft" align="right" valign="top"><a id="a7eb5621686c16ec95674f1604961b7ab"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.env</b> = swift.Swift()</td></tr>
+<tr class="separator:a7eb5621686c16ec95674f1604961b7ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7067c483ebb2e5d3a08e381351ebc46b"><td class="memItemLeft" align="right" valign="top"><a id="a7067c483ebb2e5d3a08e381351ebc46b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.realtime</b></td></tr>
+<tr class="separator:a7067c483ebb2e5d3a08e381351ebc46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae698ea179317f3ffd8c3b5904943fa82"><td class="memItemLeft" align="right" valign="top"><a id="ae698ea179317f3ffd8c3b5904943fa82"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>robot.robot</b> = rtb.models.UR3()</td></tr>
+<tr class="separator:ae698ea179317f3ffd8c3b5904943fa82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This file provides functions for controlling the robot. </p>
-<dl class="section author"><dt>Author</dt><dd>Minh Tri Cao </dd></dl>
+<dl class="section author"><dt>Author</dt><dd>Minh Tri Cao </dd>
+<dd>
+Ho Minh Quang Ngo</dd></dl>
 <dl class="section date"><dt>Date</dt><dd>May 9, 2023 </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="aa7d1b5d8c835e98108835da8cf573dca"></a>

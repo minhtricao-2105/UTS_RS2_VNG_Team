@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ## @file
 # @brief This script is used for computer vision.
 #
@@ -21,7 +23,8 @@
 # @author Minh Tri Cao
 # @date May 9, 2023
 
-#!/usr/bin/env python3
+
+
 # THESE LIBRARY IS USED FOR COMPUTER VISION:
 import rospy
 import cv2 as cv
@@ -100,7 +103,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=110)
+    img = cv.convertScaleAbs(img, alpha=1, beta=120)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -233,7 +236,7 @@ def perform_computervision():
     for (x,y,r,i) in compare_two_image():
         for(x1,y1,r1,i1) in find_first_position():
             if i == i1:
-                final = np.vstack((final, [x1, y1, 0.2]))
+                final = np.vstack((final, [x1, y1, r]))
 
     final = np.unique(final, axis=0)
   
@@ -241,21 +244,23 @@ def perform_computervision():
 
     publisher_2.publish(message)
 
-    # for(x,y,r,i) in final:
-    #     # print(x, y, r)
+    for(x,y,r) in final:
+        # print(x, y, r)
         
-    #     if r == 1:
-    #         print("AA Batery at position:",x,y)
-    #         cv.circle(image_1, (x, y), 6, (0, 0, 255), -9)
-    #     if r == 0:
-    #         cv.circle(image_1, (x, y), 6, (0, 0, 0), -9)
-    #         print("AAA Batery at position:",x,y)
+        if r == 1:
+            print("AA Batery at position:",x,y)
+            cv.circle(image_1, (x, y), 6, (0, 0, 255), -9)
+        if r == 0:
+            cv.circle(image_1, (x, y), 6, (0, 0, 0), -9)
+            print("AAA Batery at position:",x,y)
 
     print('DONE THE CV')
 
     cv.imshow('hello', image_1)
 
     cv.waitKey(0)
+
+
 
     # cv.destroyAllWindows()
     input("Done The Vision Part, Remove the Cable to Continue .... \n")

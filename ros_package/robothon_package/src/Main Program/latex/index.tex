@@ -1,25 +1,23 @@
 \hypertarget{index_intro_sec}{}\doxysection{Introduction}\label{index_intro_sec}
-This documentation provides an overview of the software design and architecture for a robot navigation system. The system includes computer vision, localization, mapping, and path planning components.\hypertarget{index_install_sec}{}\doxysection{Installation}\label{index_install_sec}
-To install the system, please follow the instructions in the R\+E\+A\+D\+ME file.\hypertarget{index_usage_sec}{}\doxysection{Usage}\label{index_usage_sec}
-To use the system, follow these steps\+:
-
-
-\begin{DoxyEnumerate}
-\item Launch the robot navigation system.
-\item Calibrate the sensors and cameras.
-\item Initialize the localization system.
-\item Start the mapping process.
-\item Plan a path to the desired destination.
-\item Navigate the robot to the destination.
-\end{DoxyEnumerate}\hypertarget{index_comp_sec}{}\doxysection{Components}\label{index_comp_sec}
-The robot navigation system consists of the following components\+:
-
 
 \begin{DoxyItemize}
-\item Computer Vision\+: Detects objects in the environment and provides location data.
-\item Localization\+: Estimates the position and orientation of the robot.
-\item Mapping\+: Builds a map of the environment.
-\item Path Planning\+: Calculates the optimal path from the robot\textquotesingle{}s current location to the destination.
-\item Control\+: Sends commands to the robot\textquotesingle{}s motors to navigate the robot along the planned path.
+\item This project aims to address the 2022 Robothon Competition Challenge and explore how a robot system can detect and handle e-\/waste.
+\item The project is aimed at tackling the increasing issue of e-\/waste and the need for proper disposal of batteries.
+\item The mission of the project is to develop a robot system that can detect the position and type of battery and then pick and place these batteries into the correct position for proper disposal or recycling.
+\item The project aims to not only provide a solution to the problem of e-\/waste but also to raise awareness about the importance of proper disposal of batteries and other electronic devices.
+\item The use of robotics and automation in waste management can significantly reduce the human effort and time required for waste management while also improving the efficiency and accuracy of the process.
 \end{DoxyItemize}\hypertarget{index_code_sec}{}\doxysection{Code Documentation}\label{index_code_sec}
-This documentation provides detailed information about the code implementation for the robot navigation system. Please refer to the classes and functions documentation for more information. 
+
+\begin{DoxyItemize}
+\item This documentation provides detailed information about the code implementation for the robot navigation system. Please refer to the classes and functions documentation for more information.
+\end{DoxyItemize}\hypertarget{index_main_sec}{}\doxysection{Main function}\label{index_main_sec}
+
+\begin{DoxyItemize}
+\item This project involves the use of two R\+OS nodes to accomplish its mission.
+\item The first node is responsible for computer vision, which detects the position and type of battery.
+\item The second node controls the robot arm to pick up and place the batteries in their designated locations. Both nodes work together seamlessly to achieve the goal of this project.
+\end{DoxyItemize}
+
+~\newline
+ Updated Date\+: May 9 2023 ~\newline
+ By Ho Minh Quang Ngo and Minh Tri Cao 

@@ -32,6 +32,51 @@ list {\bfseries robot.\+transfer} = \mbox{[}$\,$\mbox{]}
 \item 
 \mbox{\Hypertarget{robot_8py_a45d7bb669cf5fb16f1047dcda0c1df9a}\label{robot_8py_a45d7bb669cf5fb16f1047dcda0c1df9a}} 
 {\bfseries robot.\+subscriber\+\_\+3} = rospy.\+Subscriber(\textquotesingle{}Color\+\_\+data\textquotesingle{}, Float32\+Multi\+Array, callback\+\_\+3)
+\item 
+\mbox{\Hypertarget{robot_8py_a475098636be2f7ca5ee1c985bf9a87e1}\label{robot_8py_a475098636be2f7ca5ee1c985bf9a87e1}} 
+{\bfseries robot.\+gripper\+\_\+pub} = rospy.\+Publisher(\textquotesingle{}On\+Robot\+R\+G\+Output\textquotesingle{}, On\+Robot\+R\+G\+Output, queue\+\_\+size=1)
+\item 
+\mbox{\Hypertarget{robot_8py_aed098dccd37b482028e4bf916095e641}\label{robot_8py_aed098dccd37b482028e4bf916095e641}} 
+\mbox{\hyperlink{robot_8py_aed098dccd37b482028e4bf916095e641}{robot.\+joint\+\_\+traj}} = Joint\+Trajectory()
+\begin{DoxyCompactList}\small\item\em B\+E\+L\+O\+NG TO T\+HE R\+O\+B\+OT O\+V\+ER H\+E\+RE \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{robot_8py_a34a3c3c10660b818ed6676470d8768d5}\label{robot_8py_a34a3c3c10660b818ed6676470d8768d5}} 
+{\bfseries robot.\+frame\+\_\+id}
+\item 
+\mbox{\Hypertarget{robot_8py_a45b34588e621a044ca0764ec04cd0841}\label{robot_8py_a45b34588e621a044ca0764ec04cd0841}} 
+{\bfseries robot.\+joint\+\_\+names}
+\item 
+\mbox{\Hypertarget{robot_8py_a4f35d270b3567632b2fd70c7f940801c}\label{robot_8py_a4f35d270b3567632b2fd70c7f940801c}} 
+{\bfseries robot.\+goal} = Follow\+Joint\+Trajectory\+Goal()
+\item 
+\mbox{\Hypertarget{robot_8py_a0abd53724b44f2b94400b9b7b9199543}\label{robot_8py_a0abd53724b44f2b94400b9b7b9199543}} 
+{\bfseries robot.\+seq}
+\item 
+\mbox{\Hypertarget{robot_8py_af0d78d93f383c681a5075a101292d5b1}\label{robot_8py_af0d78d93f383c681a5075a101292d5b1}} 
+{\bfseries robot.\+stamp}
+\item 
+\mbox{\Hypertarget{robot_8py_a3edac003e42f8e89de2a09d952cbc111}\label{robot_8py_a3edac003e42f8e89de2a09d952cbc111}} 
+{\bfseries robot.\+goal\+\_\+time\+\_\+tolerance}
+\item 
+\mbox{\Hypertarget{robot_8py_abc5c4dceec728b22a619c4f6e4459eb6}\label{robot_8py_abc5c4dceec728b22a619c4f6e4459eb6}} 
+int {\bfseries robot.\+buffer\+\_\+seconds} = 1
+\item 
+\mbox{\Hypertarget{robot_8py_ad10fda597b6c644b098a81003ec504c0}\label{robot_8py_ad10fda597b6c644b098a81003ec504c0}} 
+int {\bfseries robot.\+duration\+\_\+seconds} = 5
+\item 
+\mbox{\Hypertarget{robot_8py_ac2e486d3fbe84780e80586eb9566805c}\label{robot_8py_ac2e486d3fbe84780e80586eb9566805c}} 
+{\bfseries robot.\+client} = actionlib.\+Simple\+Action\+Client(\textquotesingle{}scaled\+\_\+pos\+\_\+joint\+\_\+traj\+\_\+controller/follow\+\_\+joint\+\_\+trajectory\textquotesingle{}, Follow\+Joint\+Trajectory\+Action)
+\item 
+\mbox{\Hypertarget{robot_8py_a1fdc7725d635d2dce7b6e8c558b49254}\label{robot_8py_a1fdc7725d635d2dce7b6e8c558b49254}} 
+{\bfseries robot.\+start\+\_\+time} = time.\+perf\+\_\+counter()
+\item 
+\mbox{\Hypertarget{robot_8py_a7eb5621686c16ec95674f1604961b7ab}\label{robot_8py_a7eb5621686c16ec95674f1604961b7ab}} 
+{\bfseries robot.\+env} = swift.\+Swift()
+\item 
+\mbox{\Hypertarget{robot_8py_a7067c483ebb2e5d3a08e381351ebc46b}\label{robot_8py_a7067c483ebb2e5d3a08e381351ebc46b}} 
+{\bfseries robot.\+realtime}
+\item 
+\mbox{\Hypertarget{robot_8py_ae698ea179317f3ffd8c3b5904943fa82}\label{robot_8py_ae698ea179317f3ffd8c3b5904943fa82}} 
+{\bfseries robot.\+robot} = rtb.\+models.\+U\+R3()
 \end{DoxyCompactItemize}
 
 
@@ -40,6 +85,8 @@ This file provides functions for controlling the robot.
 
 \begin{DoxyAuthor}{Author}
 Minh Tri Cao 
+
+Ho Minh Quang Ngo
 \end{DoxyAuthor}
 \begin{DoxyDate}{Date}
 May 9, 2023 

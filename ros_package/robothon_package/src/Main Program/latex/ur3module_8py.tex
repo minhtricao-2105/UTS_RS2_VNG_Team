@@ -1,0 +1,195 @@
+\hypertarget{ur3module_8py}{}\doxysection{ur3module.\+py File Reference}
+\label{ur3module_8py}\index{ur3module.py@{ur3module.py}}
+
+
+This file provides some functions for finding trajectory and solution for controlling the robot.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{ur3module_8py_a906807cb386002ede6b617207df31304}{ur3module.\+get\+\_\+link\+\_\+transform}} (robot, q)
+\item 
+bool \mbox{\hyperlink{ur3module_8py_a94ebd800ae6360fef3d93b3f797b5578}{ur3module.\+is\+\_\+touch\+\_\+ground}} (robot, q)
+\item 
+bool \mbox{\hyperlink{ur3module_8py_a2f677900d3d03562ad9c4690dd4a0022}{ur3module.\+is\+\_\+collision\+\_\+obstacle}} (robot, q, obstacle\+\_\+list, is\+\_\+swift=True)
+\item 
+bool \mbox{\hyperlink{ur3module_8py_aa6f317160269ca2f4a16368ee0534f1f}{ur3module.\+is\+\_\+self\+\_\+collision\+\_\+\+U\+R3}} (q)
+\item 
+def \mbox{\hyperlink{ur3module_8py_abfdf9f2077c60141c6236655be4c99f5}{ur3module.\+is\+\_\+elbow\+\_\+up}} (robot, q)
+\item 
+\mbox{\Hypertarget{ur3module_8py_ad2268b4e63e3441424951a80353bb769}\label{ur3module_8py_ad2268b4e63e3441424951a80353bb769}} 
+def {\bfseries ur3module.\+is\+\_\+joint\+\_\+valid} (robot, q, obstacle\+\_\+list=None)
+\item 
+np.\+array \mbox{\hyperlink{ur3module_8py_aaaafaea827b8b824f13aefd4c57e2b4e}{ur3module.\+solve\+\_\+for\+\_\+valid\+\_\+ik}} (robot, obj\+\_\+pose, relative\+\_\+pose=S\+E3(0, 0, 0), elbow\+\_\+up\+\_\+request=False)
+\item 
+def \mbox{\hyperlink{ur3module_8py_a96282b1523da6f555d0d6a37e38271c2}{ur3module.\+move\+\_\+robot\+\_\+with\+\_\+object}} (robot, path, env, obj=None, relative\+\_\+pose=None, show\+\_\+path=True)
+\item 
+def \mbox{\hyperlink{ur3module_8py_ab4bee5405fb50dad9f360d931fba14c8}{ur3module.\+move\+\_\+robot\+\_\+insurance}} (robot, q\+\_\+end, env, obstacle\+\_\+list=None, show\+\_\+path=True)
+\item 
+\mbox{\Hypertarget{ur3module_8py_a683cb263421ca9f18783c01ce83261c1}\label{ur3module_8py_a683cb263421ca9f18783c01ce83261c1}} 
+def {\bfseries ur3module.\+get\+\_\+valid\+\_\+path} (robot, path, obstacle\+\_\+list=None)
+\item 
+\mbox{\Hypertarget{ur3module_8py_a91d6e60878363f0351d249ba0ca4630c}\label{ur3module_8py_a91d6e60878363f0351d249ba0ca4630c}} 
+def {\bfseries ur3module.\+show\+\_\+path} (robot, path, env)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{ur3module_8py_a5b9e33be5cae3171557676305b646a91}\label{ur3module_8py_a5b9e33be5cae3171557676305b646a91}} 
+{\bfseries ur3module.\+robo\+\_\+clone} = rtb.\+models.\+U\+R3()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file provides some functions for finding trajectory and solution for controlling the robot. 
+
+\begin{DoxyAuthor}{Author}
+Ho Minh Quang Ngo
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+last updated on May 9, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ur3module_8py_a906807cb386002ede6b617207df31304}\label{ur3module_8py_a906807cb386002ede6b617207df31304}} 
+\index{ur3module.py@{ur3module.py}!get\_link\_transform@{get\_link\_transform}}
+\index{get\_link\_transform@{get\_link\_transform}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{get\_link\_transform()}{get\_link\_transform()}}
+{\footnotesize\ttfamily bool ur3module.\+get\+\_\+link\+\_\+transform (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{q }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Get transform for each link of the robot
+
+:param robot: Manipulator 
+:type robot: URDF model
+:param q: joint state 
+:type q: array like
+:return: list of transform for each link at the given joint state
+:rtype: list of SE3 transforms
+
+Computes SE3 object for each link of the input robot 
+\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_a2f677900d3d03562ad9c4690dd4a0022}\label{ur3module_8py_a2f677900d3d03562ad9c4690dd4a0022}} 
+\index{ur3module.py@{ur3module.py}!is\_collision\_obstacle@{is\_collision\_obstacle}}
+\index{is\_collision\_obstacle@{is\_collision\_obstacle}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{is\_collision\_obstacle()}{is\_collision\_obstacle()}}
+{\footnotesize\ttfamily bool ur3module.\+is\+\_\+collision\+\_\+obstacle (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{q,  }\item[{}]{obstacle\+\_\+list,  }\item[{}]{is\+\_\+swift = {\ttfamily True} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check whether any self collision happens in an UR3 robot. 
+
+:param robot: Manipulator 
+:type robot: URDF model
+:param q: joint state 
+:type q: array like
+:param obstacle_list: list of obstacles 
+:type obstacle_list: list of objects of Shape class
+:param is_swift: whether the Swift environment is used, default is True
+:type is_swift: bool
+:return: whether any self-collision happens for a UR3 robot at the given joint state 
+:rtype: bool value\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_abfdf9f2077c60141c6236655be4c99f5}\label{ur3module_8py_abfdf9f2077c60141c6236655be4c99f5}} 
+\index{ur3module.py@{ur3module.py}!is\_elbow\_up@{is\_elbow\_up}}
+\index{is\_elbow\_up@{is\_elbow\_up}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{is\_elbow\_up()}{is\_elbow\_up()}}
+{\footnotesize\ttfamily def ur3module.\+is\+\_\+elbow\+\_\+up (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{q }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check whether the configuration q of the robot is elbow up
+
+:param robot: UR3 manipulator 
+:type robot: URDF model
+:param q: current joint state of the robot 
+:type q: array like
+:return: whether the configuration q of the robot is elbow up
+:rtype: boolean\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_aa6f317160269ca2f4a16368ee0534f1f}\label{ur3module_8py_aa6f317160269ca2f4a16368ee0534f1f}} 
+\index{ur3module.py@{ur3module.py}!is\_self\_collision\_UR3@{is\_self\_collision\_UR3}}
+\index{is\_self\_collision\_UR3@{is\_self\_collision\_UR3}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{is\_self\_collision\_UR3()}{is\_self\_collision\_UR3()}}
+{\footnotesize\ttfamily bool ur3module.\+is\+\_\+self\+\_\+collision\+\_\+\+U\+R3 (\begin{DoxyParamCaption}\item[{}]{q }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check whether any self collision happens in an UR3 robot.
+Cannot be used when being imported separately without the robo_clone global variable
+
+:param q: joint state 
+:type q: array like
+:return: whether any self-collision happens for a UR3 robot at the given joint state 
+:rtype: bool value\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_a94ebd800ae6360fef3d93b3f797b5578}\label{ur3module_8py_a94ebd800ae6360fef3d93b3f797b5578}} 
+\index{ur3module.py@{ur3module.py}!is\_touch\_ground@{is\_touch\_ground}}
+\index{is\_touch\_ground@{is\_touch\_ground}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{is\_touch\_ground()}{is\_touch\_ground()}}
+{\footnotesize\ttfamily bool ur3module.\+is\+\_\+touch\+\_\+ground (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{q }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Check whether any link of the input robot lower than the given certain height from the base,
+at the given joint state. Cannot be used without importing 'get_link_transform'
+
+:param robot: Manipulator 
+:type robot: URDF model
+:param q: joint state 
+:type q: array like
+:return: whether the ground touch happens for any link in robot at the given joint state
+:rtype: bool value\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_ab4bee5405fb50dad9f360d931fba14c8}\label{ur3module_8py_ab4bee5405fb50dad9f360d931fba14c8}} 
+\index{ur3module.py@{ur3module.py}!move\_robot\_insurance@{move\_robot\_insurance}}
+\index{move\_robot\_insurance@{move\_robot\_insurance}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{move\_robot\_insurance()}{move\_robot\_insurance()}}
+{\footnotesize\ttfamily def ur3module.\+move\+\_\+robot\+\_\+insurance (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{q\+\_\+end,  }\item[{}]{env,  }\item[{}]{obstacle\+\_\+list = {\ttfamily None},  }\item[{}]{show\+\_\+path = {\ttfamily True} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create a trapezoidal joint-state path from the current position to the input position and then move the UR3 robot. 
+Check self-collision & obstacle (including ground) and stop the robot when collision will happen. 
+Cannot be use without importing 'is_self_collision_UR3' and 'is_touch_ground'
+
+:param robot: UR3 manipulator 
+:type robot: URDF model
+:param q_end: final joint state of the robot
+:type q_end: 1x6 array like
+:param env: environment
+:type env: environment object
+:param obstacle_list: list of obstacles inside the environment
+:type obstacle_list: list of obstacles of Shape Class
+:param show_path: show the path of the end-effector, true by default
+:type show_path: boolean\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_a96282b1523da6f555d0d6a37e38271c2}\label{ur3module_8py_a96282b1523da6f555d0d6a37e38271c2}} 
+\index{ur3module.py@{ur3module.py}!move\_robot\_with\_object@{move\_robot\_with\_object}}
+\index{move\_robot\_with\_object@{move\_robot\_with\_object}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{move\_robot\_with\_object()}{move\_robot\_with\_object()}}
+{\footnotesize\ttfamily def ur3module.\+move\+\_\+robot\+\_\+with\+\_\+object (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{path,  }\item[{}]{env,  }\item[{}]{obj = {\ttfamily None},  }\item[{}]{relative\+\_\+pose = {\ttfamily None},  }\item[{}]{show\+\_\+path = {\ttfamily True} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Move the robot along the given path. Unsure about self-collision & obstacle (including ground) avoidance 
+
+:param robot: Manipulator 
+:type robot: URDF model
+:param path: path that the robot should follow along
+:type path: mxn list of ndarray with n-axis robot and m steps
+:param env: environment
+:type env: environment object
+:param obj: object that move along with the robot's end-effector
+:type obj: Shape class
+:param relative_pose: transform from robot end-effector to object's pose
+:type relative_pose: SE3 object
+:param show_path: show the path of the end-effector, true by default
+:type show_path: boolean\end{DoxyVerb}
+ \mbox{\Hypertarget{ur3module_8py_aaaafaea827b8b824f13aefd4c57e2b4e}\label{ur3module_8py_aaaafaea827b8b824f13aefd4c57e2b4e}} 
+\index{ur3module.py@{ur3module.py}!solve\_for\_valid\_ik@{solve\_for\_valid\_ik}}
+\index{solve\_for\_valid\_ik@{solve\_for\_valid\_ik}!ur3module.py@{ur3module.py}}
+\doxysubsubsection{\texorpdfstring{solve\_for\_valid\_ik()}{solve\_for\_valid\_ik()}}
+{\footnotesize\ttfamily  np.\+array ur3module.\+solve\+\_\+for\+\_\+valid\+\_\+ik (\begin{DoxyParamCaption}\item[{}]{robot,  }\item[{}]{obj\+\_\+pose,  }\item[{}]{relative\+\_\+pose = {\ttfamily SE3(0,0,0)},  }\item[{}]{elbow\+\_\+up\+\_\+request = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Solve for the valid inversed kinematics solution of the UR3 robot at the given goal pose.
+A valid solution will not lead to self-collision and the ground touch. 
+Cannot be use without importing 'is_self_collision_UR3' and 'is_touch_ground'
+
+:param robot: UR3 manipulator 
+:type robot: URDF model
+:param obj_pose: object pose that require the end-effector to reach 
+:type obj_pose: SE3 object
+:param relative_pose: relative pose from the end-effector to the object pose 
+:type relative_pose: SE3 object
+:param relative_pose: relative pose from the end-effector to the object pose 
+:type relative_pose: SE3 object
+:param elbow_up_request: if the solution require an elbow up configuration, false by default 
+:type elbow_up_request: boolean
+:return: a valid solution IK solution using Levenberg-Marquadt optimization 
+:rtype: list of joint state\end{DoxyVerb}
+ 

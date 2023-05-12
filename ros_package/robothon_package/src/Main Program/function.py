@@ -1,3 +1,15 @@
+##  @file
+#   @brief This file contains the necessary functions for implementing the computer vision aspect of the project.
+#   
+#   The functions in this file are used to process images and extract information that is relevant to the project.
+#   The primary libraries used in this file are OpenCV and NumPy. OpenCV is used for image processing, while NumPy is used for numerical operations.
+#   The functions in this file are designed to identify and track objects, detect colors, and perform other computer vision tasks that are essential to the functionality of the project.
+#   
+#   @author Minh Tri Cao
+#
+#   @date May 9, 2023
+
+
 import numpy as np
 import cv2 as cv
 import math
@@ -6,7 +18,11 @@ from colorLibrary import*
 import imutils
 from colorLibrary import*
 
-# Rescale Function:
+##  @brief Rescales the input frame with the given scale factor
+#   @param frame The input frame to be resized
+#   @param scale The scale factor to resize the frame
+#   @return The resized frame
+##
 def rescaleFrame(frame, scale):
     width     = int(frame.shape[1] * scale)
     height    = int(frame.shape[0] * scale)
@@ -127,8 +143,11 @@ def findEdgeNear(edge, point, img, array):
 #Image Progressing for battery:
 
 
-# Crop the middle of the image and then combine with the black blank space
-# So that it will have the same size of the initial image:
+##  @brief Crop an image using a factor and return the cropped image
+#   @param img: Input image to be cropped
+#   @param factor: A factor by which image will be cropped (e.g., 2 means image will be cropped to 1/2 of its original size)
+#   @return Cropped image
+##
 def crop(img,factor):
     # Get the dimensions of the image
     height, width = img.shape[:2]
@@ -156,8 +175,10 @@ def crop(img,factor):
 
     return black
 
-#Image processing apply canny edge to detect the edge of the image
-
+##  @brief Applies Canny edge detection to the input image
+#   @param img Input image to be processed
+#   @return The processed image with Canny edge detection applied
+##
 def processing(img):
 
     img = cv.convertScaleAbs(img, alpha=1, beta=100)
@@ -175,6 +196,9 @@ def processing(img):
 
     return edges
 
+##  @brief This function applies Hough Circle Transform to detect circles in an image and draw them
+#   @return cv::Mat The input image with detected circles drawn on it
+##
 def show_circle():
     
     # Using the first image in here:
@@ -210,14 +234,15 @@ def find_first_position():
     coordinates = []
 
     # Apply the position of each hole
-    #position 1 (AA Battery)
-    coordinates.append((265,135,23,1))
+    #position 1 
+    coordinates.append((270,137,16,1))
     #position 2
-    coordinates.append((260,205,16,2))
+    coordinates.append((270,205,16,2))
     #position 3
-    coordinates.append((260,268,16,3))
-    #position 4 (AA Battery)
-    coordinates.append((265,340,23,4))
+    coordinates.append((270,268,16,3))
+    #position 4 
+    coordinates.append((270,358,16,4))
+
     #position 5
     coordinates.append((314,137,16,5))
     #position 6 (AA Battery)
@@ -226,19 +251,28 @@ def find_first_position():
     coordinates.append((314,270,23,7))
     #position 8
     coordinates.append((313,333,16,8))
-    #position 9
-    coordinates.append((363,134,16,9))
+
+    #position 9 (AA Battery)
+    coordinates.append((368,134,26,9))
     #position 10
     coordinates.append((366,204,16,10))
     #position 11
     coordinates.append((366,270,16,11))
-    #position 12
-    coordinates.append((363,334,16,12))
+    #position 12(AA Battery)
+    coordinates.append((363,334,26,12))
 
     # Return a list to store the coordinates of the centers of detected circular edges   
     return coordinates
 
-import numpy as np
+##  @brief Convert pixel coordinates to local camera frame coordinates
+#
+#   The function converts pixel coordinates to local camera frame coordinates using the camera intrinsic and extrinsic parameters.
+#   First, the pixel coordinates are converted to normalized image coordinates. Then, the normalized image coordinates are converted
+#   to camera coordinates using the camera height. Finally, the camera coordinates are transformed to local camera frame coordinates using the camera extrinsic parameters.
+#
+#   @param locations numpy array of shape (n, 2) containing the pixel coordinates to be converted
+#   @return numpy array of shape (n, 3) containing the corresponding local camera frame coordinates
+##
 
 def transfer_local(locations):
     # camera intrinsic parameters

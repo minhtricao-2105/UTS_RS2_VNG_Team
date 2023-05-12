@@ -1,0 +1,157 @@
+\hypertarget{function_8py}{}\doxysection{function.\+py File Reference}
+\label{function_8py}\index{function.py@{function.py}}
+
+
+This file contains the necessary functions for implementing the computer vision aspect of the project.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{function_8py_a54f69cc6493c856b6d0bae5077790d9c}{function.\+rescale\+Frame}} (frame, scale)
+\begin{DoxyCompactList}\small\item\em Rescales the input frame with the given scale factor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{function_8py_ab7d87386f0106dce070a0c36acd97304}\label{function_8py_ab7d87386f0106dce070a0c36acd97304}} 
+def {\bfseries function.\+distance} (p1, p2)
+\item 
+\mbox{\Hypertarget{function_8py_a3e2924476ccfb6c752b99d3ff1954d0e}\label{function_8py_a3e2924476ccfb6c752b99d3ff1954d0e}} 
+def {\bfseries function.\+findn\+Near} (positions, point)
+\item 
+\mbox{\Hypertarget{function_8py_a386253acae0fa9b5a535e32788aca93d}\label{function_8py_a386253acae0fa9b5a535e32788aca93d}} 
+def {\bfseries function.\+find\+Cordinate} (positions, img)
+\item 
+\mbox{\Hypertarget{function_8py_a79b6d9803ceea409d8b6fbed4ebc2860}\label{function_8py_a79b6d9803ceea409d8b6fbed4ebc2860}} 
+def {\bfseries function.\+draw\+Rec} (img, array)
+\item 
+\mbox{\Hypertarget{function_8py_a26704a878f7e85a58755af8ff85222a1}\label{function_8py_a26704a878f7e85a58755af8ff85222a1}} 
+def {\bfseries function.\+displace\+Points} (img, random\+\_\+point\+\_\+0, random\+\_\+point\+\_\+1, random\+\_\+point\+\_\+2, random\+\_\+point\+\_\+3)
+\item 
+\mbox{\Hypertarget{function_8py_a433dd3ddd4a625e2c1bb904164921458}\label{function_8py_a433dd3ddd4a625e2c1bb904164921458}} 
+def {\bfseries function.\+find\+Middle} (point1, point2)
+\item 
+\mbox{\Hypertarget{function_8py_a0b7ff049cb9c9a5d5dc623706b64b5dd}\label{function_8py_a0b7ff049cb9c9a5d5dc623706b64b5dd}} 
+def {\bfseries function.\+array\+Mid\+Point} (array)
+\item 
+\mbox{\Hypertarget{function_8py_a246b663db973135fdf2aa6b79e8dbd4f}\label{function_8py_a246b663db973135fdf2aa6b79e8dbd4f}} 
+def {\bfseries function.\+displace\+Point} (img, point)
+\item 
+\mbox{\Hypertarget{function_8py_a76d1403b00c70e53a82e94a9616c1ede}\label{function_8py_a76d1403b00c70e53a82e94a9616c1ede}} 
+def {\bfseries function.\+find\+Edge\+Near} (edge, point, img, array)
+\item 
+def \mbox{\hyperlink{function_8py_adf4ad6be83df999457613aef14b1063c}{function.\+crop}} (img, factor)
+\begin{DoxyCompactList}\small\item\em Crop an image using a factor and return the cropped image. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{function_8py_a35df54f76da3552f89e08e38eee20071}{function.\+processing}} (img)
+\begin{DoxyCompactList}\small\item\em Applies Canny edge detection to the input image. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{function_8py_a112abea6f459b00344981d016c06a765}{function.\+show\+\_\+circle}} ()
+\begin{DoxyCompactList}\small\item\em This function applies Hough Circle Transform to detect circles in an image and draw them. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{function_8py_ac5dc7475a3e3cbee65c58d16c97b1d48}\label{function_8py_ac5dc7475a3e3cbee65c58d16c97b1d48}} 
+def {\bfseries function.\+find\+\_\+first\+\_\+position} ()
+\item 
+def \mbox{\hyperlink{function_8py_a50470b39c365d5dd2117fc48238f51f8}{function.\+transfer\+\_\+local}} (locations)
+\begin{DoxyCompactList}\small\item\em Convert pixel coordinates to local camera frame coordinates. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file contains the necessary functions for implementing the computer vision aspect of the project. 
+
+The functions in this file are used to process images and extract information that is relevant to the project. The primary libraries used in this file are Open\+CV and Num\+Py. Open\+CV is used for image processing, while Num\+Py is used for numerical operations. The functions in this file are designed to identify and track objects, detect colors, and perform other computer vision tasks that are essential to the functionality of the project.
+
+\begin{DoxyAuthor}{Author}
+Minh Tri Cao
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+May 9, 2023 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{function_8py_adf4ad6be83df999457613aef14b1063c}\label{function_8py_adf4ad6be83df999457613aef14b1063c}} 
+\index{function.py@{function.py}!crop@{crop}}
+\index{crop@{crop}!function.py@{function.py}}
+\doxysubsubsection{\texorpdfstring{crop()}{crop()}}
+{\footnotesize\ttfamily def function.\+crop (\begin{DoxyParamCaption}\item[{}]{img,  }\item[{}]{factor }\end{DoxyParamCaption})}
+
+
+
+Crop an image using a factor and return the cropped image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em img} & Input image to be cropped \\
+\hline
+{\em factor} & A factor by which image will be cropped (e.\+g., 2 means image will be cropped to 1/2 of its original size) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Cropped image 
+\end{DoxyReturn}
+\mbox{\Hypertarget{function_8py_a35df54f76da3552f89e08e38eee20071}\label{function_8py_a35df54f76da3552f89e08e38eee20071}} 
+\index{function.py@{function.py}!processing@{processing}}
+\index{processing@{processing}!function.py@{function.py}}
+\doxysubsubsection{\texorpdfstring{processing()}{processing()}}
+{\footnotesize\ttfamily def function.\+processing (\begin{DoxyParamCaption}\item[{}]{img }\end{DoxyParamCaption})}
+
+
+
+Applies Canny edge detection to the input image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em img} & Input image to be processed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The processed image with Canny edge detection applied 
+\end{DoxyReturn}
+\mbox{\Hypertarget{function_8py_a54f69cc6493c856b6d0bae5077790d9c}\label{function_8py_a54f69cc6493c856b6d0bae5077790d9c}} 
+\index{function.py@{function.py}!rescaleFrame@{rescaleFrame}}
+\index{rescaleFrame@{rescaleFrame}!function.py@{function.py}}
+\doxysubsubsection{\texorpdfstring{rescaleFrame()}{rescaleFrame()}}
+{\footnotesize\ttfamily def function.\+rescale\+Frame (\begin{DoxyParamCaption}\item[{}]{frame,  }\item[{}]{scale }\end{DoxyParamCaption})}
+
+
+
+Rescales the input frame with the given scale factor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frame} & The input frame to be resized \\
+\hline
+{\em scale} & The scale factor to resize the frame \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The resized frame 
+\end{DoxyReturn}
+\mbox{\Hypertarget{function_8py_a112abea6f459b00344981d016c06a765}\label{function_8py_a112abea6f459b00344981d016c06a765}} 
+\index{function.py@{function.py}!show\_circle@{show\_circle}}
+\index{show\_circle@{show\_circle}!function.py@{function.py}}
+\doxysubsubsection{\texorpdfstring{show\_circle()}{show\_circle()}}
+{\footnotesize\ttfamily def function.\+show\+\_\+circle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+This function applies Hough Circle Transform to detect circles in an image and draw them. 
+
+\begin{DoxyReturn}{Returns}
+cv\+::\+Mat The input image with detected circles drawn on it 
+\end{DoxyReturn}
+\mbox{\Hypertarget{function_8py_a50470b39c365d5dd2117fc48238f51f8}\label{function_8py_a50470b39c365d5dd2117fc48238f51f8}} 
+\index{function.py@{function.py}!transfer\_local@{transfer\_local}}
+\index{transfer\_local@{transfer\_local}!function.py@{function.py}}
+\doxysubsubsection{\texorpdfstring{transfer\_local()}{transfer\_local()}}
+{\footnotesize\ttfamily def function.\+transfer\+\_\+local (\begin{DoxyParamCaption}\item[{}]{locations }\end{DoxyParamCaption})}
+
+
+
+Convert pixel coordinates to local camera frame coordinates. 
+
+The function converts pixel coordinates to local camera frame coordinates using the camera intrinsic and extrinsic parameters. First, the pixel coordinates are converted to normalized image coordinates. Then, the normalized image coordinates are converted to camera coordinates using the camera height. Finally, the camera coordinates are transformed to local camera frame coordinates using the camera extrinsic parameters.
+
+
+\begin{DoxyParams}{Parameters}
+{\em locations} & numpy array of shape (n, 2) containing the pixel coordinates to be converted \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+numpy array of shape (n, 3) containing the corresponding local camera frame coordinates 
+\end{DoxyReturn}

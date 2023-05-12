@@ -1,11 +1,29 @@
-/*! \mainpage Robot Navigation System Documentation
+/*! \mainpage Robotics Studio 2 Robothon Team
 
 \section intro_sec Introduction
 
+- This project aims to address the 2022 Robothon Competition Challenge and explore how a robot system can detect and handle e-waste.
 
+- The project is aimed at tackling the increasing issue of e-waste and the need for proper disposal of batteries.
+
+- The mission of the project is to develop a robot system that can detect the position and type of battery and then pick and place these batteries into the correct position for proper disposal or recycling.
+
+- The project aims to not only provide a solution to the problem of e-waste but also to raise awareness about the importance of proper disposal of batteries and other electronic devices. 
+
+- The use of robotics and automation in waste management can significantly reduce the human effort and time required for waste management while also improving the efficiency and accuracy of the process.
 
 \section code_sec Code Documentation
 
-This documentation provides detailed information about the code implementation for the robot navigation system. Please refer to the classes and functions documentation for more information.
+- This documentation provides detailed information about the code implementation for the robot navigation system. Please refer to the classes and functions documentation for more information.
 
+\section main_sec Main function
+
+-   This project involves the use of two ROS nodes to accomplish its mission.
+
+-   The first node is responsible for computer vision, which detects the position and type of battery. 
+
+-   The second node controls the robot arm to pick up and place the batteries in their designated locations. Both nodes work together seamlessly to achieve the goal of this project.
+
+@n Updated Date: May 9 2023
+@n By Ho Minh Quang Ngo and Minh Tri Cao
 */
