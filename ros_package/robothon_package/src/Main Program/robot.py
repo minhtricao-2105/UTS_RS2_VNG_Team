@@ -14,6 +14,9 @@
 import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Int32
+import moveit_commander
+import moveit_msgs.msg
 import numpy as np
 from function import*
 
@@ -48,7 +51,9 @@ transfer = []
 
 # Create a global variable for the robot to wait for the computer vision part complete:
 running_ = False
-# running_ = True
+
+# Create a flag variable moveit commander
+moveIt = False
 
 def cam_to_global(pixel_x, pixel_y, camera_transform):
     # Define the camera parameters
@@ -124,17 +129,34 @@ def callback_3(msg):
     
 rospy.init_node('robot_node')
 
+pub_1 = rospy.Publisher('Move_home',Int32,queue_size=1)
+
+############## BELONG TO THE ROBOT OVER HERE ###########################
+
+while moveIt == False:
+    rospy.loginfo("Moving Robot to Home!!")
+    moveit_commander.roscpp_initialize(sys.argv)
+    joint_home_degree = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
+    joint_home_radian = [math.radians(joint_home_degree) for joint_home_degree in joint_home_degree]
+    arm = setUpRobot(0.5)
+    arm.go(joint_home_radian)
+    moveIt = True
+    mess = Int32()
+    mess.data = 1
+    pub_1.publish(mess)
+    rospy.loginfo("Done Moving to Home!!")
+    break
+
 # Subcribe Declaration:
 subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
 
 subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
 
-pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 # subscriber_2.unsubscribe()
 
 # subscriber_3.unsubscribe()
 
-############## BELONG TO THE ROBOT OVER HERE ###########################
+pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 
 while len(location_array) == 0:
     rospy.loginfo("Waiting for vision")
@@ -217,27 +239,6 @@ while running_ == True:
     pixel_y_1 = location_array[0][1]
 
     global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
-
-    # q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
-    # q_sample = [x*pi/180 for x in q_sample]
-    # ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
-
-    # offset_z = 0.17
-    # obj_pose=SE3(global_position_1[0], global_position_1[1], global_position_1[2]+ offset_z)*ee_orientation
-
-    # q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] 
-    # q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request=True)
-    # q_goal[-1] += 2*pi
-    # print(q_goal)
-
-    # path = rtb.jtraj(robot.q, q_goal,50)
-
-    # arrived = False
-    # if not arrived:
-    #     for q in path.q:
-    #         robot.q = q
-    #         cam_move(cam,robot,TCR)
-    #         env.step(dt)
 
     path = move_to_pin(robot, q_start, global_position_1)
     arrived = False

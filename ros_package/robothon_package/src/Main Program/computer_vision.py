@@ -37,6 +37,7 @@ import imutils
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Int32
 
 # Create a CvBridge object to convert ROS messages to OpenCV Images
 bridge = CvBridge()
@@ -48,6 +49,12 @@ image_1 = None
 
 #Setting the flag so that the image only take once time only
 flag = 1
+
+#Setting the flag for waiting the robot to move home!
+move_home = 0
+
+#Setting the flag for running this node
+running_ = False
 
 ## @brief Callback function for processing depth image messages
 #
@@ -334,24 +341,40 @@ def colour_detection():
     # Publish the message on the topic
     publisher_3.publish(message)
     
+def move_home(msg):
+    global move_home
+
+    move_home = msg.data
 
 rospy.init_node('Realsense')
 
-rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
+subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
-# Create a first publisher to publish a message to a robot nodes
-sub_1 = publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)
+while move_home != 1:
+    rospy.loginfo("Waiting for the robot to move home!")
+    if move_home == 1:
+        running_ = True
+        break
 
-# A secondary publisher will be established to transmit data obtained after performing computer vision tasks.
-publisher_2 = rospy.Publisher('Image_Data',Float32MultiArray, queue_size = 20)
+while running_ == True: 
 
-# A third publisher will be establisted to transmit data for colour detection:
-publisher_3 = rospy.Publisher('Color_data', Float32MultiArray, queue_size = 20)
+    rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
 
-input("Press any key to capture a second image\n")
+    # Create a first publisher to publish a message to a robot nodes
+    sub_1 = publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)
 
-sub_2 = rospy.Subscriber("/camera/color/image_raw", Image, batteries_callback)
+    # A secondary publisher will be established to transmit data obtained after performing computer vision tasks.
+    publisher_2 = rospy.Publisher('Image_Data',Float32MultiArray, queue_size = 20)
 
+    # A third publisher will be establisted to transmit data for colour detection:
+    publisher_3 = rospy.Publisher('Color_data', Float32MultiArray, queue_size = 20)
+
+    input("Press any key to capture a second image\n")
+
+    sub_2 = rospy.Subscriber("/camera/color/image_raw", Image, batteries_callback)
+
+    running_ = False
+    
 # wait for a key press
 rospy.spin()
 

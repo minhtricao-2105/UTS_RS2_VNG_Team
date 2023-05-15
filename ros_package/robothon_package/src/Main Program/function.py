@@ -11,6 +11,7 @@
 
 
 import numpy as np
+import sys
 import cv2 as cv
 import math
 from math import sqrt, pow
@@ -18,6 +19,8 @@ from colorLibrary import*
 import imutils
 from colorLibrary import*
 from ur3module import *
+import moveit_commander
+import moveit_msgs.msg
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
@@ -30,6 +33,28 @@ def rescaleFrame(frame, scale):
     dimension = (width, height)
 
     return cv.resize(frame, dimension, interpolation = cv.INTER_AREA)
+
+def setUpRobot(maxVelocity):
+    # Initialize the moveit_commander and rospy nodes
+    moveit_commander.roscpp_initialize(sys.argv)
+    
+    # Initialize the MoveIt planning scene, robot commander, and arm group
+    scene = moveit_commander.PlanningSceneInterface()
+    robot = moveit_commander.RobotCommander()
+    arm = moveit_commander.MoveGroupCommander("manipulator")
+
+    # Set the reference frame and end effector link
+    arm.set_pose_reference_frame("base_link")
+    arm.set_end_effector_link("ee_link")
+
+    # Set the maximum velocity scaling factor
+    arm.set_max_velocity_scaling_factor(maxVelocity)
+
+    # Get the current joint values
+    current_joint_values = arm.get_current_joint_values()
+
+    return arm
+
 
 # Find distance from 2 points:
 def distance(p1,p2):
