@@ -1,10 +1,3 @@
-##  @file
-#   @brief This file provides some functions for finding trajectory and solution for controlling the robot
-#   
-#   @author Ho Minh Quang Ngo
-#
-#   @date last updated on May 9, 2023
-
 import roboticstoolbox as rtb
 import numpy as np
 from spatialmath import SE3
@@ -114,10 +107,34 @@ def is_elbow_up(robot, q):
     :rtype: boolean
  
     """
-    T = get_link_transform(robot,q)
-    if T[4].A[2,3] > T[-1].A[2,3]: # at position 4 is the elbow 
-        # print(T[4].A[2,3],T[-1].A[2,3]) 
-        return True
+    # T = get_link_transform(robot,q)
+    # if T[4].A[2,3] > T[-1].A[2,3]: # at position 4 is the elbow 
+    #     # print(T[4].A[2,3],T[-1].A[2,3]) 
+    #     return True
+    T = robot.fkine(robot.q)
+    R = T.R
+    if R[1, 2] > 0: return True
+    else: return False
+
+def is_shoulder_left(robot, q):
+    """
+    Check whether the configuration q of the robot is shoulder left
+
+    :param robot: UR3 manipulator 
+    :type robot: URDF model
+    :param q: current joint state of the robot 
+    :type q: array like
+    :return: whether the configuration q of the robot is shoulder left
+    :rtype: boolean
+ 
+    """
+    # T = get_link_transform(robot,q)
+    # if T[4].A[2,3] > T[-1].A[2,3]: # at position 4 is the elbow 
+    #     # print(T[4].A[2,3],T[-1].A[2,3]) 
+    #     return True
+    T = robot.fkine(robot.q)
+    R = T.R
+    if R[0, 1] < 0: return True
     else: return False
 
 def is_joint_valid(robot,q,obstacle_list = None):
@@ -132,7 +149,7 @@ def is_joint_valid(robot,q,obstacle_list = None):
     else:
         return False,touch_ground,touch_self,touch_obstacle
 
-def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_request = False)-> np.array:
+def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0),q_guess = [], elbow_up_request = False, shoulder_left_request = False)-> np.array:
     """
     Solve for the valid inversed kinematics solution of the UR3 robot at the given goal pose.
     A valid solution will not lead to self-collision and the ground touch. 
@@ -146,8 +163,12 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
     :type relative_pose: SE3 object
     :param relative_pose: relative pose from the end-effector to the object pose 
     :type relative_pose: SE3 object
+    :param q_guess: initial joint value to guess the solution, none by default
+    :type q_guess: list of joints
     :param elbow_up_request: if the solution require an elbow up configuration, false by default 
     :type elbow_up_request: boolean
+    :param shoulder_left_request: if the solution require an shoulder left configuration, false by default 
+    :type shoulder_left_request: boolean
     :return: a valid solution IK solution using Levenberg-Marquadt optimization 
     :rtype: list of joint state
  
@@ -162,10 +183,10 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
 
     while not valid_solution:
         # random guess for ik_solver
-        joint_guess_random = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
-
+        if (not bool(q_guess)): joint_guess_random = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
+        else: joint_guess_random = q_guess
         # Numerical inverse kinematics by default Levenberg-Marquadt optimization
-        pick_joint_config = robot.ikine_LM(obj_pose*relative_pose,q0 = joint_guess_random)       
+        pick_joint_config = robot.ikine_LM(obj_pose*relative_pose,q0 = joint_guess_random)     
         if pick_joint_config.success:
             if it_solve_possible > MAX_ITERATION : break 
             it_solve_possible += 1 
@@ -183,13 +204,24 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0), elbow_up_reque
                 if np.linalg.norm(pose_diff[:3,3]) <= TOLERANCE:
                     if elbow_up_request: # when there is a request for elbow up config, check it
                         if is_elbow_up(robot,pick_joint_config.q):
-                            print("     ->Valid solution found!")
+                            print("     ->Valid elbow-up solution found!")
                             valid_solution = True
-                            break
+                            # break
                         else:
                             print("     -Solution found but elbow up condition doesnt match! Re-iterate...") 
                             continue
+                    
+                    if shoulder_left_request: # when there is a request for shoulder_left config, check it
+                        if is_shoulder_left(robot,pick_joint_config.q):
+                            print("     ->Valid shoulder-left solution found!")
+                            valid_solution = True
+                            break
+                        else:
+                            valid_solution = False
+                            print("     -Solution found but shoulder left condition doesnt match! Re-iterate...") 
+                            continue
                     print("     ->Valid solution found!")
+
                     valid_solution = True   
                 else:
                     print("     -Get solution but error is larger than tolerance. Keep finding!") 
@@ -303,7 +335,5 @@ def get_valid_path(robot,path,obstacle_list = None):
     print("--PATH CHECKING DONE!")
     return path_valid, all_valid
 
-def show_path(robot,path,env):
-    for q in path:
-        env.add(collisionObj.Sphere(radius=0.002, pose = robot.fkine(q),color = (0.5,0.1,0.1,1)))
+
 

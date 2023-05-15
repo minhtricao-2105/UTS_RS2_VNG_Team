@@ -48,6 +48,27 @@ location_array = []
 # Array to store the transfer from pixel to local frame of camera:
 transfer = []
 
+def cam_to_global(pixel_x, pixel_y):
+    # Define the camera parameters
+    pixel_width = 640  # Width of the image in pixels
+    pixel_height = 480  # Height of the image in pixels
+    focal_length = 848  # Focal length of the camera in pixels
+    
+    # Compute the normalized coordinates of the point
+    normalized_x = (pixel_x - pixel_width / 2) / focal_length
+    normalized_y = (pixel_height / 2 - pixel_y) / focal_length
+
+    # Compute the distance from the camera to the global point
+    distance = 0.18  # Distance from the camera to the global point in meters
+
+    # Compute the position of the point in the camera frame
+    camera_position = np.array([distance * normalized_x, distance * normalized_y, distance, 1])
+
+    # Map the point from the camera frame to the global frame
+    global_position = np.matmul(camera_transform, camera_position)
+
+    return global_position
+
 ##  @brief Callback function for receiving data from a ROS message.
 #
 #   This function is called when a ROS message is received by the subscriber. The data from the message is stored in a global variable, and a pixel-to-local-frame transfer value is also calculated and stored in another global variable.
@@ -108,16 +129,16 @@ def callback_3(msg):
 rospy.init_node('robot_node')
 
 # Subcribe Declaration:
-subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
+# subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
 
-subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
+# subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
 
 # Publisher Declaration:
 gripper_pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 
-subscriber_2.unsubscribe()
+# subscriber_2.unsubscribe()
 
-subscriber_3.unsubscribe()
+# subscriber_3.unsubscribe()
 
 ############## BELONG TO THE ROBOT OVER HERE ###########################
 
@@ -155,13 +176,91 @@ duration_seconds = 5
 # client = actionlib.SimpleActionClient('eff_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 client = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
-# start_time = time.perf_cou+nter()
+# start_time = time.perf_counter()
 # create environment 
 start_time = time.perf_counter()
 env = swift.Swift()
 env.launch(realtime=True)
-
+dt = 0.05
 robot = rtb.models.UR3()
 
+# First position of the robot:
+q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
+robot = rtb.models.UR3()
+robot.q = [x*pi/180 for x in q_deg]
+
+cam = collisionObj.Cuboid(scale=[0.03,0.06,0.015], pose = SE3(0,0,0), color = [0.5,0.5,0.1,1])
+
+TCR = SE3(0.085,0,0.09)
+cam_move(cam, robot, TCR*SE3.Ry(pi/2))
+
+env.add(robot)
+
+camera_transform = cam.T
+
+# Define the point in Pixel frame
+pixel_x_1 = 500 #265  # X-coordinate of the point in pixels
+pixel_y_1 = 360 #135  # Y-coordinate of the point in pixels
+
+global_position_1 = cam_to_global(pixel_x_1,pixel_y_1)
+
+q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
+q_sample = [x*pi/180 for x in q_sample]
+ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
+
+offset_z = 0.17
+obj_pose=SE3(global_position_1[0], global_position_1[1], global_position_1[2]+ offset_z)*ee_orientation
+
+q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] 
+q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request=True)
+q_goal[-1] += 2*pi
+print(q_goal)
+
+path = rtb.jtraj(robot.q, q_goal,50)
+
+arrived = False
+if not arrived:
+    for q in path.q:
+        robot.q = q
+        cam_move(cam,robot,TCR)
+        env.step(dt)
+
+total_path = []
+
+for q in path.q:
+    total_path.append(q)
+
+arrived = True
+end_time = time.perf_counter()
+execution_time = end_time - start_time
+
+while arrived == True:
+    # print(total_path)
+    print("Im fking done!")
+    for i in range(len(total_path)):
+
+        point = JointTrajectoryPoint()
+
+        point.positions = total_path[i]
+
+        # Calculate the time stamp based on the duration from the current time
+       
+        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
+
+        goal.trajectory.points.append(point)
+
+        # Send the goal to the action server
+    client.send_goal(goal)
+
+        # Wait for the action to complete (or for the connection to be lost)
+    client.wait_for_result()
+
+        # Get the result of the action
+    result = client.get_result()
+
+        # Print the result
+    print(result)
+
+    break
 
 rospy.spin()
