@@ -103,7 +103,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=120)
+    img = cv.convertScaleAbs(img, alpha=1, beta=130)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -232,19 +232,25 @@ def perform_computervision():
     print('Processing CV')
 
     final = np.empty((0,3), int)
+    detection = np.empty((0,3), int)
 
     for (x,y,r,i) in compare_two_image():
         for(x1,y1,r1,i1) in find_first_position():
             if i == i1:
-                final = np.vstack((final, [x1, y1, r]))
+                detection = np.vstack((detection,[x1,y1,r]))
+                for(x2,y2,r2,i2) in control_robot():
+                    if i1 == i2:
+                        final = np.vstack((final, [x2, y2, r]))
 
-    final = np.unique(final, axis=0)
-  
+    final = np.unique(final, axis = 0)
+    
+    detection = np.unique(detection, axis = 0)
+
     message = Float32MultiArray(data=final.flatten())
 
     publisher_2.publish(message)
 
-    for(x,y,r) in final:
+    for(x,y,r) in detection:
         # print(x, y, r)
         
         if r == 1:

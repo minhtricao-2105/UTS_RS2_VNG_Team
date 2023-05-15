@@ -17,6 +17,7 @@ from math import sqrt, pow
 from colorLibrary import*
 import imutils
 from colorLibrary import*
+from ur3module import *
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
@@ -237,7 +238,7 @@ def control_robot():
 
     ## DONE
     #position 1
-    coordinates.append((600,500,16,1))
+    coordinates.append((600,500,26,1))
     #position 2
     coordinates.append((500,500,16,2))
     #position 3
@@ -274,7 +275,7 @@ def find_first_position():
 
     # Apply the position of each hole
     #position 1 
-    coordinates.append((270,137,16,1))
+    coordinates.append((270,137,26,1))
     #position 2
     coordinates.append((270,205,16,2))
     #position 3
@@ -345,7 +346,7 @@ def transfer_local(locations):
 def cam_move(cam,robot,T):
     cam.T = robot.fkine(robot.q)*T
 
-def cam_to_global(pixel_x, pixel_y):
+def cam_to_global(pixel_x, pixel_y, camera_transform):
     # Define the camera parameters
     pixel_width = 640  # Width of the image in pixels
     pixel_height = 480  # Height of the image in pixels
@@ -365,3 +366,44 @@ def cam_to_global(pixel_x, pixel_y):
     global_position = np.matmul(camera_transform, camera_position)
 
     return global_position
+
+def move_to_pin(robot, q_curr, global_position):
+    q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
+    q_sample = [x*pi/180 for x in q_sample]
+    ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
+
+    offset_z = 0.175
+    obj_pose=SE3(global_position[0], global_position[1], global_position[2]+ offset_z)*ee_orientation
+
+    q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] 
+    q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request=True)
+    q_goal[-1] += 2*pi
+    # print(q_goal)
+
+    path = rtb.jtraj(q_curr, q_goal,50)
+    return path
+
+def lift_up(robot, q_curr):
+    lift = 0.08
+    q_guess_2 = [ 1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491]
+    q_lifts = []
+    step_num = 4
+    step_lift = lift/(step_num-1)
+
+    # q_curr = robot.q
+    
+    #generate 4 poses for lifting up
+    for i in range(step_num):
+        if i == 0 : 
+            q_lifts.append(q_curr)
+            continue
+        pose_lift = robot.fkine(q_curr)*SE3(-(0+step_lift*i),0,0)
+        q_lift = solve_for_valid_ik(robot=robot, obj_pose=pose_lift, q_guess = q_guess_2, elbow_up_request = False, shoulder_left_request= False)
+        q_lift[-1] = q_lift[-1] + 2*pi
+        q_lifts.append(q_lift)
+
+    path_lift = rtb.mstraj(viapoints=np.array([q for q in q_lifts]),dt=0.01,tacc=0.05,qdmax = np.pi)
+
+    return path_lift
+
+
