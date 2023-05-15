@@ -294,7 +294,7 @@ while running_ == True:
     rospy.loginfo("LIFTING UP !!!!!!!!")
 
     robot.q = path.q[-1]
-    path_lift = lift_up(robot, path.q[-1])
+    path_lift = move_up_down(robot, path.q[-1])
     
     arrived = False
     if not arrived:

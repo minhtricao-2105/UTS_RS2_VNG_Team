@@ -15,7 +15,7 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-import imutils
+# import imutils
 from colorLibrary import*
 from ur3module import *
 
@@ -367,37 +367,44 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 
     return global_position
 
-def move_to_pin(robot, q_curr, global_position):
+def move_to_pin(robot, q_curr, global_position, offset_z = 0.175):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
     q_sample = [x*pi/180 for x in q_sample]
     ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
 
-    offset_z = 0.175
+    # offset_z = 0.175
     obj_pose=SE3(global_position[0], global_position[1], global_position[2]+ offset_z)*ee_orientation
 
-    q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] 
-    q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request=True)
+    q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] #guess value for IK solver
+    q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request= True)
     q_goal[-1] += 2*pi
     # print(q_goal)
 
     path = rtb.jtraj(q_curr, q_goal,50)
     return path
 
-def lift_up(robot, q_curr):
-    lift = 0.08
-    q_guess_2 = [ 1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491]
+def move_up_down(robot, q_curr, dir = 'up'):
+    
+    lift = 0.05 #default lifting distance
+
+    if dir == 'up': pass
+    elif dir == 'down':
+        lift = -lift
+    else:
+        print("ERROR DIRECTION INPUT!")
+        return []
+    
+    q_guess_2 = [ 1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491] #guess value for IK solver
     q_lifts = []
     step_num = 4
     step_lift = lift/(step_num-1)
-
-    # q_curr = robot.q
     
-    #generate 4 poses for lifting up
+    #generate 4 poses for lifting up/moving down
     for i in range(step_num):
         if i == 0 : 
             q_lifts.append(q_curr)
             continue
-        pose_lift = robot.fkine(q_curr)*SE3(-(0+step_lift*i),0,0)
+        pose_lift = robot.fkine(q_curr)*SE3(-(step_lift*i),0,0)
         q_lift = solve_for_valid_ik(robot=robot, obj_pose=pose_lift, q_guess = q_guess_2, elbow_up_request = False, shoulder_left_request= False)
         q_lift[-1] = q_lift[-1] + 2*pi
         q_lifts.append(q_lift)
