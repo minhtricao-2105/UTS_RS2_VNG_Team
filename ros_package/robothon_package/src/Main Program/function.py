@@ -447,7 +447,7 @@ def add_trajectory(total_path, goal, execution_time):
 
     duration_seconds = 5.0
 
-    for i in len(total_path):
+    for i in range(len(total_path)):
 
         point = JointTrajectoryPoint()
 
