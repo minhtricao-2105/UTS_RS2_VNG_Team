@@ -400,9 +400,12 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175):
     # offset_z = 0.175
     obj_pose=SE3(global_position[0], global_position[1], global_position[2]+ offset_z)*ee_orientation
 
-    q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896] #guess value for IK solver
-    q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = True, shoulder_left_request= True)
-    q_goal[-1] += 2*pi
+    q_guess = [1.3279389,  -1.41725404,  0.17017859, -0.62366733, -1.53202614, -0.20099896+2*pi] #guess value for IK solver
+    q_goal = solve_for_valid_ik(robot=robot, obj_pose=obj_pose, q_guess = q_guess, elbow_up_request = False, shoulder_left_request= False)
+    
+    # if abs(q_goal[-1] - q_sample[-1]) > pi:
+    #     q_goal[-1] += 2*pi
+    q_goal[-1] = q_sample[-1]
     # print(q_goal)
 
     path = rtb.jtraj(q_curr, q_goal,50)

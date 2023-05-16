@@ -194,10 +194,11 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0),q_guess = [], e
             # if a solution exist, check whether it leads to self-collision or ground touching
             ground_touch = is_touch_ground(robot,pick_joint_config.q)
             self_collision = is_self_collision_UR3(pick_joint_config.q)
-            if ground_touch or self_collision:
-                print("     -Touch ground or self collision at step", it_solve_possible)
-                if ground_touch: print("        -TOUCH GROUND!")
-                continue
+            # if ground_touch or self_collision:
+            #     print("     -Touch ground or self collision at step", it_solve_possible)
+            #     if ground_touch: print("        -TOUCH GROUND!")
+            #     continue
+            if False: continue
             else:
                 # if the solution doesnt touch ground or self collision, check whether it is within goal tolerance:
                 pose_diff =  robot.fkine(pick_joint_config.q) - obj_pose*relative_pose

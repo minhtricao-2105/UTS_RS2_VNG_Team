@@ -347,6 +347,76 @@ while running_ == True:
 
         arrived = False
     
+
+    rospy.loginfo("MOVING THE ANOTHER POSITION")
+    
+    goal.trajectory.points.clear()
+
+    pixel_x_2 = 600
+    pixel_y_2 = 360
+
+    global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
+
+    q_start = path_lift.q[-1]
+    robot.q = q_start
+
+    path_move = move_to_pin(robot, q_start, global_position_2,0.225)
+
+    arrived = False
+    
+    move = []
+    
+    for q in path_move.q:
+        move.append(q)
+    
+    q_start = path_move.q[-1]
+    
+    path_down = move_up_down(robot, q_start,'down')
+
+    for q in path_down.q:
+        move.append(q)
+
+    end_time_2 = time.perf_counter()
+    
+    execution_time_2 = end_time_2 - start_time
+
+    arrived = True
+
+    while arrived == True:
+        # print(total_path)
+        for i in range(len(move)):
+
+            point = JointTrajectoryPoint()
+
+            point.positions = move[i]
+
+            # Calculate the time stamp based on the duration from the current time
+        
+            point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(move))) + rospy.Duration.from_sec(execution_time_2 + 1)
+
+            goal.trajectory.points.append(point)
+
+            # Send the goal to the action server
+        client.send_goal(goal)
+
+            # Wait for the action to complete (or for the connection to be lost)
+        client.wait_for_result()
+
+            # Get the result of the action
+        result = client.get_result()
+
+            # Print the result
+        print(result)
+        
+        while not rospy.is_shutdown():
+            pub.publish(openGripper(400))
+            rospy.sleep(3)
+            rospy.loginfo("I am here")
+            break
+        break
+
+        arrived = False    
+    
     running_ = False
 
 rospy.spin()
