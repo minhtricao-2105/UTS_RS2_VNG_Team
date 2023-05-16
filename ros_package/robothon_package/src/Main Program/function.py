@@ -9,7 +9,7 @@
 #
 #   @date May 9, 2023
 
-
+import rospy
 import numpy as np
 import sys
 import cv2 as cv
@@ -21,6 +21,8 @@ from colorLibrary import*
 from ur3module import *
 import moveit_commander
 import moveit_msgs.msg
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
@@ -441,4 +443,18 @@ def move_up_down(robot, q_curr, dir = 'up'):
 
     return path_lift
 
+def add_trajectory(total_path, goal, execution_time):
 
+    duration_seconds = 5.0
+
+    for i in len(total_path):
+
+        point = JointTrajectoryPoint()
+
+        point.positions = total_path[i]
+
+        point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
+
+        goal.trajectory.points.append(point)
+
+    return goal

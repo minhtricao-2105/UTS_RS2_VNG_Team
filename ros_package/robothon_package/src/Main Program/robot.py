@@ -11,7 +11,6 @@
 
 
 #Library Belongs to ROS:
-import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int32
@@ -28,7 +27,6 @@ from spatialmath import SE3
 from math import pi
 from math import degrees
 import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 import swift
 import time
 from ur3module import *
@@ -111,19 +109,19 @@ def callback_3(msg):
     # At the begining, flag will equal to 0
     flag = 0
 
-    # # The first one will be the yellow container:
-    # if flag == 0:
-    #     colour_array_yellow = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
+    # The first one will be the yellow container:
+    if flag == 0:
+        colour_array_yellow = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
 
-    #     rospy.loginfo('Yellow array: %s', colour_array_yellow)
+        # rospy.loginfo('Yellow array: %s', colour_array_yellow)
 
-    #     flag += 1
+        flag += 1
 
-    # # The second one will be the orange container:
-    # if flag == 1:
-    #     colour_array_orange = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
+    # The second one will be the orange container:
+    if flag == 1:
+        colour_array_orange = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
         
-    #     rospy.loginfo('Orange array: %s', colour_array_orange)
+        # rospy.loginfo('Orange array: %s', colour_array_orange)
 
   
     
@@ -259,17 +257,19 @@ while running_ == True:
 
     while arrived == True:
         # print(total_path)
-        for i in range(len(total_path)):
+        # for i in range(len(total_path)):
 
-            point = JointTrajectoryPoint()
+        #     point = JointTrajectoryPoint()
 
-            point.positions = total_path[i]
+        #     point.positions = total_path[i]
 
-            # Calculate the time stamp based on the duration from the current time
+        #     # Calculate the time stamp based on the duration from the current time
         
-            point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
+        #     point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
 
-            goal.trajectory.points.append(point)
+        #     goal.trajectory.points.append(point)
+
+        add_trajectory(total_path, goal, execution_time)
 
             # Send the goal to the action server
         client.send_goal(goal)
