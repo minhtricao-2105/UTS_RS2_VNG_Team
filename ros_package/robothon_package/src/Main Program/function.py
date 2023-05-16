@@ -19,7 +19,7 @@ from colorLibrary import*
 # import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
+# import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -394,7 +394,7 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 
     return global_position
 
-def move_to_pin(robot, q_curr, global_position, offset_z = 0.175):
+def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = False):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
     q_sample = [x*pi/180 for x in q_sample]
     ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
@@ -408,6 +408,7 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175):
     # if abs(q_goal[-1] - q_sample[-1]) > pi:
     #     q_goal[-1] += 2*pi
     q_goal[-1] = q_sample[-1]
+    if turn: q_goal[-1] += pi/2
     # print(q_goal)
 
     path = rtb.jtraj(q_curr, q_goal,50)
