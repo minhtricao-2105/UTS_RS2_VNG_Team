@@ -1,3 +1,13 @@
+##  @file
+#   @brief Functions for UR3 for solving inversed kinematics, collision checking: self-collision, ground collision and obstacle detection, and trajectory generation.
+#   
+#   These functions are require for controlling the robot to travel among goals, and testing its movement in simulated environment
+#   
+#   @author Ho Minh Quang Ngo
+#
+#   @date May 14, 2023
+
+
 import roboticstoolbox as rtb
 import numpy as np
 from spatialmath import SE3

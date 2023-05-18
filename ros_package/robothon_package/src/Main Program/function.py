@@ -5,8 +5,9 @@
 #   The primary libraries used in this file are OpenCV and NumPy. OpenCV is used for image processing, while NumPy is used for numerical operations.
 #   The functions in this file are designed to identify and track objects, detect colors, and perform other computer vision tasks that are essential to the functionality of the project.
 #   
-#   @author Minh Tri Cao
-#
+#   @author Minh Tri Cao 
+#   @author Ho Minh Quang Ngo
+
 #   @date May 9, 2023
 
 import rospy
@@ -443,6 +444,25 @@ def move_up_down(robot, q_curr, dir = 'up'):
     path_lift = rtb.mstraj(viapoints=np.array([q for q in q_lifts]),dt=0.01,tacc=0.05,qdmax = np.pi)
 
     return path_lift
+
+def RMRC_motion(robot, path, threshold = 0.01):
+    pose_list = [robot.fkine(q) for q in path.q]
+    
+    for pose in pose_list:
+        print("Step:", i)
+        arrived = False
+        while np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose.A[0:3,3]) > threshold:
+            v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1.5, threshold=threshold)
+            robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v
+            # cam_move(cam, robot, TCR)
+            # cam_move(gripper, robot, TGR)
+            # env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q) * SE3(0.2, 0,0),color = (0.1,0.5,0.1,1)))
+            # env.step(dt)
+        i+=1
+
+    print("FINAL ERROR: ", np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose_list[-1].A[0:3,3]))
+
+
 
 def add_trajectory(total_path, goal, execution_time):
 

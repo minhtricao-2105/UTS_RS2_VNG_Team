@@ -10,10 +10,6 @@ from math import pi
 robot = rtb.models.UR3()
 robot.q = [0, -pi/2, pi/3, 0, pi/2, 0]
 
-# robot_2 = rtb.models.UR3()
-# robot_2.base = SE3.Tx(1)*robot_2.base
-# robot_2.q = [0, -pi/2, pi/3, 0, pi/2, 0]
-
 env = swift.Swift()
 env.launch(realtime=True)
 env.add(robot)

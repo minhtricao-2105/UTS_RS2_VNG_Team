@@ -1,5 +1,5 @@
-# from ur3module import *
 from function import*
+from time import sleep
 
 # Clone
 robot = rtb.models.UR3() 
@@ -16,6 +16,7 @@ camera_transform = cam.T #camera transform at capturing position
 TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175)
 gripper_path = "/home/quangngo/Desktop/RTB-P Test files/SomeApplications/CAMGRIPPER.STL"
 gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
+cam_move(gripper, robot, TGR)
 
 # Enviroment
 env = swift.Swift()
@@ -34,45 +35,32 @@ env.add(goal_obj_1)
 
 # Move to gripping point
 path = move_to_pin(robot, q_start, global_position_1, turn = False)
-for q in path.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    env.step(dt)
 
-# Lifting up
-robot.q = path.q[-1]
-path_lift = move_up_down(robot, path.q[-1])
-for q in path_lift.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    env.step(dt)
-print("DONE LIFT!")
+pose_list = [robot.fkine(q) for q in path.q]
+# pose_list = []
+# for i in range(len(path.q)):
+#     pose = robot.fkine(path.q[i])
+#     pose_list.append(pose)
 
-# Define new points in Pixel frame
-pixel_x_2 = 500
-pixel_y_2 = 430
-global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform) #global position
-goal_obj_2 = collisionObj.Sphere(radius = 0.008, pose = SE3(global_position_2[0], global_position_2[1], global_position_2[2]),color = (0.1,0.5,0.1,1))
-env.add(goal_obj_2)
+i = 0
 
-# Move to dropping point
-robot.q = path_lift.q[-1]
-path_2 = move_to_pin(robot, path_lift.q[-1], global_position_2, offset_z = 0.225,turn= True)
-for q in path_2.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    env.step(dt)
+for pose in pose_list:
+    p = collisionObj.Sphere(radius = 0.005, pose = pose * SE3(0.2,0,0),color = (0.5,0.1,0.1,1))
+    # print(pose.A[0:3,3])
+    env.add(p)
 
-# Moving down
-robot.q = path_2.q[-1]
-path_lift_2 = move_up_down(robot, path_2.q[-1],dir = 'down')
-for q in path_lift_2.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    env.step(dt)
+for pose in pose_list:
+    print("Step:", i)
+    arrived = False
+    while np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose.A[0:3,3]) > 0.01:
+        v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1.5, threshold=0.01)
+        robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v
+        cam_move(cam, robot, TCR)
+        cam_move(gripper, robot, TGR)
+        env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q) * SE3(0.2, 0,0),color = (0.1,0.5,0.1,1)))
+        env.step(dt)
+    i+=1
+
+print("FINAL ERROR: ", np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose_list[-1].A[0:3,3]))
 
 env.hold()
