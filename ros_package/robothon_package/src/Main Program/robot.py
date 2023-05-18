@@ -150,10 +150,6 @@ subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
 
 subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
 
-# subscriber_2.unsubscribe()
-
-# subscriber_3.unsubscribe()
-
 pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 
 while len(location_array) == 0:
@@ -161,7 +157,6 @@ while len(location_array) == 0:
     if(len(location_array) != 0):
         rospy.loginfo("Let go")
         rospy.loginfo('Location array: %s', location_array)
-        # input("Done The Vision Part, Remove the Cable to Continue .... \n")
         running_ = True
         break
 
@@ -169,33 +164,32 @@ rospy.loginfo("Wait 5 seconds")
 rospy.sleep(5)
 
 while running_ == True:
-
-    # Publisher Declaration:
-    # pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
     
-    # Create a JointTrajectory message
-    joint_traj = JointTrajectory()
+    # # Create a JointTrajectory message
+    # joint_traj = JointTrajectory()
 
-    # Fill in the header
-    joint_traj.header.frame_id = "base_link"
+    # # Fill in the header
+    # joint_traj.header.frame_id = "base_link"
 
-    # Set the joint names
-    joint_traj.joint_names = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
+    # # Set the joint names
+    # joint_traj.joint_names = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
 
-    # Create a FollowJointTrajectoryGoal message:
-    goal = FollowJointTrajectoryGoal()
+    # # Create a FollowJointTrajectoryGoal message:
+    # goal = FollowJointTrajectoryGoal()
 
-    # Set the joint names:
-    goal.trajectory.joint_names = joint_traj.joint_names
+    # # Set the joint names:
+    # goal.trajectory.joint_names = joint_traj.joint_names
 
-    # Set Sequence
-    goal.trajectory.header.seq = 1
+    # # Set Sequence
+    # goal.trajectory.header.seq = 1
 
-    # Set time stamp
-    goal.trajectory.header.stamp = rospy.Time.now()
+    # # Set time stamp
+    # goal.trajectory.header.stamp = rospy.Time.now()
 
-    # Set Tolerance
-    goal.goal_time_tolerance = rospy.Duration.from_sec(0.05)
+    # # Set Tolerance
+    # goal.goal_time_tolerance = rospy.Duration.from_sec(0.05)
+
+    goal = set_up_action_client()
 
     # This allows for the time taken to send the message. If the network is fast this could be reduced
     buffer_seconds = 1
@@ -238,7 +232,7 @@ while running_ == True:
 
     global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
-    path = move_to_pin(robot, q_start, global_position_1)
+    path = move_to_pin(robot, q_start, global_position_1, turn = 45)
     arrived = False
     if not arrived:
         for q in path.q:
@@ -256,22 +250,10 @@ while running_ == True:
     execution_time = end_time - start_time
 
     while arrived == True:
-        # print(total_path)
-        # for i in range(len(total_path)):
-
-        #     point = JointTrajectoryPoint()
-
-        #     point.positions = total_path[i]
-
-        #     # Calculate the time stamp based on the duration from the current time
-        
-        #     point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
-
-        #     goal.trajectory.points.append(point)
 
         add_trajectory(total_path, goal, execution_time)
 
-            # Send the goal to the action server
+        # Send the goal to the action server
         client.send_goal(goal)
 
             # Wait for the action to complete (or for the connection to be lost)
@@ -320,29 +302,19 @@ while running_ == True:
     goal.trajectory.points.clear()
 
     while arrived == True:
-        # print(total_path)
-        for i in range(len(total_lift)):
 
-            point = JointTrajectoryPoint()
+        add_trajectory(total_lift, goal, execution_time_1)
 
-            point.positions = total_lift[i]
-
-            # Calculate the time stamp based on the duration from the current time
-        
-            point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_lift))) + rospy.Duration.from_sec(execution_time_1 + 1)
-
-            goal.trajectory.points.append(point)
-
-            # Send the goal to the action server
+        # Send the goal to the action server
         client.send_goal(goal)
 
-            # Wait for the action to complete (or for the connection to be lost)
+        # Wait for the action to complete (or for the connection to be lost)
         client.wait_for_result()
 
-            # Get the result of the action
+        # Get the result of the action
         result = client.get_result()
 
-            # Print the result
+         # Print the result
         print(result)
 
         arrived = False
@@ -360,7 +332,7 @@ while running_ == True:
     q_start = path_lift.q[-1]
     robot.q = q_start
 
-    path_move = move_to_pin(robot, q_start, global_position_2,0.225)
+    path_move = move_to_pin(robot, q_start, global_position_2,0.225,-45)
 
     arrived = False
     
@@ -383,18 +355,8 @@ while running_ == True:
     arrived = True
 
     while arrived == True:
-        # print(total_path)
-        for i in range(len(move)):
 
-            point = JointTrajectoryPoint()
-
-            point.positions = move[i]
-
-            # Calculate the time stamp based on the duration from the current time
-        
-            point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(move))) + rospy.Duration.from_sec(execution_time_2 + 1)
-
-            goal.trajectory.points.append(point)
+        add_trajectory(move, goal,execution_time_2)
 
             # Send the goal to the action server
         client.send_goal(goal)
@@ -413,9 +375,9 @@ while running_ == True:
             rospy.sleep(3)
             rospy.loginfo("I am here")
             break
+        
         break
-
-        arrived = False    
+ 
     
     running_ = False
 

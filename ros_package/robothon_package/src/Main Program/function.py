@@ -20,7 +20,7 @@ from colorLibrary import*
 # import imutils
 from colorLibrary import*
 from ur3module import *
-# import moveit_commander
+import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -58,117 +58,6 @@ def setUpRobot(maxVelocity):
 
     return arm
 
-
-# Find distance from 2 points:
-def distance(p1,p2):
-    distance_1 = sqrt(pow(p1[0]-p2[0],2)+pow(p1[1]-p2[1],2))
-    return distance_1
-
-#find nearest point
-def findnNear(positions, point):
-    arrayDistance_0 = []
-    for i in positions:
-        arrayDistance_0.append(distance(point, i[0]))
-    random_point_0 = positions[np.argmin(arrayDistance_0)][0]
-    return random_point_0
-
-
-def findCordinate(positions, img):
-    min_y_idx = np.argmin(positions[:, 0, 1])
-
-    # find y max:
-    max_y_idx = np.argmax(positions[:, 0, 1])
-
-    # find x max:
-    max_x_idx = np.argmax(positions[:, 0, 0])
-
-    # Get coordinates of point with minimum y value
-    min_y_point = positions[min_y_idx][0]
-    max_y_point = positions[max_y_idx][0]
-    max_x_point = positions[max_x_idx][0]
-
-    # Find the height and width 
-    height, width = img.shape[:2]
-
-    arrayDistance_0 = []
-    arrayDistance_1 = []
-    arrayDistance_2 = []
-    arrayDistance_3 = []
-
-    # distance from 0 0
-    for i in positions:
-        arrayDistance_0.append(distance([0, 0], i[0]))
-
-    # distance from 0 0
-    for i in positions:
-        arrayDistance_1.append(distance([width, 0], i[0]))
-
-    # distance from 0 0
-    for i in positions:
-        arrayDistance_2.append(distance([width,height], i[0]))
-
-    # distance from 0 0
-    for i in positions:
-        arrayDistance_3.append(distance([0,height], i[0]))
-
-    random_point_0 = positions[np.argmin(arrayDistance_0)][0]
-    random_point_1 = positions[np.argmin(arrayDistance_1)][0]
-    random_point_2 = positions[np.argmin(arrayDistance_2)][0]
-    random_point_3 = positions[np.argmin(arrayDistance_3)][0]
-
-    newArray = [random_point_0, random_point_1, random_point_2, random_point_3]
-    
-    return newArray
-
-#Draw a rectangle for 4 points
-def drawRec(img, array):
-    cv.line(img, tuple(array[0]), tuple(array[1]), (235, 97, 35), 3)
-    cv.line(img, tuple(array[1]), tuple(array[2]), (235, 97, 35), 3)
-    cv.line(img, tuple(array[2]), tuple(array[3]), (235, 97, 35), 3)
-    cv.line(img, tuple(array[3]), tuple(array[0]), (235, 97, 35), 3)
-    
-
-#Displace 4 points:
-def displacePoints(img, random_point_0, random_point_1, random_point_2, random_point_3):
-    cv.circle(img, tuple(random_point_0),10,(0,0,255),thickness = 3)
-    cv.circle(img, tuple(random_point_1),10,(0,0,255),thickness = 3)
-    cv.circle(img, tuple(random_point_2),10,(0,0,255),thickness = 3)
-    cv.circle(img, tuple(random_point_3),10,(0,0,255),thickness = 3)    
-
-#Find a middle point:
-def findMiddle(point1, point2):
-    middle_x = (point1[0] + point2[0])/2
-    middle_y = (point1[1] + point2[1])/2
-    return [int(middle_x), int(middle_y)]
-
-#Find an array of midpoint
-def arrayMidPoint(array):
-    a0 = findMiddle(array[0],array[1])
-    a1 = findMiddle(array[1],array[2])
-    a2 = findMiddle(array[2],array[3])
-    a3 = findMiddle(array[3],array[0])
-
-    return [a0, a1, a2, a3]
-
-#displace 1 points
-def displacePoint(img, point):
-    cv.circle(img, tuple(point),10,(0,0,255),thickness = 3)
-
-#find a edge near an edge
-def findEdgeNear(edge, point, img, array):
-    contours, _ = cv.findContours(edge, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    min_distance = float('inf')
-    closest_contour = None
-    for contour in contours:
-        distance = cv.pointPolygonTest(contour, tuple(point), True)
-        if distance >= 0 and distance < min_distance:
-            min_distance = distance
-            closest_contour = contour
-    # Draw the closest contour on the original image
-    if closest_contour is not None:
-        cv.drawContours(img, [closest_contour], -1, (255, 0, 0), 6)
-    else: drawRec(img,array)
-    
 #Image Progressing for battery:
 
 
@@ -224,38 +113,6 @@ def processing(img):
     edges = cv.Canny(grey, 30, 150)
 
     return edges
-
-##  @brief This function applies Hough Circle Transform to detect circles in an image and draw them
-#   @return cv::Mat The input image with detected circles drawn on it
-##
-def show_circle():
-    
-    # Using the first image in here:
-    global image
-
-    # # Apply the canny detection in here:
-    # edge = canny_edge(image)
-
-    # Apply Hough Circle Transform
-    circles = cv.HoughCircles(edge , cv.HOUGH_GRADIENT, dp=1, minDist=25,
-                          param1=50, param2=25, minRadius=0, maxRadius=100)
-    
-    # Draw the detected circles on the image
-    if circles is not None:
-        circles = np.round(circles[0, :]).astype("int")
-        for (x, y, r) in circles:
-            if r > 30:
-                r = 21
-
-            cv.circle(image, (x, y), r, (0, 0, 255), 3)
-            # Add the (x,y) coordinates as text to the image
-            text = "({},{})".format(x, y)
-            cv.putText(image, text, (x - 15, y - 15), cv.FONT_HERSHEY_SIMPLEX, 0.3, (0, 0, 255), 1)
-
-            # Point out the center:
-            cv.circle(image, (x, y), 3, (0, 0, 255), -1)
-
-    return image
 
 def control_robot():
 
@@ -332,45 +189,6 @@ def find_first_position():
     # Return a list to store the coordinates of the centers of detected circular edges   
     return coordinates
 
-##  @brief Convert pixel coordinates to local camera frame coordinates
-#
-#   The function converts pixel coordinates to local camera frame coordinates using the camera intrinsic and extrinsic parameters.
-#   First, the pixel coordinates are converted to normalized image coordinates. Then, the normalized image coordinates are converted
-#   to camera coordinates using the camera height. Finally, the camera coordinates are transformed to local camera frame coordinates using the camera extrinsic parameters.
-#
-#   @param locations numpy array of shape (n, 2) containing the pixel coordinates to be converted
-#   @return numpy array of shape (n, 3) containing the corresponding local camera frame coordinates
-##
-
-def transfer_local(locations):
-    # camera intrinsic parameters
-    fx = 617.306
-    fy = 617.714
-    cx = 327.984
-    cy = 242.966
-
-    # camera extrinsic parameters
-    camera_height = 0.2  # height of camera above ground
-    R = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])  # identity rotation matrix
-    t = np.array([0.0, 0.0, 0.0])  # zero translation vector
-
-    # convert pixel coordinates to normalized image coordinates
-    x = (locations[:, 0] - cx) / fx
-    y = (locations[:, 1] - cy) / fy
-
-        # convert normalized image coordinates to camera coordinates
-    Xc = x * camera_height / fx
-    Yc = y * camera_height / fy
-    Zc = camera_height * np.ones_like(x)
-    
-    # transform camera coordinates to local camera frame
-    Rt = np.hstack((R, t[:, np.newaxis]))
-    Rt = np.vstack((Rt, [0, 0, 0, 1]))
-    locations_cam = np.hstack((Xc[:, np.newaxis], Yc[:, np.newaxis], Zc[:, np.newaxis], np.ones_like(x)[:, np.newaxis]))
-    locations_local = np.dot(Rt, locations_cam.T).T[:, :3]
-
-    return locations_local
-
 def cam_move(cam,robot,T):
     cam.T = robot.fkine(robot.q)*T
 
@@ -395,7 +213,7 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 
     return global_position
 
-def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = False):
+def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
     q_sample = [x*pi/180 for x in q_sample]
     ee_orientation = SE3.Rt(robot.fkine(q_sample).R)
@@ -409,7 +227,7 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = False):
     # if abs(q_goal[-1] - q_sample[-1]) > pi:
     #     q_goal[-1] += 2*pi
     q_goal[-1] = q_sample[-1]
-    if turn: q_goal[-1] += pi/2
+    if turn!=0: q_goal[-1] += turn * pi/180
     # print(q_goal)
 
     path = rtb.jtraj(q_curr, q_goal,50)
@@ -468,7 +286,7 @@ def add_trajectory(total_path, goal, execution_time):
 
     duration_seconds = 5.0
 
-    for i in len(total_path):
+    for i in range(len(total_path)):
 
         point = JointTrajectoryPoint()
 
@@ -479,3 +297,38 @@ def add_trajectory(total_path, goal, execution_time):
         goal.trajectory.points.append(point)
 
     return goal
+
+def set_up_action_client():
+    
+    # Create a JointTrajectory message
+    joint_traj = JointTrajectory()
+
+    # Set the joint names
+    joint_traj.joint_names = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
+
+    # Fill in the header
+    joint_traj.header.frame_id = "base_link"
+
+    # Create a FollowJointTrajectoryGoal message:
+    goal = FollowJointTrajectoryGoal()
+    
+    # Set the joint names:
+    goal.trajectory.joint_names = joint_traj.joint_names
+
+    # Set the joint names:
+    goal.trajectory.joint_names = joint_traj.joint_names
+
+    # Set Sequence
+    goal.trajectory.header.seq = 1
+
+    # Set time stamp
+    goal.trajectory.header.stamp = rospy.Time.now()
+
+    # Set Tolerance
+    goal.goal_time_tolerance = rospy.Duration.from_sec(0.05)
+
+    return goal
+
+def battery_graph_search(arr):
+
+    return arr
