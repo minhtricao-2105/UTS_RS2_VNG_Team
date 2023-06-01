@@ -289,9 +289,9 @@ def add_trajectory(total_path, goal, execution_time):
     for i in range(len(total_path)):
 
         point = JointTrajectoryPoint()
-
+        
         point.positions = total_path[i]
-
+        
         point.time_from_start = rospy.Duration.from_sec((i+1)*(duration_seconds/len(total_path))) + rospy.Duration.from_sec(execution_time + 1)
 
         goal.trajectory.points.append(point)
@@ -315,10 +315,8 @@ def set_up_action_client():
     # Set the joint names:
     goal.trajectory.joint_names = joint_traj.joint_names
 
-    # Set the joint names:
-    goal.trajectory.joint_names = joint_traj.joint_names
-
     # Set Sequence
+    
     goal.trajectory.header.seq = 1
 
     # Set time stamp
