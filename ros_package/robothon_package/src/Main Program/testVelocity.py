@@ -103,7 +103,7 @@ for pose in pose_list:
         v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1.5, threshold=0.01)
         robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v 
 
-         # Clear the previous goal trajectory
+        # Clear the previous goal trajectory
         goal.trajectory.points = []
 
         # Sending command:

@@ -50,11 +50,15 @@ for pose in pose_list:
     env.add(p)
 
 for pose in pose_list:
-    print("Step:", i)
+    # print("Step:", i)
     arrived = False
     while np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose.A[0:3,3]) > 0.01:
         v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1.5, threshold=0.01)
-        robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v # This is sending the 
+        vj = np.linalg.pinv(robot.jacobe(robot.q)) @ v # This is sending the velocity
+        vj = vj.tolist()
+        joint_step = [dt*x for x in vj]
+        robot.q = [x+y for x,y in zip(robot.q, joint_step)]
+
         cam_move(cam, robot, TCR)
         cam_move(gripper, robot, TGR)
         env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q) * SE3(0.2, 0,0),color = (0.1,0.5,0.1,1)))

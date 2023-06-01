@@ -20,7 +20,7 @@ from colorLibrary import*
 # import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
+# import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
