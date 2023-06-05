@@ -110,7 +110,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=130)
+    img = cv.convertScaleAbs(img, alpha=1, beta=120)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -208,6 +208,8 @@ def compare_two_image():
         perimeter = cv.arcLength(contour,True)
         
         area = cv.contourArea(contour)
+
+        print(center)
 
         if(area > 30 and perimeter > 150):
 
@@ -355,6 +357,9 @@ while move_home != 1:
     if move_home == 1:
         running_ = True
         break
+
+# # delete this one
+# running_ = True
 
 while running_ == True: 
 

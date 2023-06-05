@@ -163,31 +163,25 @@ while len(location_array) == 0:
 rospy.loginfo("Wait 5 seconds")
 rospy.sleep(5)
 
-while running_ == True:
+hole = []
+duplicate = False
+for i in location_array:
+    if len(hole) == len(location_array):
+        break
+
+    if i[2] == 0:
+        hole.append((667, 825))
+
+    elif i[2] == 1:
+        if duplicate == False:
+            hole.append((245,135))
+            duplicate = True
+        else:
+            hole.append((630,135))
+        
+
     
-    # # Create a JointTrajectory message
-    # joint_traj = JointTrajectory()
-
-    # # Fill in the header
-    # joint_traj.header.frame_id = "base_link"
-
-    # # Set the joint names
-    # joint_traj.joint_names = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
-
-    # # Create a FollowJointTrajectoryGoal message:
-    # goal = FollowJointTrajectoryGoal()
-
-    # # Set the joint names:
-    # goal.trajectory.joint_names = joint_traj.joint_names
-
-    # # Set Sequence
-    # goal.trajectory.header.seq = 1
-
-    # # Set time stamp
-    # goal.trajectory.header.stamp = rospy.Time.now()
-
-    # # Set Tolerance
-    # goal.goal_time_tolerance = rospy.Duration.from_sec(0.05)
+while running_ == True:
 
     goal = set_up_action_client()
 
@@ -202,12 +196,7 @@ while running_ == True:
     client = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
     
     start_time = time.perf_counter()
-    # create environment 
-    start_time = time.perf_counter()
 
-    # First position of the robot:
-    q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
-    
     # Enviroment
     env = swift.Swift()
     env.launch(realtime=True)
@@ -215,169 +204,185 @@ while running_ == True:
 
     # Clone
     robot = rtb.models.UR3()
-    q_start = [x*pi/180 for x in q_deg]
-    robot.q = q_start
-    env.add(robot)
+  
+    # Gripper
+    gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+    gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
+    TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175) #relative pose of gripper to ee
 
+    # Camera
     cam = collisionObj.Cuboid(scale=[0.03,0.06,0.015], pose = SE3(0,0,0), color = [0.5,0.5,0.1,1])
+    TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) #relative pose of cam to ee
+    
+    env.add(robot)
+    env.add(cam)
+    env.add(gripper)
 
-    TCR = SE3(0.085,0,0.09)
-    cam_move(cam, robot, TCR*SE3.Ry(pi/2))
+    for i in range(len(location_array)):
 
-    camera_transform = cam.T
+        # First position of the robot:
+        q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
+        q_start = [x*pi/180 for x in q_deg]
+        robot.q = q_start
+        
+        cam_move(cam, robot, TCR)
+        cam_move(gripper, robot, TGR)
+        camera_transform = cam.T
 
-    # Define the point in Pixel frame
-    pixel_x_1 = location_array[0][0]
-    pixel_y_1 = location_array[0][1]
+        # Define the point in Pixel frame
+        pixel_x_1 = location_array[i][0]
+        pixel_y_1 = location_array[i][1]
 
-    global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
+        global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
-    path = move_to_pin(robot, q_start, global_position_1, turn = 45)
-    arrived = False
-    if not arrived:
+        path = move_to_pin(robot, q_start, global_position_1)
+        arrived = False
+        if not arrived:
+            for q in path.q:
+                robot.q = q
+                cam_move(cam,robot,TCR)
+                env.step(dt)
+
+        total_path = []
+
         for q in path.q:
-            robot.q = q
-            cam_move(cam,robot,TCR)
-            env.step(dt)
+            total_path.append(q)
 
-    total_path = []
+        arrived = True
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
 
-    for q in path.q:
-        total_path.append(q)
+        while arrived == True:
 
-    arrived = True
-    end_time = time.perf_counter()
-    execution_time = end_time - start_time
-
-    while arrived == True:
-
-        add_trajectory(total_path, goal, execution_time)
-
-        # Send the goal to the action server
-        client.send_goal(goal)
-
-            # Wait for the action to complete (or for the connection to be lost)
-        client.wait_for_result()
-
-            # Get the result of the action
-        result = client.get_result()
-
-            # Print the result
-        print(result)
-
-        arrived = False
-
-        while not rospy.is_shutdown():
-            pub.publish(moveGripperToPosition(400, 50))
-            rospy.sleep(3)
-            rospy.loginfo("I am here")
-            break
-        break
-
-    rospy.loginfo("LIFTING UP !!!!!!!!")
-
-    robot.q = path.q[-1]
-    path_lift = move_up_down(robot, path.q[-1])
-    
-    arrived = False
-    if not arrived:
-        for q in path_lift.q:
-            robot.q = q
-            cam_move(cam,robot,TCR)
-            env.step(dt)
-
-    total_lift = []
-
-    for q in path_lift.q:
-        total_lift.append(q)
-    
-    print(len(total_lift))
-
-    end_time_1 = time.perf_counter()
-    
-    execution_time_1 = end_time_1 - start_time
-
-    arrived = True
-
-    goal.trajectory.points.clear()
-
-    while arrived == True:
-
-        add_trajectory(total_lift, goal, execution_time_1)
-
-        # Send the goal to the action server
-        client.send_goal(goal)
-
-        # Wait for the action to complete (or for the connection to be lost)
-        client.wait_for_result()
-
-        # Get the result of the action
-        result = client.get_result()
-
-         # Print the result
-        print(result)
-
-        arrived = False
-    
-
-    rospy.loginfo("MOVING THE ANOTHER POSITION")
-    
-    goal.trajectory.points.clear()
-
-    pixel_x_2 = 600
-    pixel_y_2 = 360
-
-    global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
-
-    q_start = path_lift.q[-1]
-    robot.q = q_start
-
-    path_move = move_to_pin(robot, q_start, global_position_2,0.225,-45)
-
-    arrived = False
-    
-    move = []
-    
-    for q in path_move.q:
-        move.append(q)
-    
-    q_start = path_move.q[-1]
-    
-    path_down = move_up_down(robot, q_start,'down')
-
-    for q in path_down.q:
-        move.append(q)
-
-    end_time_2 = time.perf_counter()
-    
-    execution_time_2 = end_time_2 - start_time
-
-    arrived = True
-
-    while arrived == True:
-
-        add_trajectory(move, goal,execution_time_2)
+            add_trajectory(total_path, goal, execution_time)
 
             # Send the goal to the action server
-        client.send_goal(goal)
+            client.send_goal(goal)
+
+                # Wait for the action to complete (or for the connection to be lost)
+            client.wait_for_result()
+
+                # Get the result of the action
+            result = client.get_result()
+
+                # Print the result
+            print(result)
+
+            arrived = False
+
+            while not rospy.is_shutdown():
+                pub.publish(moveGripperToPosition(400, 50))
+                rospy.sleep(3)
+                break
+            break
+
+        rospy.loginfo("LIFTING UP !!!!!!!!")
+
+        robot.q = path.q[-1]
+
+        path_lift = move_up_down(robot, path.q[-1], lift=0.06)
+        
+        arrived = False
+
+        if not arrived:
+            for q in path_lift.q:
+                robot.q = q
+                cam_move(cam,robot,TCR)
+                env.step(dt)
+
+        total_lift = []
+
+        for q in path_lift.q:
+            total_lift.append(q)
+        
+        print(len(total_lift))
+
+        end_time_1 = time.perf_counter()
+        
+        execution_time_1 = end_time_1 - start_time
+
+        arrived = True
+
+        goal.trajectory.points.clear()
+
+        while arrived == True:
+
+            add_trajectory(total_lift, goal, execution_time_1)
+
+            # Send the goal to the action server
+            client.send_goal(goal)
 
             # Wait for the action to complete (or for the connection to be lost)
-        client.wait_for_result()
+            client.wait_for_result()
 
             # Get the result of the action
-        result = client.get_result()
+            result = client.get_result()
 
             # Print the result
-        print(result)
+            print(result)
+
+            arrived = False
         
-        while not rospy.is_shutdown():
-            pub.publish(openGripper(400))
-            rospy.sleep(3)
-            rospy.loginfo("I am here")
+
+        rospy.loginfo("MOVING THE ANOTHER POSITION")
+        
+        goal.trajectory.points.clear()
+
+        pixel_x_2 = hole[i][0]
+        pixel_y_2 = hole[i][1]
+
+        global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
+
+        q_start = path_lift.q[-1]
+        robot.q = q_start
+
+        path_move = move_to_pin(robot, q_start, global_position_2,0.225)
+
+        arrived = False
+        
+        move = []
+        
+        for q in path_move.q:
+            move.append(q)
+        
+        q_start = path_move.q[-1]
+        
+        path_down = move_up_down(robot, q_start,'down',lift = 0.05)
+
+        for q in path_down.q:
+            move.append(q)
+
+        end_time_2 = time.perf_counter()
+        
+        execution_time_2 = end_time_2 - start_time
+
+        arrived = True
+
+        while arrived == True:
+
+            add_trajectory(move, goal,execution_time_2)
+
+                # Send the goal to the action server
+            client.send_goal(goal)
+
+                # Wait for the action to complete (or for the connection to be lost)
+            client.wait_for_result()
+
+                # Get the result of the action
+            result = client.get_result()
+
+                # Print the result
+            print(result)
+            
+            while not rospy.is_shutdown():
+                pub.publish(openGripper(400))
+                rospy.sleep(3)
+                break
+            
             break
         
-        break
- 
+        arm.go(joint_home_radian)
+
     
     running_ = False
 

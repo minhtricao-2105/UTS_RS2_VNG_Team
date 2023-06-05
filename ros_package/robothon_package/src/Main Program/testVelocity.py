@@ -95,42 +95,82 @@ for pose in pose_list:
     p = collisionObj.Sphere(radius = 0.005, pose = pose * SE3(0.2,0,0),color = (0.5,0.1,0.1,1))
 
 
+dt = 10
+
 for pose in pose_list:
     
     print("Step:", i)
+
     # print(joint_states)
-    while np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose.A[0:3,3]) > 0.01:
-        v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1.5, threshold=0.01)
-        robot.qd = np.linalg.pinv(robot.jacobe(robot.q)) @ v 
+    while np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose.A[0:3,3]) > 0.1:
+        v, arrived = rtb.p_servo(robot.fkine(robot.q), pose, 1, threshold=0.1)
+        vj = np.linalg.pinv(robot.jacobe(robot.q)) @ v # This is sending the velocity
+        vj = vj.tolist()
+        joint_step = [dt*x for x in vj]
+        q = [x+y for x,y in zip(joint_states, joint_step)]
 
         # Clear the previous goal trajectory
-        goal.trajectory.points = []
+        goal.trajectory.points.clear()
 
         # Sending command:
         point = JointTrajectoryPoint()
 
-        point.positions = robot.qd.tolist()
+        point.positions = robot.q.tolist()
+
+        print(point.positions)
 
         current_time = rospy.Time.now()
 
-        point.time_from_start = current_time 
+        point.time_from_start = current_time
         
         goal.trajectory.points.append(point)
 
         client.send_goal(goal)
-        
-        client.wait_for_result()
+
+        rospy.sleep(2)
 
         cam_move(cam, robot, TCR)
 
         cam_move(gripper, robot, TGR)
+        
         # robot.q = robot.q + robot.qd * 0.05
+        while not rospy.is_shutdown():
+            print("Joint State: ", joint_states)
+            break
+
         robot.q = joint_states
+        # break
     i+=1
 
 print("FINAL ERROR: ", np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose_list[-1].A[0:3,3]))
 
+# for q in path.q:
+    
+    # # goal.trajectory.points.clear()
 
+    # goal = set_up_action_client()
+    
+    # point = JointTrajectoryPoint()
+
+    # point.positions = q.tolist()
+
+    # point.time_from_start = rospy.Time.now() + rospy.Duration.from_sec(0.2)
+    
+    # goal.trajectory.points.append(point)
+
+    # print(goal)
+
+    # client.send_goal(goal)
+
+    # print("HEREE")
+    
+    # client.wait_for_result()
+    
+    # # result = client.get_result()
+    
+    # # print(result)
+
+    # rospy.sleep(1)
 
 # env.hold()
 rospy.spin()

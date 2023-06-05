@@ -20,7 +20,7 @@ from colorLibrary import*
 # import imutils
 from colorLibrary import*
 from ur3module import *
-# import moveit_commander
+import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -123,32 +123,32 @@ def control_robot():
 
     ## DONE
     #position 1
-    coordinates.append((600,500,26,1))
+    coordinates.append((600,550,26,1))
     #position 2
-    coordinates.append((500,500,16,2))
+    coordinates.append((500,550,16,2))
     #position 3
-    coordinates.append((400,500,16,3))
+    coordinates.append((400,550,16,3))
     #position 4
-    coordinates.append((300,500,16,4))
+    coordinates.append((300,550,26,4))
 
     ##
     #position 5
-    coordinates.append((600,430,16,5))
+    coordinates.append((600,480,16,5))
     #position 6 (AA Battery)
-    coordinates.append((500,430,23,6))
+    coordinates.append((500,480,23,6))
     #position 7 (AA Battery)
-    coordinates.append((400,430,23,7))
+    coordinates.append((400,480,23,7))
     #position 8
-    coordinates.append((300,430,16,8))
+    coordinates.append((300,480,16,8))
 
     #position 9 (AA Battery)
-    coordinates.append((600,360,26,9))
+    coordinates.append((600,410,16,9))
     #position 10
-    coordinates.append((500,360,16,10))
+    coordinates.append((500,410,16,10))
     #position 11
-    coordinates.append((400,360,16,11))
+    coordinates.append((400,410,16,11))
     #position 12(AA Battery)
-    coordinates.append((300,360,26,12))
+    coordinates.append((300,410,16,12))
 
     # Return a list to store the coordinates of the centers of detected circular edges   
     return coordinates
@@ -160,31 +160,31 @@ def find_first_position():
 
     # Apply the position of each hole
     #position 1 
-    coordinates.append((270,137,26,1))
+    coordinates.append((245,137,26,1))
     #position 2
-    coordinates.append((270,205,16,2))
+    coordinates.append((245,203,16,2))
     #position 3
-    coordinates.append((270,268,16,3))
+    coordinates.append((245,268,16,3))
     #position 4 
-    coordinates.append((270,358,16,4))
+    coordinates.append((245,333,26,4))
 
     #position 5
-    coordinates.append((314,137,16,5))
+    coordinates.append((290,137,16,5))
     #position 6 (AA Battery)
-    coordinates.append((314,205,23,6))
+    coordinates.append((290,203,23,6))
     #position 7 (AA Battery)
-    coordinates.append((314,270,23,7))
+    coordinates.append((290,278,23,7))
     #position 8
-    coordinates.append((313,333,16,8))
+    coordinates.append((290,333,16,8))
 
     #position 9 (AA Battery)
-    coordinates.append((368,134,26,9))
+    coordinates.append((338,137,16,9))
     #position 10
-    coordinates.append((366,204,16,10))
+    coordinates.append((338,203,16,10))
     #position 11
-    coordinates.append((366,270,16,11))
+    coordinates.append((338,278,16,11))
     #position 12(AA Battery)
-    coordinates.append((363,334,26,12))
+    coordinates.append((338,328,16,12))
 
     # Return a list to store the coordinates of the centers of detected circular edges   
     return coordinates
@@ -230,13 +230,12 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     if turn!=0: q_goal[-1] += turn * pi/180
     # print(q_goal)
 
-    path = rtb.jtraj(q_curr, q_goal,50)
+    path = rtb.jtraj(q_curr, q_goal,10)
     return path
 
-def move_up_down(robot, q_curr, dir = 'up'):
+def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
     
-    lift = 0.05 #default lifting distance
-
+    # lift = 0.03 #default lifting distance
     if dir == 'up': pass
     elif dir == 'down':
         lift = -lift
@@ -330,3 +329,22 @@ def set_up_action_client():
 def battery_graph_search(arr):
 
     return arr
+
+def hole():
+    # store it in the vector:
+    coordinates = []
+
+    # Apply the position of each hole
+
+    ## DONE
+    #position 1
+    coordinates.append((245,135,1))
+
+    #position 2
+    coordinates.append((630,135,1))
+
+    #position 4
+    coordinates.append((660, 825, 0))
+
+    return coordinates
+
