@@ -165,21 +165,29 @@ rospy.sleep(5)
 
 hole = []
 duplicate = False
+position = hole_cordinate()
+
 for i in location_array:
-    if len(hole) == len(location_array):
-        break
-
-    if i[2] == 0:
-        hole.append((667, 825))
-
-    elif i[2] == 1:
-        if duplicate == False:
-            hole.append((245,135))
-            duplicate = True
+    # if i[2] == 0.0:
+    #     for j in position: 
+    #         if j[2] == 0.0  and j not in hole:
+    #             hole.append(j)
+    #         else:
+    #             continue
+    # elif i[2] == 1.0:
+    #     for j in position: 
+    #         if j[2] == 1.0  and j not in hole:
+    #             hole.append(j)
+    #         else:
+    #             continue
+    for j in position:
+        if j[2] == i[2] and j not in hole:
+            hole.append(j)
         else:
-            hole.append((630,135))
-        
+            continue
 
+        
+rospy.loginfo('Holes: %s', hole)
     
 while running_ == True:
 
@@ -214,12 +222,34 @@ while running_ == True:
     cam = collisionObj.Cuboid(scale=[0.03,0.06,0.015], pose = SE3(0,0,0), color = [0.5,0.5,0.1,1])
     TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) #relative pose of cam to ee
     
+    # Set initial position
+    q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
+    q_start = [x*pi/180 for x in q_deg]
+    robot.q = q_start
+
+    # Add to environment
     env.add(robot)
     env.add(cam)
     env.add(gripper)
 
-    for i in range(len(location_array)):
+    pin = []
+    TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) #relative pose pin to robot
 
+    cam_move(cam, robot, TCR)
+    cam_move(gripper, robot, TGR)
+    camera_transform = cam.T
+    
+    for i in range(len(location_array)):
+        global_pos = cam_to_global(location_array[i][0],location_array[i][1], camera_transform)
+        pin.append(collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = (0.2,0.2,0.5,1)))
+        # cam_move(pin[i],robot, TCP)
+        env.add(pin[i])
+    
+    for i in range(len(location_array)):
+        while not rospy.is_shutdown():
+            pub.publish(moveGripperToPosition(400, 280))
+            rospy.sleep(3)
+            break
         # First position of the robot:
         q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
         q_start = [x*pi/180 for x in q_deg]
@@ -235,12 +265,14 @@ while running_ == True:
 
         global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
-        path = move_to_pin(robot, q_start, global_position_1)
+        # Move to the pin
+        path = move_to_pin(robot, q_start, global_position_1, turn = 90)
         arrived = False
         if not arrived:
             for q in path.q:
                 robot.q = q
                 cam_move(cam,robot,TCR)
+                cam_move(gripper,robot,TGR)
                 env.step(dt)
 
         total_path = []
@@ -276,27 +308,28 @@ while running_ == True:
                 break
             break
 
+        # Move up
         rospy.loginfo("LIFTING UP !!!!!!!!")
-
+        
         robot.q = path.q[-1]
-
         path_lift = move_up_down(robot, path.q[-1], lift=0.06)
         
         arrived = False
-
         if not arrived:
             for q in path_lift.q:
                 robot.q = q
                 cam_move(cam,robot,TCR)
+                cam_move(gripper,robot,TGR)
+                cam_move(pin[i],robot, TCP)
                 env.step(dt)
 
         total_lift = []
+        
 
         for q in path_lift.q:
             total_lift.append(q)
-        
-        print(len(total_lift))
 
+        
         end_time_1 = time.perf_counter()
         
         execution_time_1 = end_time_1 - start_time
@@ -324,6 +357,7 @@ while running_ == True:
             arrived = False
         
 
+        # Move to Goal
         rospy.loginfo("MOVING THE ANOTHER POSITION")
         
         goal.trajectory.points.clear()
@@ -333,22 +367,43 @@ while running_ == True:
 
         global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
 
-        q_start = path_lift.q[-1]
+        rot = rotate_ee(path_lift.q[-1], turn = 90)
+        q_start = rot.q[-1]
+
         robot.q = q_start
-
-        path_move = move_to_pin(robot, q_start, global_position_2,0.225)
-
+        path_move = move_to_pin(robot, q_start, global_position_2,0.225)    
+        
         arrived = False
         
-        move = []
+        if not arrived:
+            for q in path_move.q:
+                robot.q = q
+                cam_move(cam,robot,TCR)
+                cam_move(gripper,robot,TGR)
+                cam_move(pin[i],robot, TCP)
+                env.step(dt)
         
+        move = []
+
+        for q in rot.q:
+            move.append(q)
+
         for q in path_move.q:
             move.append(q)
         
         q_start = path_move.q[-1]
         
-        path_down = move_up_down(robot, q_start,'down',lift = 0.05)
+        # Move down
+        path_down = move_up_down(robot, q_start,'down',lift = 0.035)
 
+        if not arrived:
+            for q in path_down.q:
+                robot.q = q
+                cam_move(cam,robot,TCR)
+                cam_move(gripper,robot,TGR)
+                cam_move(pin[i],robot, TCP)
+                env.step(dt)
+        
         for q in path_down.q:
             move.append(q)
 
@@ -375,7 +430,7 @@ while running_ == True:
             print(result)
             
             while not rospy.is_shutdown():
-                pub.publish(openGripper(400))
+                pub.publish(moveGripperToPosition(400, 170))
                 rospy.sleep(3)
                 break
             

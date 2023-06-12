@@ -14,7 +14,7 @@ camera_transform = cam.T #camera transform at capturing position
 
 # Gripper
 TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175)
-gripper_path = "/home/quangngo/Desktop/RTB-P Test files/SomeApplications/CAMGRIPPER.STL"
+gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
 gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
 
 # Enviroment

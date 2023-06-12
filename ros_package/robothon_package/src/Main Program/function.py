@@ -213,6 +213,12 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 
     return global_position
 
+def rotate_ee(q_curr, turn = 0):
+    q_goal = q_curr
+    if turn!=0: q_goal[-1] += turn * pi/180
+    path = rtb.jtraj(q_curr, q_goal, 20)
+    return path
+
 def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
     q_sample = [x*pi/180 for x in q_sample]
@@ -230,7 +236,7 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     if turn!=0: q_goal[-1] += turn * pi/180
     # print(q_goal)
 
-    path = rtb.jtraj(q_curr, q_goal,10)
+    path = rtb.jtraj(q_curr, q_goal,50)
     return path
 
 def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
@@ -330,7 +336,7 @@ def battery_graph_search(arr):
 
     return arr
 
-def hole():
+def hole_cordinate():
     # store it in the vector:
     coordinates = []
 
@@ -338,13 +344,19 @@ def hole():
 
     ## DONE
     #position 1
-    coordinates.append((245,135,1))
+    coordinates.append((245,35, 1.0))
 
     #position 2
-    coordinates.append((630,135,1))
+    coordinates.append((245,135,1.0))
+
+    #position 3
+    coordinates.append((630,35,1.0))
 
     #position 4
-    coordinates.append((660, 825, 0))
+    coordinates.append((630,135,1.0))
+
+    #position 5
+    coordinates.append((660,825,0.0))
 
     return coordinates
 
