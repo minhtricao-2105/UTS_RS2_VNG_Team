@@ -14,7 +14,8 @@ camera_transform = cam.T #camera transform at capturing position
 
 # Gripper
 TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175)
-gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+# gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+gripper_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
 gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
 
 # Enviroment
@@ -36,48 +37,51 @@ env.add(pin)
 
 # Move to gripping point
 path = move_to_pin(robot, q_start, global_position_1, turn = False)
-for q in path.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    env.step(dt)
+# for q in path.q:
+#     robot.q = q
+#     cam_move(cam,robot,TCR)
+#     cam_move(gripper,robot,TGR)
+#     env.step(dt)
 
-# Lifting up
-robot.q = path.q[-1]
-path_lift = move_up_down(robot, path.q[-1])
-for q in path_lift.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    cam_move(pin,robot,TCP)
-    env.step(dt)
-print("DONE LIFT!")
+# # Lifting up
+# robot.q = path.q[-1]
+# path_lift = move_up_down(robot, path.q[-1])
+# for q in path_lift.q:
+#     robot.q = q
+#     cam_move(cam,robot,TCR)
+#     cam_move(gripper,robot,TGR)
+#     cam_move(pin,robot,TCP)
+#     env.step(dt)
+# print("DONE LIFT!")
 
-# Define new points in Pixel frame
-pixel_x_2 = 600
-pixel_y_2 = 360
-global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform) #global position
-goal_obj_2 = collisionObj.Sphere(radius = 0.002, pose = SE3(global_position_2[0], global_position_2[1], global_position_2[2]),color = (0.5,0.1,0.1,1))
-env.add(goal_obj_2)
+# # Define new points in Pixel frame
+# pixel_x_2 = 600
+# pixel_y_2 = 360
+# global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform) #global position
+# goal_obj_2 = collisionObj.Sphere(radius = 0.002, pose = SE3(global_position_2[0], global_position_2[1], global_position_2[2]),color = (0.5,0.1,0.1,1))
+# env.add(goal_obj_2)
 
-# Move to dropping point
-robot.q = path_lift.q[-1]
-path_2 = move_to_pin(robot, path_lift.q[-1], global_position_2, offset_z = 0.225,turn= True)
-for q in path_2.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    cam_move(pin,robot,TCP)
-    env.step(dt)
+# # Move to dropping point
+# robot.q = path_lift.q[-1]
+# path_2 = move_to_pin(robot, path_lift.q[-1], global_position_2, offset_z = 0.225,turn= True)
+# for q in path_2.q:
+#     robot.q = q
+#     cam_move(cam,robot,TCR)
+#     cam_move(gripper,robot,TGR)
+#     cam_move(pin,robot,TCP)
+#     env.step(dt)
 
-# Moving down
-robot.q = path_2.q[-1]
-path_lift_2 = move_up_down(robot, path_2.q[-1],dir = 'down')
-for q in path_lift_2.q:
-    robot.q = q
-    cam_move(cam,robot,TCR)
-    cam_move(gripper,robot,TGR)
-    cam_move(pin,robot,TCP)
-    env.step(dt)
+# # Moving down
+# robot.q = path_2.q[-1]
+# path_lift_2 = move_up_down(robot, path_2.q[-1],dir = 'down')
+# for q in path_lift_2.q:
+#     robot.q = q
+#     cam_move(cam,robot,TCR)
+#     cam_move(gripper,robot,TGR)
+#     cam_move(pin,robot,TCP)
+#     env.step(dt)
+
+# Test move_simulation_robot
+move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
 
 env.hold()

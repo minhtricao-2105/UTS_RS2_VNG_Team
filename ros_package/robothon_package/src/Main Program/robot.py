@@ -241,8 +241,9 @@ while running_ == True:
     
     for i in range(len(location_array)):
         global_pos = cam_to_global(location_array[i][0],location_array[i][1], camera_transform)
-        pin.append(collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = (0.2,0.2,0.5,1)))
-        # cam_move(pin[i],robot, TCP)
+        color = (0.2,0.2,0.5,1)
+        if location_array[i][2] == 0 : color = (0.2,0.5,0.2,1)
+        pin.append(collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = color))
         env.add(pin[i])
     
     for i in range(len(location_array)):
@@ -268,12 +269,13 @@ while running_ == True:
         # Move to the pin
         path = move_to_pin(robot, q_start, global_position_1, turn = 0)
         arrived = False
-        if not arrived:
-            for q in path.q:
-                robot.q = q
-                cam_move(cam,robot,TCR)
-                cam_move(gripper,robot,TGR)
-                env.step(dt)
+        if not arrived: 
+            move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+            # for q in path.q:
+            #     robot.q = q
+            #     cam_move(cam,robot,TCR)
+            #     cam_move(gripper,robot,TGR)
+            #     env.step(dt)
 
         total_path = []
 

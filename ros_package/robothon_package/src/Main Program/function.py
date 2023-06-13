@@ -20,7 +20,7 @@ from colorLibrary import*
 # import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
+# import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -280,10 +280,15 @@ def RMRC_motion(robot, path, threshold = 0.01):
             # env.add(collisionObj.Sphere(radius=0.005, pose = robot.fkine(robot.q) * SE3(0.2, 0,0),color = (0.1,0.5,0.1,1)))
             # env.step(dt)
         i+=1
-
     print("FINAL ERROR: ", np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose_list[-1].A[0:3,3]))
 
-
+def move_simulation_robot(robot, path, env, dt, gripper = False, cam = False, pin = False, TCR = SE3(0,0,0), TGR = SE3(0,0,0), TCP = SE3(0,0,0)):
+    for q in path:
+        robot.q = q
+        if not isinstance(cam,bool): cam_move(cam,robot,TCR)
+        if not isinstance(gripper,bool): cam_move(gripper,robot,TGR)
+        if not isinstance(pin,bool): cam_move(pin, robot, TCP)
+        env.step(dt)
 
 def add_trajectory(total_path, goal, execution_time):
 
