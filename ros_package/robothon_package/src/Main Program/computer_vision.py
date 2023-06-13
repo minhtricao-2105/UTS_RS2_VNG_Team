@@ -237,7 +237,7 @@ def compare_two_image():
 def perform_computervision():
     
     # Canny Edge Detection when we have the figure:
-    print('[UPDATE]: Processing COMPUTER VISION PART')
+    rospy.loginfo('[UPDATE]: Processing COMPUTER VISION PART')
 
     final = np.empty((0,3), int)
     detection = np.empty((0,3), int)
@@ -262,15 +262,15 @@ def perform_computervision():
         # print(x, y, r)
         if r == 1:
             print("AA Batery at position:",x,y)
-            cv.circle(image_1, (x, y), 6, (0, 0, 255), -15)
-            cv.putText(image_1, f"AA: ({x}, {y})", (x + 15, y + 15), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 5)
+            cv.circle(image_1, (x, y), 10, (0, 0, 255), -10)
+            cv.putText(image_1, f"AA: ({x}, {y})", (x + 20, y + 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 128), 3)
 
         if r == 0:
-            cv.circle(image_1, (x, y), 6, (255, 0, 0), -15)
+            cv.circle(image_1, (x, y), 10, (255, 0, 0), -10)
             print("AAA Batery at position:",x,y)
-            cv.putText(image_1, f"AA: ({x}, {y})", (x + 15, y + 15), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 5)
+            cv.putText(image_1, f"AAA: ({x}, {y})", (x + 20, y + 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 128), 3)
 
-    print('[UPDATE]: Complete the Vision Part')
+    rospy.loginfo('[UPDATE]: Complete the Vision Part')
 
     cv.imshow('CV Part', image_1)
 

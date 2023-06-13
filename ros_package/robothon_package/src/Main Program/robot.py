@@ -132,7 +132,7 @@ pub_1 = rospy.Publisher('Move_home',Int32,queue_size=1)
 ############## BELONG TO THE ROBOT OVER HERE ###########################
 
 while moveIt == False:
-    rospy.loginfo("Moving Robot to Home!!")
+    rospy.loginfo("[UPDATE]: Moving Robot to Home!!")
     moveit_commander.roscpp_initialize(sys.argv)
     joint_home_degree = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
     joint_home_radian = [math.radians(joint_home_degree) for joint_home_degree in joint_home_degree]
@@ -142,7 +142,6 @@ while moveIt == False:
     mess = Int32()
     mess.data = 1
     pub_1.publish(mess)
-    rospy.loginfo("Done Moving to Home!!")
     break
 
 # Subcribe Declaration:
@@ -153,14 +152,15 @@ subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
 pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 
 while len(location_array) == 0:
-    rospy.loginfo("Waiting for vision")
+    rospy.loginfo("[WARNING]: Waiting for Computer Vision Part")
     if(len(location_array) != 0):
-        rospy.loginfo("Let go")
-        rospy.loginfo('Location array: %s', location_array)
+        rospy.loginfo("[UPDATE]: Robot recevieved data from Vision Node!")
+        rospy.loginfo('[UPDATE]: BATTERIES LOCATION: %s', location_array)
         running_ = True
         break
 
 rospy.loginfo("Wait 5 seconds")
+
 rospy.sleep(5)
 
 hole = []
@@ -168,26 +168,22 @@ duplicate = False
 position = hole_cordinate()
 
 for i in location_array:
-    # if i[2] == 0.0:
-    #     for j in position: 
-    #         if j[2] == 0.0  and j not in hole:
-    #             hole.append(j)
-    #         else:
-    #             continue
-    # elif i[2] == 1.0:
-    #     for j in position: 
-    #         if j[2] == 1.0  and j not in hole:
-    #             hole.append(j)
-    #         else:
-    #             continue
-    for j in position:
-        if j[2] == i[2] and j not in hole:
-            hole.append(j)
-        else:
-            continue
-
+    if i[2] == 0.0:
+        for j in position: 
+            if j[2] == 0.0  and j not in hole:
+                hole.append(j)
+                break
+            else:
+                continue
+    elif i[2] == 1.0:
+        for j in position: 
+            if j[2] == 1.0  and j not in hole:
+                hole.append(j)
+                break
+            else:
+                continue
         
-rospy.loginfo('Holes: %s', hole)
+rospy.loginfo('Hole Location: %s', hole)
     
 while running_ == True:
 
@@ -246,10 +242,12 @@ while running_ == True:
         env.add(pin[i])
     
     for i in range(len(location_array)):
+
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 280))
             rospy.sleep(3)
             break
+
         # First position of the robot:
         q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
         q_start = [x*pi/180 for x in q_deg]
@@ -304,12 +302,12 @@ while running_ == True:
 
             while not rospy.is_shutdown():
                 pub.publish(moveGripperToPosition(400, 50))
-                rospy.sleep(3)
+                rospy.sleep(1)
                 break
             break
 
         # Move up
-        rospy.loginfo("LIFTING UP !!!!!!!!")
+        rospy.loginfo("[UPDATE]: ROBOT'S MOVING UP")
         
         robot.q = path.q[-1]
         path_lift = move_up_down(robot, path.q[-1], lift=0.06)
@@ -325,7 +323,6 @@ while running_ == True:
 
         total_lift = []
         
-
         for q in path_lift.q:
             total_lift.append(q)
 
@@ -358,7 +355,7 @@ while running_ == True:
         
 
         # Move to Goal
-        rospy.loginfo("MOVING THE ANOTHER POSITION")
+        rospy.loginfo("[UPDATE]: MOVING TO ANOTHER POSITION")
         
         goal.trajectory.points.clear()
 
@@ -406,7 +403,7 @@ while running_ == True:
         
         for q in path_down.q:
             move.append(q)
-
+         
         end_time_2 = time.perf_counter()
         
         execution_time_2 = end_time_2 - start_time
@@ -428,7 +425,7 @@ while running_ == True:
 
                 # Print the result
             print(result)
-            
+             
             while not rospy.is_shutdown():
                 pub.publish(moveGripperToPosition(400, 170))
                 rospy.sleep(3)
