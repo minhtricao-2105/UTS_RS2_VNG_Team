@@ -43,8 +43,6 @@ def get_data():
     # joint_positions[0] = j2
     # joint_positions[2] = j0
 
-
-
 get_data()
 
 print(joint_positions)

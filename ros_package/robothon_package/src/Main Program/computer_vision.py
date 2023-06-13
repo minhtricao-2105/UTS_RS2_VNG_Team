@@ -84,7 +84,6 @@ def depth_callback(data):
 #   @param  data The image data received from the ROS node
 #   @return None
 
-
 def batteries_callback(data):
 
     global image_1
@@ -110,7 +109,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=130)
+    img = cv.convertScaleAbs(img, alpha=1, beta=100)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -238,7 +237,7 @@ def compare_two_image():
 def perform_computervision():
     
     # Canny Edge Detection when we have the figure:
-    print('Processing CV')
+    print('[UPDATE]: Processing COMPUTER VISION PART')
 
     final = np.empty((0,3), int)
     detection = np.empty((0,3), int)
@@ -261,24 +260,24 @@ def perform_computervision():
 
     for(x,y,r) in detection:
         # print(x, y, r)
-        
         if r == 1:
             print("AA Batery at position:",x,y)
-            cv.circle(image_1, (x, y), 6, (0, 0, 255), -9)
+            cv.circle(image_1, (x, y), 6, (0, 0, 255), -15)
+            cv.putText(image_1, f"AA: ({x}, {y})", (x + 15, y + 15), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 5)
+
         if r == 0:
-            cv.circle(image_1, (x, y), 6, (0, 0, 0), -9)
+            cv.circle(image_1, (x, y), 6, (255, 0, 0), -15)
             print("AAA Batery at position:",x,y)
+            cv.putText(image_1, f"AA: ({x}, {y})", (x + 15, y + 15), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 5)
 
-    print('DONE THE CV')
+    print('[UPDATE]: Complete the Vision Part')
 
-    cv.imshow('hello', image_1)
+    cv.imshow('CV Part', image_1)
 
     cv.waitKey(0)
 
-
-
     # cv.destroyAllWindows()
-    input("Done The Vision Part, Remove the Cable to Continue .... \n")
+    input("[UPDATE]: Done The Vision Part, Remove the Cable to Continue .... \n")
 
 ## @brief Detects the color of battery containers in an image using OpenCV
 #
@@ -353,7 +352,7 @@ rospy.init_node('Realsense')
 subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
 while move_home != 1:
-    rospy.loginfo("Waiting for the robot to move home!")
+    rospy.loginfo("[WARNING]: Waiting for the robot to move home!")
     if move_home == 1:
         running_ = True
         break
@@ -374,7 +373,7 @@ while running_ == True:
     # A third publisher will be establisted to transmit data for colour detection:
     publisher_3 = rospy.Publisher('Color_data', Float32MultiArray, queue_size = 20)
 
-    input("Press any key to capture a second image\n")
+    input("[INPUT]: Press any key to capture a second image\n")
 
     sub_2 = rospy.Subscriber("/camera/color/image_raw", Image, batteries_callback)
 

@@ -266,7 +266,7 @@ while running_ == True:
         global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
         # Move to the pin
-        path = move_to_pin(robot, q_start, global_position_1, turn = 90)
+        path = move_to_pin(robot, q_start, global_position_1, turn = 0)
         arrived = False
         if not arrived:
             for q in path.q:
@@ -367,7 +367,7 @@ while running_ == True:
 
         global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
 
-        rot = rotate_ee(path_lift.q[-1], turn = 90)
+        rot = rotate_ee(path_lift.q[-1], turn = 0)
         q_start = rot.q[-1]
 
         robot.q = q_start

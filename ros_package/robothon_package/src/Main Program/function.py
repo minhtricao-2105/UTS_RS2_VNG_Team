@@ -120,8 +120,6 @@ def control_robot():
     coordinates = []
 
     # Apply the position of each hole
-
-    ## DONE
     #position 1
     coordinates.append((600,550,26,1))
     #position 2
@@ -216,7 +214,7 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 def rotate_ee(q_curr, turn = 0):
     q_goal = q_curr
     if turn!=0: q_goal[-1] += turn * pi/180
-    path = rtb.jtraj(q_curr, q_goal, 20)
+    path = rtb.jtraj(q_curr, q_goal, 200)
     return path
 
 def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
@@ -341,10 +339,9 @@ def hole_cordinate():
     coordinates = []
 
     # Apply the position of each hole
-
     ## DONE
     #position 1
-    coordinates.append((245,35, 1.0))
+    coordinates.append((245,35,1.0))
 
     #position 2
     coordinates.append((245,135,1.0))
