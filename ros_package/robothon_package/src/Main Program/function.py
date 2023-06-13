@@ -17,10 +17,10 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-# import imutils
+import imutils
 from colorLibrary import*
 from ur3module import *
-# import moveit_commander
+import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -214,8 +214,9 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 def rotate_ee(q_curr, turn = 0):
     q_goal = q_curr
     if turn!=0: q_goal[-1] += turn * pi/180
-    path = rtb.jtraj(q_curr, q_goal, 200)
+    path = rtb.jtraj(q_curr, q_goal, 50)
     return path
+
 
 def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
@@ -234,7 +235,7 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     if turn!=0: q_goal[-1] += turn * pi/180
     # print(q_goal)
 
-    path = rtb.jtraj(q_curr, q_goal,50)
+    path = rtb.jtraj(q_curr, q_goal,30)
     return path
 
 def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
@@ -290,9 +291,7 @@ def move_simulation_robot(robot, path, env, dt, gripper = False, cam = False, pi
         if not isinstance(pin,bool): cam_move(pin, robot, TCP)
         env.step(dt)
 
-def add_trajectory(total_path, goal, execution_time):
-
-    duration_seconds = 5.0
+def add_trajectory(total_path, goal, execution_time, duration_seconds = 1.0):
 
     for i in range(len(total_path)):
 
@@ -345,7 +344,7 @@ def hole_cordinate():
 
     # Apply the position of each hole
     ## DONE
-    #position 1
+    # position 1
     coordinates.append((245,35,1.0))
 
     #position 2
@@ -357,7 +356,7 @@ def hole_cordinate():
     #position 4
     coordinates.append((630,135,1.0))
 
-    #position 5
+    # position 5
     coordinates.append((660,825,0.0))
 
     return coordinates
