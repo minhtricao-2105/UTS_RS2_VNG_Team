@@ -82,6 +82,9 @@ path = move_to_pin(robot, q_start, global_position_1, turn = False)
 #     env.step(dt)
 
 # Test move_simulation_robot
-move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+# move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
 
+# Test ee rotation
+path_rot = rotate_ee(robot.q, turn = -90)
+move_simulation_robot(robot = robot, path= path_rot.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
 env.hold()

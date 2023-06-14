@@ -17,10 +17,10 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-import imutils
+# import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
+# import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
@@ -212,10 +212,11 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 
     return global_position
 
-def rotate_ee(q_curr, turn = 0):
-    q_goal = q_curr
-    if turn!=0: q_goal[-1] += turn * pi/180
-    path = rtb.jtraj(q_curr, q_goal, 50)
+def rotate_ee(q_curr, turn = 0.0):
+    q_curr[-1] += pi - pi/4.6 # correction
+    q_goal = list(q_curr)
+    if turn!= 0: q_goal[-1] += turn * pi/180
+    path = rtb.jtraj(q_curr, q_goal, 30)
     return path
 
 
