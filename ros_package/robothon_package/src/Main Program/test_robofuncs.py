@@ -83,9 +83,15 @@ path = move_to_pin(robot, q_start, global_position_1, turn = False)
 
 # Test move_simulation_robot
 # move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+<<<<<<< HEAD
 
 # Test rotating
 path_rot = rotate_ee(robot.q, 30)
 move_simulation_robot(robot = robot, path= path_rot, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+=======
+>>>>>>> e22b32e55d78444732817f9f4515f670e3936857
 
+# Test ee rotation
+path_rot = rotate_ee(robot.q, turn = -90)
+move_simulation_robot(robot = robot, path= path_rot.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
 env.hold()
