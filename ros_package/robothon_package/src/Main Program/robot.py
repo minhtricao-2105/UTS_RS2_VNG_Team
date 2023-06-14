@@ -268,15 +268,26 @@ while running_ == True:
 
         global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
-        # Move to the pin
-        if location_array[i][2] == 0.0:
-            path = move_to_pin(robot, q_start, global_position_1, turn = 90)
-        else:
-            path = move_to_pin(robot, q_start, global_position_1, turn = 0)
+        
+        speed = 1 # Default speed of real robot
+        turn = 0 # Default turn of ee
 
+        # Move to the position of the battery
+        if location_array[i][2] == 0.0: #rotate the ee first
+            q_now = list(robot.q)
+            q_now[-1] -= 5*pi/6.5
+            rot_ee = rotate_ee(q_now, turn = 90)
+            move_simulation_robot(robot = robot, path= rot_ee.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+            
+            arrived = True
+            send_action_client(arrived, rot_ee.q, goal, start_time, client, speed = speed)
+            
+            q_start = rot_ee.q[-1]
+            turn = 90
+
+        path = move_to_pin(robot, q_start, global_position_1, turn = turn)
         arrived = False
-        if not arrived: 
-            move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+        move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
 
         total_path = []
 
@@ -286,7 +297,10 @@ while running_ == True:
         arrived = True
 
         # Send the trajectory to the robot via the action client command:
-        send_action_client(arrived, total_path, goal, start_time, client)
+        if location_array[i][2] == 0.0:
+            speed = 3
+
+        send_action_client(arrived, total_path, goal, start_time, client, speed = speed)
 
         # Close the gripper:
         while not rospy.is_shutdown():
@@ -303,8 +317,7 @@ while running_ == True:
         arrived = False
 
         #Simulate the robot
-        if not arrived:
-            move_simulation_robot(robot = robot, path= path_lift.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
+        move_simulation_robot(robot = robot, path= path_lift.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
 
         total_lift = []
         
@@ -349,13 +362,9 @@ while running_ == True:
 
         arrived = False
         
-        if not arrived:
-            move_simulation_robot(robot = robot, path= path_move.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
+        move_simulation_robot(robot = robot, path= path_move.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
         move = []
-
-        # for q in rot.q:
-        #     move.append(q)
 
         for q in path_move.q:
             move.append(q)
@@ -374,7 +383,7 @@ while running_ == True:
         if hole[i][0] == 630 and hole[i][1] == 135:
              path_down = move_up_down(robot, q_start,'down',lift = 0.028)
         else:
-            path_down = move_up_down(robot, q_start,'down',lift = 0.033)
+            path_down = move_up_down(robot, q_start,'down',lift = 0.035)
 
 
         move_simulation_robot(robot = robot, path= path_down.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)

@@ -109,7 +109,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=120)
+    img = cv.convertScaleAbs(img, alpha=1, beta=155)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
