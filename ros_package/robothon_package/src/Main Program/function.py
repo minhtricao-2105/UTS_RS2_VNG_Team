@@ -24,7 +24,8 @@ import moveit_commander
 import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-
+from gripperFunction import*
+import time
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
 #   @param scale The scale factor to resize the frame
@@ -361,3 +362,20 @@ def hole_cordinate():
 
     return coordinates
 
+def send_action_client(arrived, path, goal, start_time, client, speed = 1):
+    
+    end_time = time.perf_counter()
+
+    execution_time = end_time - start_time
+
+    while arrived == True:
+        
+        add_trajectory(path, goal, execution_time, speed)
+
+        client.send_goal(goal)
+
+        client.wait_for_result()
+
+        result = client.get_result()
+
+        arrived = False

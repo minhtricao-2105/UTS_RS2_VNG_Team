@@ -276,40 +276,25 @@ while running_ == True:
             total_path.append(q)
 
         arrived = True
-        end_time = time.perf_counter()
-        execution_time = end_time - start_time
 
-        while arrived == True:
+        # Send the trajectory to the robot via the action client command:
+        send_action_client(arrived, total_path, goal, start_time, client)
 
-            add_trajectory(total_path, goal, execution_time)
-
-            # Send the goal to the action server
-            client.send_goal(goal)
-
-                # Wait for the action to complete (or for the connection to be lost)
-            client.wait_for_result()
-
-                # Get the result of the action
-            result = client.get_result()
-
-                # Print the result
-            print(result)
-
-            arrived = False
-
-            while not rospy.is_shutdown():
-                pub.publish(moveGripperToPosition(400, 50))
-                rospy.sleep(0.25)
-                break
+        # Close the gripper:
+        while not rospy.is_shutdown():
+            pub.publish(moveGripperToPosition(400, 50))
+            rospy.sleep(0.25)
             break
 
-        # Move up
+        # The Robot will move up from the code below:
         rospy.loginfo("[UPDATE]: ROBOT'S MOVING UP")
         
         robot.q = path.q[-1]
         path_lift = move_up_down(robot, path.q[-1], lift=0.06)
         
         arrived = False
+
+        #Simulate the robot
         if not arrived:
             move_simulation_robot(robot = robot, path= path_lift.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
 
@@ -318,34 +303,14 @@ while running_ == True:
         for q in path_lift.q:
             total_lift.append(q)
         
-        end_time_1 = time.perf_counter()
-        
-        execution_time_1 = end_time_1 - start_time
-
         arrived = True
 
         goal.trajectory.points.clear()
 
-        while arrived == True:
-
-            add_trajectory(total_lift, goal, execution_time_1)
-
-            # Send the goal to the action server
-            client.send_goal(goal)
-
-            # Wait for the action to complete (or for the connection to be lost)
-            client.wait_for_result()
-
-            # Get the result of the action
-            result = client.get_result()
-
-            # Print the result
-            print(result)
-
-            arrived = False
+        # Send the command to the robot via the action client commander:
+        send_action_client(arrived, total_lift, goal, start_time, client)
         
-
-        # Move to Goal
+        # Move to the hole position
         rospy.loginfo("[UPDATE]: MOVING TO ANOTHER POSITION")
         
         goal.trajectory.points.clear()
@@ -375,79 +340,38 @@ while running_ == True:
         for q in path_move.q:
             move.append(q)
         
-        end_time_3 = time.perf_counter()
-        
-        execution_time_3 = end_time_3 - start_time
-
         arrived = True
 
-        while arrived == True:
+        # Send command to the robot via action client commander:
+        send_action_client(arrived, move, goal, start_time, client)
 
-            add_trajectory(move, goal,execution_time_3)
-
-                # Send the goal to the action server
-            client.send_goal(goal)
-
-                # Wait for the action to complete (or for the connection to be lost)
-            client.wait_for_result()
-
-                # Get the result of the action
-            result = client.get_result()
-
-                # Print the result
-            print(result)
-
-            arrived = False
-             
+        # Moving the robot down:
         move_down = []
 
         q_start = path_move.q[-1]
         
         # Move down
-        path_down = move_up_down(robot, q_start,'down',lift = 0.028)
+        if hole[i][0] == 630 and hole[i][1] == 135:
+             path_down = move_up_down(robot, q_start,'down',lift = 0.028)
+        else:
+            path_down = move_up_down(robot, q_start,'down',lift = 0.033)
 
-        if not arrived:
-            move_simulation_robot(robot = robot, path= path_down.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
+
+        move_simulation_robot(robot = robot, path= path_down.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
         for q in path_down.q:
             move_down.append(q)
-        
-        rot = rotate_ee(path_down.q[-1], turn = 60)
-
-        move_simulation_robot(robot = robot, path= rot.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
-
-        for q in rot.q:
-            move_down.append(q)
-
-        end_time_2 = time.perf_counter()
-        
-        execution_time_2 = end_time_2 - start_time
 
         arrived = True
 
-        while arrived == True:
+        #send command to the robot via action client commander
+        send_action_client(arrived, move_down, goal, start_time, client)
 
-            add_trajectory(move_down, goal,execution_time_2)
-
-                # Send the goal to the action server
-            client.send_goal(goal)
-
-                # Wait for the action to complete (or for the connection to be lost)
-            client.wait_for_result()
-
-                # Get the result of the action
-            result = client.get_result()
-
-                # Print the result
-            print(result)
-             
-            while not rospy.is_shutdown():
-                pub.publish(moveGripperToPosition(400, 170))
-                rospy.sleep(1)
-                break
-            
+        while not rospy.is_shutdown():
+            pub.publish(moveGripperToPosition(400, 180))
+            rospy.sleep(0.25)
             break
-        
+
         ### HOMING
         # arm.go(joint_home_radian)
         q_current = robot.q
@@ -472,27 +396,9 @@ while running_ == True:
         
         move_simulation_robot(robot = robot, path = path_back, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         
-        end_time_4 = time.perf_counter()
-        
-        execution_time_4 = end_time_4 - start_time
+        arrived = True
 
-        while arrived == True:
-
-            add_trajectory(path_back, goal,execution_time_4)
-
-            # Send the goal to the action server
-            client.send_goal(goal)
-
-            # Wait for the action to complete (or for the connection to be lost)
-            client.wait_for_result()
-
-            # Get the result of the action
-            result = client.get_result()
-
-            # Print the result
-            print(result)
-            
-            break
+        send_action_client(arrived, path_back, goal, start_time, client)
 
     running_ = False
 
