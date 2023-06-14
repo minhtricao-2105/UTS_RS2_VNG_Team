@@ -387,7 +387,7 @@ while running_ == True:
         # q_lift_home = move_up_down(robot, q_current, lift = 0.03)
 
         if abs(q_current[-1] - joint_home_radian[-1]) > pi/2:
-            q_current[-1] += pi
+            q_current[-1] += pi - pi/4.6
 
         
         q_back_home = rtb.jtraj(q_current, joint_home_radian, 40)
