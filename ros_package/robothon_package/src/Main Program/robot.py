@@ -269,7 +269,11 @@ while running_ == True:
         global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
         # Move to the pin
-        path = move_to_pin(robot, q_start, global_position_1, turn = 0)
+        if location_array[i][2] == 0.0:
+            path = move_to_pin(robot, q_start, global_position_1, turn = 90)
+        else:
+            path = move_to_pin(robot, q_start, global_position_1, turn = 0)
+
         arrived = False
         if not arrived: 
             move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
@@ -314,6 +318,16 @@ while running_ == True:
         # Send the command to the robot via the action client commander:
         send_action_client(arrived, total_lift, goal, start_time, client)
         
+        # Rotate:
+        rot = []
+        if location_array[i][2] == 0:
+            q_now = list(robot.q)
+            q_now[-1] += pi/2 + pi/13
+            rot = rotate_ee(q_now, turn = -90)
+            move_simulation_robot(robot = robot, path = rot.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
+            arrived = True
+            send_action_client(arrived, rot.q, goal, start_time, client)
+        
         # Move to the hole position
         rospy.loginfo("[UPDATE]: MOVING TO ANOTHER POSITION")
         
@@ -324,13 +338,15 @@ while running_ == True:
 
         global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
 
-        # rot = rotate_ee(path_lift.q[-1], turn = 0)
-        # q_start = rot.q[-1]
         q_start = path_lift.q[-1]
+        
+        if location_array[i][2] == 0:
+            q_start = rot.q[-1]
+        
         robot.q = q_start
 
         path_move = move_to_pin(robot, q_start, global_position_2,0.225)    
-        
+
         arrived = False
         
         if not arrived:

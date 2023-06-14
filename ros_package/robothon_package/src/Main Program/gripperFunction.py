@@ -11,7 +11,7 @@ import copy
 import rospy
 import geometry_msgs.msg
 from std_msgs.msg import String
-# from onrobot_rg_control.msg import OnRobotRGOutput
+from onrobot_rg_control.msg import OnRobotRGOutput
 import math
 import numpy as np
 
