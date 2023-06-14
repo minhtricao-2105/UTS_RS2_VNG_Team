@@ -215,7 +215,7 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 def rotate_ee(q_curr, turn = 0):
     q_goal = q_curr
     if turn!=0: q_goal[-1] += turn * pi/180
-    path = rtb.jtraj(q_curr, q_goal, 50)
+    path = rtb.jtraj(q_curr, q_goal, 100000).q
     return path
 
 
@@ -379,3 +379,24 @@ def send_action_client(arrived, path, goal, start_time, client, speed = 1):
         result = client.get_result()
 
         arrived = False
+
+def sort_battery(location_array):
+    new = []
+    for i in location_array:
+        if i[2] == 0.0:
+            for j in location_array:
+                if j[1] == i[1]:
+                    if abs(j[0] - i[0]) == 100 and j[2] == 1:
+                        new.append(j)
+                        break
+                else:
+                    continue
+            break
+        else:
+            continue
+
+    for k in location_array:
+        if k not in new:
+            new.append(k)
+
+    return new

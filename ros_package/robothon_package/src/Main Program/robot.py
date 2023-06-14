@@ -167,6 +167,10 @@ hole = []
 duplicate = False
 position = hole_cordinate()
 
+location_array = sort_battery(location_array)
+
+print("new: ", sort_battery(location_array))
+
 for i in location_array:
     if i[2] == 0.0:
         for j in position: 
@@ -390,9 +394,6 @@ while running_ == True:
 
         # path to go home 
         path_back = q_back_home.q
-        
-        # for q in q_back_home.q:
-        #     path_back.append(q)
         
         move_simulation_robot(robot = robot, path = path_back, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         

@@ -14,8 +14,8 @@ camera_transform = cam.T #camera transform at capturing position
 
 # Gripper
 TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175)
-# gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
-gripper_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+# gripper_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
 gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
 
 # Enviroment
@@ -82,6 +82,10 @@ path = move_to_pin(robot, q_start, global_position_1, turn = False)
 #     env.step(dt)
 
 # Test move_simulation_robot
-move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+# move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+
+# Test rotating
+path_rot = rotate_ee(robot.q, 30)
+move_simulation_robot(robot = robot, path= path_rot, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
 
 env.hold()
