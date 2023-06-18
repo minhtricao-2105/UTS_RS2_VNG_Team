@@ -189,6 +189,9 @@ def find_first_position():
     return coordinates
 
 def cam_move(cam,robot,T):
+    """
+    Fuction to update pose of the object following robot's end-effector
+    """
     cam.T = robot.fkine(robot.q)*T
 
 def cam_to_global(pixel_x, pixel_y, camera_transform):

@@ -216,11 +216,11 @@ while running_ == True:
     # Gripper
     gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
     gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
-    TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175) #relative pose of gripper to ee
+    TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175) # gripper pose in ee frame
 
     # Camera
     cam = collisionObj.Cuboid(scale=[0.03,0.06,0.015], pose = SE3(0,0,0), color = [0.5,0.5,0.1,1])
-    TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) #relative pose of cam to ee
+    TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) # cam pose in ee frame
     
     # Set initial position
     q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
@@ -233,7 +233,7 @@ while running_ == True:
     env.add(gripper)
 
     pin = []
-    TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) #relative pose pin to robot
+    TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) # pin pose in ee frame
 
     cam_move(cam, robot, TCR)
     cam_move(gripper, robot, TGR)
