@@ -17,7 +17,7 @@ from std_msgs.msg import Int32
 import moveit_commander
 import moveit_msgs.msg
 import numpy as np
-from function import*
+from function import *
 
 #Library Belongs to Robot Toolbox:
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -80,7 +80,6 @@ def cam_to_global(pixel_x, pixel_y, camera_transform):
 #
 #   @param msg The ROS message containing data to be processed.
 #
-
 def callback_2(msg):
     
     #Call out the global variable to store the data from the CV nodes:
@@ -98,8 +97,6 @@ def callback_2(msg):
 #   This function receives color data from CV nodes and stores them in global variables.
 #   The first data received will be stored in the yellow color array, and the second data will be stored in the orange color array.
 #   @param msg A message containing color data received from CV nodes.
-
-
 def callback_3(msg):
     
     #Call out the global variable to store the data from the CV nodes:
@@ -122,9 +119,7 @@ def callback_3(msg):
         colour_array_orange = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
         
         # rospy.loginfo('Orange array: %s', colour_array_orange)
-
-  
-    
+   
 rospy.init_node('robot_node')
 
 pub_1 = rospy.Publisher('Move_home',Int32,queue_size=1)
@@ -169,8 +164,9 @@ position = hole_cordinate()
 
 location_array = sort_battery(location_array)
 
-print("new: ", sort_battery(location_array))
+print("Battery Order: ", sort_battery(location_array))
 
+## DROPPING ORDER ---------------------------------------------- #
 for i in location_array:
     if i[2] == 0.0:
         for j in position: 
@@ -186,11 +182,13 @@ for i in location_array:
                 break
             else:
                 continue
-        
+  
 rospy.loginfo('Hole Location: %s', hole)
-    
-while running_ == True:
+## DROPPING ORDER - DONE ---------------------------------------- #   
 
+## MAIN EXECUTION ------------------------------------------------------------------------------------------------------------ #   
+while running_ == True:
+    ## INITIAL SET UP -------------------------------------------------------------------------------------------------------- #
     goal = set_up_action_client()
 
     # This allows for the time taken to send the message. If the network is fast this could be reduced
@@ -199,7 +197,7 @@ while running_ == True:
     # This is how many seconds the movement will take
     duration_seconds = 5
 
-    #Call the client
+    # Call the client
     # client = actionlib.SimpleActionClient('eff_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
     client = actionlib.SimpleActionClient('scaled_pos_joint_traj_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
     
@@ -232,7 +230,7 @@ while running_ == True:
     env.add(cam)
     env.add(gripper)
 
-    pin = []
+    pin = [] # List of pins
     TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) # pin pose in ee frame
 
     cam_move(cam, robot, TCR)
@@ -245,14 +243,19 @@ while running_ == True:
         if location_array[i][2] == 0 : color = (0.2,0.5,0.2,1)
         pin.append(collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = color))
         env.add(pin[i])
+    ## INITIAL SET UP- DONE ------------------------------------------------------------------------------------------------------------------------------------ #
     
+    ## CODE RUNNING ROBOT - TASK IN GREEN BLOCK ---------------------------------------------------------------------------------------------------------------- #
     for i in range(len(location_array)):
-
+        
+        ## GRIPPER OPEN ---------------------------------- #
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 280))
             rospy.sleep(0.25)
             break
-
+        ## GRIPPER OPEN - DONE ---------------------------------- #
+        
+        ## 0. HOMING SET UP --------------------------------- #
         # First position of the robot:
         q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
         q_start = [x*pi/180 for x in q_deg]
@@ -268,10 +271,11 @@ while running_ == True:
 
         global_position_1 = cam_to_global(pixel_x_1,pixel_y_1, camera_transform)
 
-        
         speed = 1 # Default speed of real robot
         turn = 0 # Default turn of ee
+        ## 0. HOMING SET UP - DONE ----------------------------- #
 
+        ## 1. MOVE TO BATTERY POSITION IN GREEN BLOCK ----------------------------------------------------------------------------------- #
         # Move to the position of the battery
         if location_array[i][2] == 0.0: #rotate the ee first
             q_now = list(robot.q)
@@ -285,14 +289,9 @@ while running_ == True:
             q_start = rot_ee.q[-1]
             turn = 90
 
-        path = move_to_pin(robot, q_start, global_position_1, turn = turn)
+        path_1 = move_to_pin(robot, q_start, global_position_1, turn = turn)
         arrived = False
-        move_simulation_robot(robot = robot, path= path.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
-
-        total_path = []
-
-        for q in path.q:
-            total_path.append(q)
+        move_simulation_robot(robot = robot, path= path_1.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
 
         arrived = True
 
@@ -300,38 +299,32 @@ while running_ == True:
         if location_array[i][2] == 0.0:
             speed = 3
 
-        send_action_client(arrived, total_path, goal, start_time, client, speed = speed)
+        send_action_client(arrived, path_1.q, goal, start_time, client, speed = speed)
 
         # Close the gripper:
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 50))
             rospy.sleep(0.25)
             break
-
-        # The Robot will move up from the code below:
+        ## 1. MOVE TO BATTERY POSITION IN GREEN BLOCK- DONE ---------------------------------------------------------------------------------- #
+            
+        ## 2. MOVE UP VERTICALLY---------------------------------------------------------------------------------------------------------------------------------------------#
         rospy.loginfo("[UPDATE]: ROBOT'S MOVING UP")
         
-        robot.q = path.q[-1]
-        path_lift = move_up_down(robot, path.q[-1], lift=0.06)
-        
+        robot.q = path_1.q[-1]
+        path_2 = move_up_down(robot, path_1.q[-1], lift=0.06)
         arrived = False
-
         #Simulate the robot
-        move_simulation_robot(robot = robot, path= path_lift.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
-
-        total_lift = []
-        
-        for q in path_lift.q:
-            total_lift.append(q)
+        move_simulation_robot(robot = robot, path= path_2.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
         arrived = True
 
         goal.trajectory.points.clear()
 
         # Send the command to the robot via the action client commander:
-        send_action_client(arrived, total_lift, goal, start_time, client)
+        send_action_client(arrived, path_2.q, goal, start_time, client)
         
-        # Rotate:
+        # Rotate back if the pin is AAA
         rot = []
         if location_array[i][2] == 0:
             q_now = list(robot.q)
@@ -339,9 +332,10 @@ while running_ == True:
             rot = rotate_ee(q_now, turn = -90)
             move_simulation_robot(robot = robot, path = rot.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
             arrived = True
-            send_action_client(arrived, rot.q, goal, start_time, client)
+            send_action_client(arrived, rot.q, goal, start_time, client)   
+        ## 2. MOVE UP VERTICALLY-DONE --------------------------------------------------------------------------------------------------------------------------------------------#
         
-        # Move to the hole position
+        ## 3. MOVE TO THE HOLE POSITION ------------------------------------------------------------------------------------------------------------------------------------------#
         rospy.loginfo("[UPDATE]: MOVING TO ANOTHER POSITION")
         
         goal.trajectory.points.clear()
@@ -351,81 +345,172 @@ while running_ == True:
 
         global_position_2 = cam_to_global(pixel_x_2,pixel_y_2, camera_transform)
 
-        q_start = path_lift.q[-1]
+        q_start = path_2.q[-1]
         
         if location_array[i][2] == 0:
             q_start = rot.q[-1]
         
         robot.q = q_start
 
-        path_move = move_to_pin(robot, q_start, global_position_2,0.225)    
+        path_3 = move_to_pin(robot, q_start, global_position_2,0.225)    
 
         arrived = False
         
-        move_simulation_robot(robot = robot, path= path_move.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
-        
-        move = []
-
-        for q in path_move.q:
-            move.append(q)
+        move_simulation_robot(robot = robot, path= path_3.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
         arrived = True
 
         # Send command to the robot via action client commander:
-        send_action_client(arrived, move, goal, start_time, client)
-
-        # Moving the robot down:
-        move_down = []
-
-        q_start = path_move.q[-1]
+        send_action_client(arrived, path_3.q, goal, start_time, client)
+        ## 3. MOVE TO THE HOLE POSITION - DONE ------------------------------------------------------------------------------------------------------------------------------------------#
+        
+        ## 4. MOVE DOWN AND DROP BATTERY -------------------------------------------------------------------------------------------------------------------------------------------------#
+        q_start = path_3.q[-1]
         
         # Move down
         if hole[i][0] == 630 and hole[i][1] == 135:
-             path_down = move_up_down(robot, q_start,'down',lift = 0.028)
+             path_4 = move_up_down(robot, q_start,'down',lift = 0.028)
         else:
-            path_down = move_up_down(robot, q_start,'down',lift = 0.035)
+            path_4 = move_up_down(robot, q_start,'down',lift = 0.035)
 
-
-        move_simulation_robot(robot = robot, path= path_down.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
+        move_simulation_robot(robot = robot, path= path_4.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
-        for q in path_down.q:
-            move_down.append(q)
-
         arrived = True
 
-        #send command to the robot via action client commander
-        send_action_client(arrived, move_down, goal, start_time, client)
+        # Send command to the robot via action client commander
+        send_action_client(arrived, path_4.q, goal, start_time, client)
 
+        # Open the gripper
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 180))
             rospy.sleep(0.25)
             break
+        ## 4. MOVE DOWN AND DROP BATTERY - DONE -------------------------------------------------------------------------------------------------------------------------------------------------#
 
-        ### HOMING
-        # arm.go(joint_home_radian)
+        ## 5. HOMING ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
         q_current = robot.q
-        
-        print("CURRENT:", q_current)
-        print("HOME:", joint_home_radian)
-
-        # # lift up
-        # q_lift_home = move_up_down(robot, q_current, lift = 0.03)
-
         if abs(q_current[-1] - joint_home_radian[-1]) > pi/2:
             q_current[-1] += pi - pi/4.6
 
-        
-        q_back_home = rtb.jtraj(q_current, joint_home_radian, 40)
+        # Path to go home 
+        path_back = rtb.jtraj(q_current, joint_home_radian, 40)
 
-        # path to go home 
-        path_back = q_back_home.q
-        
-        move_simulation_robot(robot = robot, path = path_back, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+        move_simulation_robot(robot = robot, path = path_back.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         
         arrived = True
 
         send_action_client(arrived, path_back, goal, start_time, client)
+        ## 5. HOMING - DONE---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+    ## CODE RUNNING ROBOT - TASK IN GREEN BLOCK - DONE --------------------------------------------------------------------------------------------------------------- #
+    
+    ## CODE RUNNING ROBOT - COIN TASK ---------------------------------------------------------------------------------------------------------------------------------#
+    ## Order:
+        # 1. home -> coin
+        # 2. coin lift
+        # 3. coin -> battery 
+        # 4. push down
+        # 5. flick coin
+        # 6. coin back
+        # 7. put coin down
+        # 8. coin -> battery + pick
+        # 9. battery -> hole
+        # 10. drop batter
+        # 11. home
+    ### 1. Move to coin
+    # q_coin = ??? -> switch to radians
+    # path_1 = rtb.jtraj(robot.q, q_coin, 40)
+    # move_simulation_robot(robot = robot, path = path_1.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+    # arrived = True
+    # send_action_client(arrived, path_1.q, goal, start_time, client)
+    
+    ### Close gripper
+    # while not rospy.is_shutdown():
+        # pub.publish(moveGripperToPosition(400, 50))
+        # rospy.sleep(0.25)
+        # break
 
+    ### 2. Lift coin up
+    # path_2 = move_up_down(robot, path_1.q[-1], lift=0.06)
+    # q_coin_up = list(path_2.q[-1])
+    # move_simulation_robot(robot = robot, path = path_2.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+    # arrived = True
+    # send_action_client(arrived, path_2.q, goal, start_time, client)
+    
+    ## -> May put below into a loop for 2 batteries
+    ### 3. Move to battery - step 1 - Above the battery:
+    # q_bat = ???
+    # path_3 =  rtb.jtraj(robot.q, q_bat, 40)
+    # move_simulation_robot(robot = robot, path = path_3.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_3.q, goal, start_time, client)
+
+    ### 4. Move to battery - step 2 - Push down:
+    # path_4 = move_up_down(robot, 'path_3.q[-1], 'down', lift=0.06)
+    # move_simulation_robot(robot = robot, path = path_4.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+    # arrived = True
+    # send_action_client(arrived, path_4.q, goal, start_time, client)
+
+    ### 5. Flick the coin to push battery up:
+    # path_5 = flick_coin(input...)
+    # move_simulation_robot(robot = robot, path = path_5.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_5.q, goal, start_time, client)
+    
+    # >>>> May flick the other battery
+    ## -> 
+
+    ### 6. Move the coin back to its holder - step 1: above the holder
+    # path_6 = rtb.jtraj(robot.q, q_coin_up, 40)
+    # move_simulation_robot(robot = robot, path = path_6.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_6.q, goal, start_time, client)
+
+    ### 7. Move the coin back to its holder - step 2: move down and drop
+    # path_7 = move_up_down(robot, 'path_6.q[-1], 'down', lift=0.06)
+    # move_simulation_robot(robot = robot, path = path_7.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_7.q, goal, start_time, client)
+
+    ### Open the gripper
+    # while not rospy.is_shutdown():
+    #     pub.publish(moveGripperToPosition(400, 180))
+    #     rospy.sleep(0.25)
+    #     break
+
+    ### 8. Go pick the battery
+    # q_pick_bat = ???
+    # path_8 = rtb.jtraj(robot.q, q_pick_bat, 40)
+    # move_simulation_robot(robot = robot, path = path_8.q, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+    # arrived = True
+    # send_action_client(arrived, path_8.q, goal, start_time, client)
+    
+    ### Close gripper
+    # while not rospy.is_shutdown():
+        # pub.publish(moveGripperToPosition(400, 50))
+        # rospy.sleep(0.25)
+        # break
+    
+    ### 9. Move to dropping position- step 1: above the hole
+    # q_drop_bat = ???
+    # path_9 = rtb.jtraj(robot.q, q_drop_bat, 40)
+    # move_simulation_robot(robot = robot, path = path_9.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_9.q, goal, start_time, client)
+    
+    ### 10. Move to dropping position- step 2: move down and drop
+    # path_10 = move_up_down(robot, 'path_9.q[-1], 'down', lift=0.06)
+    # move_simulation_robot(robot = robot, path = path_10.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin, TCR = TCR, TGR = TGR, TCP = TCP)
+    # arrived = True
+    # send_action_client(arrived, path_10.q, goal, start_time, client)
+
+    ### Open the gripper
+    # while not rospy.is_shutdown():
+    #     pub.publish(moveGripperToPosition(400, 180))
+    #     rospy.sleep(0.25)
+    #     break
+    ## CODE RUNNING ROBOT - COIN TASK -DONE ---------------------------------------------------------------------------------------------------------------------------#
+
+    ### 11. Back home
     running_ = False
-
+    
 rospy.spin()

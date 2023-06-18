@@ -42,6 +42,14 @@ rot_deg = 10
 coin_end.T = transl(-0.002,0,0.004) @ coin_end.T @ troty(rot_deg*pi/180) # apply lifting and rotation
 env.add(coin_end)
 
+input("Press anything\n")
+q_coin_end = solve_for_valid_ik(robot=robot, obj_pose= SE3(coin_end.T), relative_pose = TCP.inv(), q_guess = q_start)
+print(q_coin_end)
+path_coin = rtb.jtraj(q_start, q_coin_end, 20)
+move_simulation_robot(robot = robot, path= path_coin.q, env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
+
+env.hold()
+
 ## TEACH TEST -------------------------------------------------------------------------------------------------------- #
 # # Set the end-effector joint limit
 # robot.links[7].qlim = [-2*pi, 2*pi]
@@ -83,9 +91,3 @@ env.add(coin_end)
 #     move_simulation_robot(robot = robot, path= [robot.q], env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
 #     time.sleep(0.01)
 ## -------------------------------------------------------------------------------------------------------- #
-input("Press anything\n")
-q_coin_end = solve_for_valid_ik(robot=robot, obj_pose= SE3(coin_end.T), relative_pose = TCP.inv(), q_guess = q_start)
-path_coin = rtb.jtraj(q_start, q_coin_end, 20)
-move_simulation_robot(robot = robot, path= path_coin.q, env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCP)
-
-env.hold()

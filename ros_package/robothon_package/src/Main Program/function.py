@@ -222,7 +222,6 @@ def rotate_ee(q_curr, turn = 0.0):
     path = rtb.jtraj(q_curr, q_goal, 30)
     return path
 
-
 def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     q_sample = [63.33, -105.04, 89.33, -75.14, -87.53, 335.72]
     q_sample = [x*pi/180 for x in q_sample]
@@ -269,6 +268,11 @@ def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
     path_lift = rtb.mstraj(viapoints=np.array([q for q in q_lifts]),dt=0.01,tacc=0.05,qdmax = np.pi)
 
     return path_lift
+
+# Use test_coin_move to get data
+def flick_coin(q_at_coin, q_flick):
+    path_flick = rtb.jtraj(q_at_coin, q_flick, 20)
+    return path_flick    
 
 def RMRC_motion(robot, path, threshold = 0.01):
     pose_list = [robot.fkine(q) for q in path.q]
