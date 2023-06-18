@@ -19,7 +19,7 @@ q = np.random.rand(robot.n)
 robot.plot(q)
 
 # show the plot
-robot.teach()
+robot.teach(q)
 
 
 

@@ -10,21 +10,21 @@
 
 #   @date May 9, 2023
 
-import rospy
+# import rospy
 import numpy as np
 import sys
 import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-import imutils
+# import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
-import moveit_msgs.msg
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-from gripperFunction import*
+# import moveit_commander
+# import moveit_msgs.msg
+# from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+# from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+# from gripperFunction import*
 import time
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
