@@ -11,12 +11,32 @@
 import roboticstoolbox as rtb
 import numpy as np
 from spatialmath import SE3
+from spatialmath.base import *
 import swift
 import random
 import spatialgeometry.geom as collisionObj
 from math import pi
 
-def get_link_transform(robot,q)->bool:
+def get_joint_list(robot) -> list:
+    """
+    Get a list of link index which is a joint in a robot
+
+    :param robot: Manipulator 
+    :type robot: URDF model
+    :return: list of link index
+    :rtype: list 
+    """
+    joint_list = [] # List of joints
+
+    j = 0
+    for link in robot.links:
+        if link.isjoint:
+            joint_list.append(j)
+        j += 1
+
+    return joint_list
+
+def get_link_transform(robot,q)->list:
     """
     Get transform for each link of the robot
 
@@ -30,7 +50,9 @@ def get_link_transform(robot,q)->bool:
     Computes SE3 object for each link of the input robot 
     """
     transform_list = [] # Tranforms array of link
-    for i in range(len(q)+1): # one is added because link 0 is the world frame
+    joint_list = get_joint_list(robot) # List of joints as link index
+
+    for i in joint_list:
         transform_list.append(robot.fkine(q,end = robot.links[i].name)) 
     return transform_list
 
@@ -47,10 +69,10 @@ def is_touch_ground(robot,q)->bool:
     :rtype: bool value
  
     """
-    T = get_link_transform(robot,q)
-    height = [T[i].A[2,3] for i in range(2,robot.n)]
+    transform_list = get_link_transform(robot,q)
+    height = [T.A[2,3] for T in transform_list]
     # print(height, T[1].A[2,3])
-    if min(height) > T[1].A[2,3]: # at position 1 is the robot base
+    if min(height) > transform_list[0].A[2,3]: # at position 0 is the robot base
         return False
     else: 
         return True
@@ -171,7 +193,7 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0),q_guess = [], e
     :type obj_pose: SE3 object
     :param relative_pose: relative pose from the end-effector to the object pose 
     :type relative_pose: SE3 object
-    :param relative_pose: relative pose from the end-effector to the object pose 
+    :param relative_pose: relative pose of the end-effector in the object pose frame 
     :type relative_pose: SE3 object
     :param q_guess: initial joint value to guess the solution, none by default
     :type q_guess: list of joints
@@ -193,8 +215,12 @@ def solve_for_valid_ik(robot,obj_pose,relative_pose = SE3(0,0,0),q_guess = [], e
 
     while not valid_solution:
         # random guess for ik_solver
-        if (not bool(q_guess)): joint_guess_random = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
-        else: joint_guess_random = q_guess
+        if (not bool(q_guess)): 
+            joint_guess_random = np.array([random.randint(-180,180)*pi/180 for _ in range(robot.n)])
+        else: 
+            joint_guess_random = list(q_guess)
+            q_guess = [] # try guessing using another value by setting q_guess to empty
+
         # Numerical inverse kinematics by default Levenberg-Marquadt optimization
         pick_joint_config = robot.ikine_LM(obj_pose*relative_pose,q0 = joint_guess_random)     
         if pick_joint_config.success:
