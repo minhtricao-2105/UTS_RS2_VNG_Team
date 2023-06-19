@@ -26,7 +26,6 @@ import roboticstoolbox as rtb
 from spatialmath import SE3
 from math import pi
 from math import degrees
-import actionlib
 import swift
 import time
 from ur3module import *
@@ -399,7 +398,7 @@ while running_ == True:
         
         arrived = True
 
-        send_action_client(arrived, path_back, goal, start_time, client)
+        send_action_client(arrived, path_back.q, goal, start_time, client)
         ## 5. HOMING - DONE---------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
     ## CODE RUNNING ROBOT - TASK IN GREEN BLOCK - DONE --------------------------------------------------------------------------------------------------------------- #
     

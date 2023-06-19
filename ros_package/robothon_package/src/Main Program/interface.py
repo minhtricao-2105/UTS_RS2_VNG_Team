@@ -12,27 +12,38 @@ background = Label(window, image=background_photo)
 background.pack()
 
 # UnderBackground:
-frame_1 = tk.Frame(window, bg="lightgrey")
+frame_1 = Canvas(window, bg="#DFEAE2")
 frame_1.place(x=0, y=200, relwidth=1, relheight=1)
 
 # LEFT FRAME:
-inner_frame = tk.Frame(window, bg="white", highlightthickness=3, highlightbackground="black")
+inner_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 
 # Create the text on that frame:
-decore_left = tk.Frame(window, bg="dark green",highlightthickness=3, highlightbackground="black")
-text_left = tk.Label(decore_left, text="ROBOT CONTROL", font=("Calibri", 16, "bold"), foreground='white',bg="dark green")
-text_left.place(relx=0.5, rely=0.5, anchor="center")
+decore_left = tk.Frame(window, bg="#358873", highlightbackground="#DFEAE2")
+text_left = tk.Label(decore_left, text="ROBOT CONTROL", font=("Calibri", 16, "bold"), foreground='white',bg="#358873")
+text_left.place(relx=0.5, rely=0.55, anchor="center")
 
 # MIDDLE FRAME:
 middle_frame = tk.Frame(window, bg="white", highlightthickness=3, highlightbackground="black")
 
+# RIGHT FRAME:
+right_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2", relief="groove")
+
+# Create the text on that frame:
+decore_right = tk.Frame(window, bg="#358873", highlightbackground="#DFEAE2")
+text_right = tk.Label(decore_right, text="COMPUTER VISION", font=("Calibri", 16, "bold"), foreground='white',bg="#358873")
+text_right.place(relx=0.5, rely=0.55, anchor="center")
 
 # Create a frame for grouping widgets
-frame = tk.Frame(window, bg ="")
+frame = tk.Frame(window, bg ="", highlightthickness=0)
 frame.place(relx=0.5, rely=0.15, anchor="center")
 
 # Add labels using normal text
-label1 = tk.Label(frame, text="AUTONOMOUS E-WASTE DETECTION AND SORTING SYSTEM", font=("Calibri", 22, "bold"), bd=2, relief="solid",foreground='green',highlightbackground="black")
+label1 = tk.Label(frame, text="AUTONOMOUS E-WASTE DETECTION AND SORTING SYSTEM", font=("Calibri", 22, "bold"), bd=2, relief="solid", foreground='green')
+label1.config(bg="#B4D6C1", padx=10, pady=10, width=50)
+label1.config(borderwidth=0, relief="raised")
+label1.config(highlightthickness=0, highlightcolor="blue")
+
 label1.pack()
 
 # Apply some formatting options to the clock label
@@ -41,32 +52,37 @@ label1.config(borderwidth=2, relief="solid", padx=10, pady=5)
 # Pack the clock label to fill the frame
 label1 .pack(fill="both", expand=True)
 
-
 # Clock Frame:
 # Create a canvas to draw the clock
+frame_3 = tk.Frame(window, bg="#B4D6C1")
 
-frame_3 = tk.Frame(window, bg="white")
+
 # Create a button to run the ROS drivers
 # Create a frame for the button
-button_frame = tk.Frame(window)
-button_frame.place(relx=0.5, rely=0.5, anchor="center")
-
-# Create a button with no background color
-# button_1 = tk.Button(button_frame, text="Run the Robot Node", command=run_robot_node, highlightbackground=button_frame.cget("bg"), fg="blue", font=("Arial", 14))
-# button_1.pack(side="left", padx=10, pady=10)
-
-# # Create a button to run the ROS drivers
-# button_2 = tk.Button(window, text="Run the Robot Node", command=run_vision_node, bg = "blue", fg = "white", font = ("Arial", 14))
-# button_2.pack(side="right", padx=30, pady=10)
+button_frame_1 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
+button_frame_2 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
+button_frame_3 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
+button_frame_4 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 
 #Clock and date here:
 
 # Create a frame for grouping widgets
 def adjust_frame(event):
     frame_2.place(x=window.winfo_width() - 180, y = 30, relwidth=0.08, relheight=0.05)
-    inner_frame.place(x=window.winfo_width()*0.0214, y=230, relwidth=0.24, relheight=0.45)
-    decore_left.place(x=window.winfo_width()*0.0214, y=230, relwidth=0.24, relheight=0.08)
-    middle_frame.place(x=window.winfo_width()*0.35714, y=230, relwidth=0.35, relheight=0.45)
+    #Left Frame:
+    inner_frame.place(x=window.winfo_width()*0.0214, y=230, relwidth=0.28, relheight=0.5)
+    decore_left.place(x=window.winfo_width()*0.0214, y=230, relwidth=0.28, relheight=0.08)
+    # #Middle Frame:
+    middle_frame.place(x=window.winfo_width()*0.35714, y=230, relwidth=0.288, relheight=0.5)
+    # Clock Frame:
+    frame_3.place(x=window.winfo_width()*0.05,y=320, relwidth=0.22, relheight=0.27)
+    #Right Frame:
+    right_frame.place(x=window.winfo_width()*0.7,y=230, relwidth=0.28, relheight=0.5)
+    decore_right.place(x=window.winfo_width()*0.7,y=230, relwidth=0.28, relheight=0.08)
+    #Button Frame:
+    button_frame_1.place(x=window.winfo_width()*0.095,y=530, relwidth=0.15, relheight=0.07)
+    button_frame_2.place(x=window.winfo_width()*0.125,y=573, relwidth=0.15, relheight=0.06)
+    button_frame_3.place(x=window.winfo_width()*0.786,y=540, relwidth=0.15, relheight=0.08)
 
 # Function to update the clock and date
 def update_time():
@@ -95,9 +111,8 @@ clock_label.config(borderwidth=2, relief="solid", padx=10, pady=5)
 # Pack the clock label to fill the frame
 clock_label.pack(fill="both", expand=True)
 
-import tkinter as tk
-
 def update_clock():
+
     global remaining_time
     remaining_time -= 0.1
 
@@ -128,12 +143,12 @@ def update_clock():
         arc_start = start_angle + i * arc_angle
         arc_end = arc_start + arc_angle - arc_gap
         canvas.create_arc(x_center - radius, y_center - radius, x_center + radius, y_center + radius,
-                          start=arc_start, extent=arc_angle - arc_gap, outline="#86B049",
+                          start=arc_start, extent=arc_angle - arc_gap, outline="#207567",
                           width=arc_width, style="arc")
 
     # Draw the text indicating the percentage
     text = f"{int(percentage)}%"
-    canvas.create_text(x_center, y_center, text=text, font=("Calibri", 40, "bold"), fill="#C8B88A")
+    canvas.create_text(x_center, y_center, text=text, font=("Calibri", 40, "bold"), fill="#DFEAE2")
 
     # Check if the time has reached 0
     if remaining_time > 0:
@@ -143,20 +158,38 @@ def update_clock():
         # Perform actions when the time is up
         print("Time's up!")
 
-# Get the input time from the user
-remaining_time = 10
+def reset_clock():
+    global remaining_time
+    remaining_time = 0.1
+    button_1.config(state="disable")
+    button_3.config(state="normal")
 
+# Define a function to disable the button after it is clicked
+def disable_button():
+    global remaining_time
+    remaining_time = 10
+    button_1.config(state="disabled")
 
+def vision_button():
+    button_1.config(state="normal")
+    button_3.config(state="disabled")
 
-canvas = tk.Canvas(frame_3, width=300, height=300)
+canvas = tk.Canvas(frame_3, width=300, height=300,bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 canvas.pack()
 
-# Start the clock update
-update_clock()
+# Button Declaration here:
+button_1 = tk.Button(button_frame_1, text="START MISSION", command=lambda: [disable_button(), update_clock(),run_robot_node()], bg="#207567", fg="#DFEAE2",
+                     font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5, state="disabled")
 
-# Start the Tkinter event loop
-window.mainloop()
+button_2 = tk.Button(button_frame_2, text="Reset", command=lambda: [reset_clock(), close_terminal()], bg="#DD2C00", fg="white", font=("Calibri", 12, "bold"), borderwidth=2, relief="raised", padx=10, pady=10)
 
+button_3 = tk.Button(button_frame_3, text="RUN VISION", command=lambda: [vision_button(), run_vision_node()], bg="#207567", fg="#DFEAE2",
+                     font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5)
+
+# Pack the button
+button_1.pack(side="left", padx=10, pady=10)
+button_2.pack(side="left", padx=10, pady=10)
+button_3.pack(side="left", padx=10, pady=10)
 
 # Start the Tkinter event loop
 window.mainloop()

@@ -17,15 +17,17 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-# import imutils
+import imutils
 from colorLibrary import*
 from ur3module import *
-# import moveit_commander
-# import moveit_msgs.msg
-# from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-# from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-# from gripperFunction import*
+import moveit_commander
+import moveit_msgs.msg
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+from gripperFunction import*
 import time
+import actionlib
+
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
 #   @param scale The scale factor to resize the frame
@@ -240,7 +242,7 @@ def move_to_pin(robot, q_curr, global_position, offset_z = 0.175, turn = 0):
     path = rtb.jtraj(q_curr, q_goal,30)
     return path
 
-def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
+def move_up_down(robot, q_curr, dir = 'up', lift = 0.03,  q_guess_2 = [1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491]):
     
     # lift = 0.03 #default lifting distance
     if dir == 'up': pass
@@ -250,7 +252,7 @@ def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
         print("ERROR DIRECTION INPUT!")
         return []
     
-    q_guess_2 = [ 1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491] #guess value for IK solver
+    # q_guess_2 = [ 1.32582823, -1.48473735,  1.1266249,  -1.23659264, -1.53197561,  6.08007491] #guess value for IK solver
     q_lifts = []
     step_num = 4
     step_lift = lift/(step_num-1)
@@ -260,7 +262,8 @@ def move_up_down(robot, q_curr, dir = 'up', lift = 0.03):
         if i == 0 : 
             q_lifts.append(q_curr)
             continue
-        pose_lift = robot.fkine(q_curr)*SE3(-(step_lift*i),0,0)
+        # pose_lift = robot.fkine(q_curr)*SE3(-(step_lift*i),0,0)
+        pose_lift = SE3(0,0,step_lift*i) * robot.fkine(q_curr)
         q_lift = solve_for_valid_ik(robot=robot, obj_pose=pose_lift, q_guess = q_guess_2, elbow_up_request = False, shoulder_left_request= False)
         q_lift[-1] = q_lift[-1] + 2*pi
         q_lifts.append(q_lift)
