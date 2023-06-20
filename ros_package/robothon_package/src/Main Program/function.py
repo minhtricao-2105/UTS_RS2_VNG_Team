@@ -96,6 +96,33 @@ def crop(img,factor):
 
     return black
 
+def crop_2(img,factor):
+    # Get the dimensions of the image
+    height, width = img.shape[:2]
+
+    # Calculate the dimensions of the rectangle to crop
+    w = int(width / factor*1.5)
+    h = int(height / factor*1.25)
+
+
+    x = (width - w) // 2
+    y = (height - h) // 2
+
+    # Crop the image
+    cropped = img[y:y+h, x:x+w]
+
+    # Create a black image with the same size as the original image
+    black = np.zeros((height, width), dtype=np.uint8)
+
+    # Calculate the dimensions to paste the cropped image onto the black image
+    x_offset = (width - w) // 2
+    y_offset = (height - h) // 2
+
+    # Paste the cropped image onto the black image
+    black[y_offset:y_offset+h, x_offset:x_offset+w] = cropped
+
+    return black
+
 ##  @brief Applies Canny edge detection to the input image
 #   @param img Input image to be processed
 #   @return The processed image with Canny edge detection applied

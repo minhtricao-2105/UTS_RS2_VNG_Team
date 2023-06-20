@@ -1,5 +1,26 @@
 from interfaceFunction import*
 
+### Belong to ROS here ###
+
+def image_callback(msg):
+    bridge = CvBridge()
+    cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
+    pil_image = Image.fromarray(cv.cvtColor(cv_image, cv.COLOR_BGR2RGB))
+    resized_image = pil_image.resize((400, 250))
+    tk_image = ImageTk.PhotoImage(resized_image)
+    # Create the image label widget
+    image_label.configure(image=tk_image)
+    image_label.image = tk_image  # Keep a reference to avoid garbage collection
+
+def clear_image():
+    image_label.configure(image=None)
+    image_label.image = None
+
+rospy.init_node("interface_node")
+sub_1 = rospy.Subscriber('Image_Vision', SensorImage, image_callback)
+
+### Belong to ROS here ###
+
 # Create the Tkinter application window
 window = tk.Tk()
 window.title("Autonomous E-Waste Sorting System")
@@ -56,6 +77,10 @@ label1 .pack(fill="both", expand=True)
 # Create a canvas to draw the clock
 frame_3 = tk.Frame(window, bg="#B4D6C1")
 
+# create a frame to display figure:
+figure_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2", highlightthickness=0,highlightcolor="#DFEAE2")
+image_label = tk.Label(figure_frame, bg="#B4D6C1")
+image_label.pack()
 
 # Create a button to run the ROS drivers
 # Create a frame for the button
@@ -82,7 +107,9 @@ def adjust_frame(event):
     #Button Frame:
     button_frame_1.place(x=window.winfo_width()*0.095,y=530, relwidth=0.15, relheight=0.07)
     button_frame_2.place(x=window.winfo_width()*0.125,y=573, relwidth=0.15, relheight=0.06)
-    button_frame_3.place(x=window.winfo_width()*0.786,y=540, relwidth=0.15, relheight=0.08)
+    button_frame_3.place(x=window.winfo_width()*0.786,y=540, relwidth=0.15, relheight=0.07)
+    #Figure Frame:
+    figure_frame.place(x=window.winfo_width()*0.7,y=310, relwidth=0.28, relheight=0.275)
 
 # Function to update the clock and date
 def update_time():
@@ -181,7 +208,7 @@ canvas.pack()
 button_1 = tk.Button(button_frame_1, text="START MISSION", command=lambda: [disable_button(), update_clock(),run_robot_node()], bg="#207567", fg="#DFEAE2",
                      font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5, state="disabled")
 
-button_2 = tk.Button(button_frame_2, text="Reset", command=lambda: [reset_clock(), close_terminal()], bg="#DD2C00", fg="white", font=("Calibri", 12, "bold"), borderwidth=2, relief="raised", padx=10, pady=10)
+button_2 = tk.Button(button_frame_2, text="Reset", command=lambda: [reset_clock(), close_terminal(), clear_image()], bg="#DD2C00", fg="white", font=("Calibri", 12, "bold"), borderwidth=2, relief="raised", padx=10, pady=10)
 
 button_3 = tk.Button(button_frame_3, text="RUN VISION", command=lambda: [vision_button(), run_vision_node()], bg="#207567", fg="#DFEAE2",
                      font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5)

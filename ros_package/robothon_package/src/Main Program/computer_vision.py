@@ -35,6 +35,7 @@ from function import*
 from colorLibrary import*
 import imutils
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as SensorImage  # Importing the Image class from sensor_msgs.msg
 from std_msgs.msg import String
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int32
@@ -99,6 +100,9 @@ def batteries_callback(data):
         # Detect the container to store the batteries first:
         colour_detection()
 
+        # Calculate how many:
+        calculate_numBa()
+
         # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
 
@@ -159,6 +163,58 @@ def crop(img,factor):
     black[y_offset:y_offset+h, x_offset:x_offset+w] = cropped
 
     return black
+
+def calculate_numBa():
+    global image
+    grey = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+
+    grey = cv.GaussianBlur(grey, (5,5),1)
+
+    # Threshold the difference image to create a binary mask
+    thresh = cv.threshold(grey, 100, 150, cv.THRESH_BINARY)[1]
+
+    contours = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours = imutils.grab_contours(contours)
+
+    new_contours = list()
+    min_x = 0  # Minimum x-coordinate limit
+    max_x = 200  # Maximum x-coordinate limit
+    min_y = 100  # Minimum y-coordinate limit
+    max_y = 400  # Maximum y-coordinate limit
+    for contour in contours:
+        if cv.contourArea(contour) > 50:
+            filtered_points = []
+            for point in contour:
+                if len(point) == 1:
+                    x, y = point[0]  # Unpack the point if it contains a single value
+                else:
+                    x, y = point  # Use the point directly if it contains two values
+                if min_x <= x <= max_x and min_y <= y <= max_y:
+                    filtered_points.append(point)
+            if filtered_points:
+                new_contours.append(np.array(filtered_points))
+
+    if len(new_contours) == 1:
+        print("No Pin Found")
+    elif len(filtered_points) > 65 or len(new_contours) > 3:
+        print("There are 2 pins")
+    else:
+        print("There is 1 pin")
+        filter = []
+        for i in new_contours:
+            if cv.contourArea(i) < 100:
+                filter.append(i)
+
+
+     # Create a copy of the original image to draw contours on
+    image_with_contours = image.copy()
+
+    # Draw contours on the image
+    cv.drawContours(image_with_contours, filter, -1, (0, 255, 0), 2)
+    
+    cv.imshow('CV Part', image_with_contours)
+
+    
 
 ## @brief Compare two images using Canny edge detection and contour analysis
 #
@@ -270,9 +326,14 @@ def perform_computervision():
             print("AAA Batery at position:",x,y)
             cv.putText(image_1, f"AAA: ({x}, {y})", (x + 20, y + 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 128), 3)
 
+
     rospy.loginfo('[UPDATE]: Complete the Vision Part')
 
-    cv.imshow('CV Part', image_1)
+    # cv.imshow('CV Part', image_1)
+    
+    ros_image = bridge.cv2_to_imgmsg(image_1, encoding="bgr8")
+
+    publisher_4.publish(ros_image)
 
     cv.waitKey(0)
 
@@ -351,6 +412,9 @@ rospy.init_node('Realsense')
 
 subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
+move_home = 1
+running_ = True
+
 while move_home != 1:
     rospy.loginfo("[WARNING]: Waiting for the robot to move home!")
     if move_home == 1:
@@ -372,6 +436,9 @@ while running_ == True:
 
     # A third publisher will be establisted to transmit data for colour detection:
     publisher_3 = rospy.Publisher('Color_data', Float32MultiArray, queue_size = 20)
+
+    # Publish the image to another node:
+    publisher_4 = rospy.Publisher('Image_Vision',SensorImage, queue_size=10)
 
     input("[INPUT]: Press any key to capture a second image\n")
 

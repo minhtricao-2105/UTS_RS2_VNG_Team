@@ -2,13 +2,11 @@ import os,sys,rospy,datetime,subprocess
 import tkinter as tk
 import cv2 as cv
 
-from tkinter import Tk, Label, ttk, Canvas
+from tkinter import Label, ttk, Canvas
 from cv_bridge import CvBridge
-from PIL import Image
 from ttkthemes import ThemedStyle
-from sensor_msgs.msg import Image
-from PIL import Image as PILImage
-
+from sensor_msgs.msg import Image as SensorImage  # Importing the Image class from sensor_msgs.msg
+from PIL import ImageTk, Image
 
 # Function to add logo:
 def add_logo(window, location):
