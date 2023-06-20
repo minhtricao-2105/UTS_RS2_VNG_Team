@@ -101,7 +101,7 @@ def batteries_callback(data):
         colour_detection()
 
         # Calculate how many:
-        calculate_numBa()
+        # calculate_numBa()
 
         # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
@@ -412,8 +412,8 @@ rospy.init_node('Realsense')
 
 subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
-move_home = 1
-running_ = True
+# move_home = 1
+# running_ = True
 
 while move_home != 1:
     rospy.loginfo("[WARNING]: Waiting for the robot to move home!")

@@ -200,9 +200,11 @@ move_simulation_robot(robot = robot, path= pick1_path1.q, env= env, dt = 0.05, g
 arrived = True
 send_action_client(arrived, pick1_path1.q, goal, start_time, client, speed=2)
 
+rospy.sleep(0.5)
+
 while not rospy.is_shutdown():
     pub.publish(closeGripper(400))
-    rospy.sleep(0.25)
+    rospy.sleep(0.5)
     break
 
 pick1_way3 = [56.74, -86.43, 46.07, -51.44, -88.32, 234.33]
@@ -237,7 +239,7 @@ for q in path_droppin2.q:
 
 move_simulation_robot(robot = robot, path= path_droppin_bat1, env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
 arrived = True
-send_action_client(arrived, path_droppin_bat1, goal, start_time, client, speed=1)
+send_action_client(arrived, path_droppin_bat1, goal, start_time, client, speed=3)
 
 while not rospy.is_shutdown():
     pub.publish(moveGripperToPosition(400, 280))
@@ -259,34 +261,59 @@ arrived = True
 send_action_client(arrived, pick2_path1.q, goal, start_time, client, speed=3)
 
 while not rospy.is_shutdown():
-    pub.publish(closeGripper(300))
+    pub.publish(closeGripper(200))
     rospy.sleep(0.25)
     break
 
-pick2_way3 = [37.44, -81.68, 42.45, -50.46, -89.29, 41.75 + 360]
-pick2_way3 = [math.radians(joint_home_degree) for joint_home_degree in pick2_way3]
+# pick2_way3 = [37.44, -81.68, 42.45, -50.46, -89.29, 41.75 + 360]
+# pick2_way3 = [math.radians(joint_home_degree) for joint_home_degree in pick2_way3]
 
-path_up_pickway2 = move_up_down(robot, pick2_path1.q[-1], lift = 0.014) 
-path_to_pickway2 = rtb.jtraj(path_up_pickway2.q[-1], pick2_way3, 30)
+# path_up_pickway2 = move_up_down(robot, pick2_path1.q[-1], lift = 0.014) 
+# path_to_pickway2 = rtb.jtraj(path_up_pickway2.q[-1], pick2_way3, 30)
 
-path_pickway2 = []
-for q in path_up_pickway2.q:
-    path_pickway2.append(q)
+# path_pickway2 = [][78.65, -96.40, 64.17, -58.12, -88.22, 252.57]
+# for q in path_up_pickway2.q:
+#     path_pickway2.append(q)
 
-for q in path_to_pickway2.q:
-    path_pickway2.append(q)
+# for q in path_to_pickway2.q:
+#     path_pickway2.append(q)
 
 
-move_simulation_robot(robot = robot, path= path_pickway2, env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+# move_simulation_robot(robot = robot, path= path_pickway2, env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+# arrived = True
+# send_action_client(arrived, path_pickway2, goal, start_time, client, speed=5)
+
+# ee_transf = SE3()
+drag_pose = SE3(-0.06, 0, 0.005) * robot.fkine(pick2_way2)
+q_sol_1 = solve_for_valid_ik(robot= robot, obj_pose = drag_pose, q_guess = pick2_way2)
+q_sol_1[-1] = pick2_way2[-1]
+
+down_pose = SE3(0.008, 0, -0.008) * robot.fkine(q_sol_1)
+q_sol_2 = solve_for_valid_ik(robot= robot, obj_pose = down_pose, q_guess = list(q_sol_1))
+q_sol_2[-1] = q_sol_1[-1]
+
+# drag_back_pose = SE3(0.01, 0, 0) * robot.fkine(q_sol_1)
+# q_sol_2 = solve_for_valid_ik(robot= robot, obj_pose = drag_back_pose, q_guess = list(q_sol_1))
+# q_sol_2[-1] = q_sol_1[-1]
+
+final_ee_pose = SE3(0.055, 0, 0.06)*robot.fkine(q_sol_2)
+q_sol_3 = solve_for_valid_ik(robot= robot, obj_pose = final_ee_pose, q_guess = list(q_sol_2))
+q_sol_3[-1] = q_sol_2[-1]
+
+pickford = rtb.mstraj(viapoints=np.array([pick2_way2, q_sol_1, q_sol_2, q_sol_3]),dt=0.01,tacc=0.05,qdmax = pi)
+
+move_simulation_robot(robot = robot, path= pickford.q, env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
 arrived = True
-send_action_client(arrived, path_pickway2, goal, start_time, client, speed=5)
+send_action_client(arrived, pickford.q, goal, start_time, client, speed=5)
 
-# Move to drop battery 2 - REMEMBER TO CHANGE
-q_droppin_1 = [78.65, -96.40, 64.17, -58.12, -88.22, 252.57] 
+
+## DROP 2
+# Move to drop battery
+q_droppin_1 = [70.67, -97.03, 61.32, -54.39, -88.19, 242.99]
 q_droppin_1 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_1]
 
-path_droppin1 = rtb.jtraj(path_pickway2[-1], q_droppin_1, 30)
-path_droppin2 = move_up_down(robot, path_droppin1.q[-1], 'down', lift = 0.02)
+path_droppin1 = rtb.jtraj(pickford.q[-1], q_droppin_1, 30)
+path_droppin2 = move_up_down(robot, path_droppin1.q[-1], 'down', lift = 0.04)
 
 path_droppin_bat1 = []
 for q in path_droppin1.q:
@@ -296,12 +323,13 @@ for q in path_droppin2.q:
 
 move_simulation_robot(robot = robot, path= path_droppin_bat1, env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
 arrived = True
-send_action_client(arrived, path_droppin_bat1, goal, start_time, client, speed=1)
+send_action_client(arrived, path_droppin_bat1, goal, start_time, client, speed=3)
 
 while not rospy.is_shutdown():
     pub.publish(moveGripperToPosition(400, 280))
     rospy.sleep(0.25)
     break
+
 
 # env.hold()
 rospy.spin()
