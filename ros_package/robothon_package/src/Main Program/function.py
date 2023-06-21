@@ -437,3 +437,26 @@ def sort_battery(location_array):
             new.append(k)
 
     return new
+
+def combine_trajectory(q1, q2):
+    
+    total_q = []
+
+    for q in q1.q:
+        total_q.append(q)
+    for q in q2.q:
+        total_q.append(q)
+
+    return total_q
+
+def combine_3_trajectory(q1, q2, q3):
+    total_q = []
+
+    for q in q1.q:
+        total_q.append(q)
+    for q in q2.q:
+        total_q.append(q)
+    for q in q3.q:
+        total_q.append(q)
+
+    return total_q

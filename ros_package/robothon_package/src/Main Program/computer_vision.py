@@ -101,7 +101,7 @@ def batteries_callback(data):
         colour_detection()
 
         # Calculate how many:
-        # calculate_numBa()
+        calculate_numBa()
 
         # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
@@ -200,17 +200,13 @@ def calculate_numBa():
         print("There are 2 pins")
     else:
         print("There is 1 pin")
-        filter = []
         for i in new_contours:
-            if cv.contourArea(i) < 100:
-                filter.append(i)
-
 
      # Create a copy of the original image to draw contours on
     image_with_contours = image.copy()
 
     # Draw contours on the image
-    cv.drawContours(image_with_contours, filter, -1, (0, 255, 0), 2)
+    cv.drawContours(image_with_contours,  new_contours, -1, (0, 255, 0), 2)
     
     cv.imshow('CV Part', image_with_contours)
 
@@ -412,8 +408,8 @@ rospy.init_node('Realsense')
 
 subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
-# move_home = 1
-# running_ = True
+move_home = 1
+running_ = True
 
 while move_home != 1:
     rospy.loginfo("[WARNING]: Waiting for the robot to move home!")

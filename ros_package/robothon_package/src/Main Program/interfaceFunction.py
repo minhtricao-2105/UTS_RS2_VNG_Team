@@ -1,6 +1,7 @@
 import os,sys,rospy,datetime,subprocess
 import tkinter as tk
 import cv2 as cv
+import pyautogui
 
 from tkinter import Label, ttk, Canvas
 from cv_bridge import CvBridge
