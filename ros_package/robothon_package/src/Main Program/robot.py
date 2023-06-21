@@ -223,6 +223,10 @@ while running_ == True:
     # Coin
     coin = collisionObj.Cylinder(radius = 0.01, length= 0.005, pose = SE3(0, 0, 0), color = [0.3,0.3,0.1,1])
     TCC = SE3(0.23,0,0) * SE3.Rx(pi/2) #coin pose in ee frame
+    coin.T = np.array([[-0.01042, -0.9999, 0.01244, 0.2231],
+                   [0.003293, 0.0124, 0.9999, 0.2865],
+                   [-0.9999, 0.01046, 0.003163, 0.34],
+                   [0, 0, 0, 1]]) @ TCC.A
     
     # Set initial position
     q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
@@ -450,27 +454,8 @@ while running_ == True:
     
     #### 3.1 MOVE TO ROBOT TO THE POSITION BEFORE FLIPPING THE BATTERY 1:
 
-    flip_coin_data = []
-
-    # Data Belong to battery 1:
-    battery_1_position = [45.52, -68.18, 27.30, -47.27, -87.16, 315.94]
-    battery_1_position = [math.radians(joint_home_degree) for joint_home_degree in battery_1_position]
-
-    # Data Belong to battery 2:
-    battery_2_position = [56.25, -73.65, 35.65, -53.94, -89.34, 324.05]
-    battery_2_position = [math.radians(joint_home_degree) for joint_home_degree in battery_2_position]
-
-    # Store data:
-    flip_coin_data.append(battery_1_position)
-    flip_coin_data.append(battery_2_position)
-
-    # Rotation data:
-    rot_coin = []
-    rot_coin.append([-0.002,0,0.0043,14])
-    rot_coin.append([0.002,0,0.0043,-14])
-
                 # TEST ADDING BATTERY INFO AND DROPPING INFO
-    is_battery_there = '12' # '1': only battery 1,'2': only battery 1, '12': both batteries 
+    is_battery_there = '12' # '1': only battery 1,'2': only battery 2, '12': both batteries 
 
     # Data belong to battery 1:
     battery_1_position = [45.52, -68.18, 27.30, -47.27, -87.16, 315.94]
@@ -517,7 +502,7 @@ while running_ == True:
     path_droppin_bat1 = combine_trajectories([path1_droppin1, path1_droppin2])
 
     #-> Combine route for battery 1
-    path1_instruction ={'picking': pick1_path1, 'taking': pick1_path2, 'dropping': path_droppin_bat1}
+    path1_instruction ={'picking': pick1_path1.q, 'taking': pick1_path2, 'dropping': path_droppin_bat1}
 
     # ROUTE FOR BATTERY 2:
     #-> From current position to picking position
@@ -531,7 +516,7 @@ while running_ == True:
     if is_battery_there == '2': # if only battery 2 is put in, taking from the coin drop position
         q_pick2_start = path_drop.q[-1]
 
-    pick2_path1 = rtb.mstraj(viapoints=np.array([q_pick2_start, pick2_way1, pick2_way2]),dt=0.01,tacc=0.05,qdmax = pi)
+    pick2_path1 = rtb.mstraj(viapoints=np.array([q_pick2_start, joint_home_radian, pick2_way1, pick2_way2]),dt=0.01,tacc=0.05,qdmax = pi)
 
     #-> From picking position taking out
     drag_pose = SE3(-0.06, 0, 0.005) * robot.fkine(pick2_way2)
@@ -549,13 +534,13 @@ while running_ == True:
     pick2_path2 = rtb.mstraj(viapoints=np.array([pick2_way2, q_sol_1, q_sol_2, q_sol_3]),dt=0.01,tacc=0.05,qdmax = pi) 
     
     #->  To dropping position 2
-    path2_droppin1 = rtb.jtraj(pick2_path2[-1], q_droppin_2, 30)
-    path2_droppin2 = move_up_down(robot, path1_droppin1.q[-1], 'down', lift = 0.04)
+    path2_droppin1 = rtb.jtraj(pick2_path2.q[-1], q_droppin_2, 30)
+    path2_droppin2 = move_up_down(robot, path2_droppin1.q[-1], 'down', lift = 0.04)
 
     path_droppin_bat2 = combine_trajectories([path2_droppin1, path2_droppin2])
 
      #-> Combine route for battery 2
-    path2_instruction ={'picking': pick2_path1, 'taking': pick2_path2, 'dropping': path_droppin_bat2}
+    path2_instruction ={'picking': pick2_path1.q, 'taking': pick2_path2.q, 'dropping': path_droppin_bat2}
 
     # LISTS FOR HOLDING DATA
     flip_coin_data = []
@@ -658,7 +643,7 @@ while running_ == True:
         # Move to drop battery
         move_simulation_robot(robot = robot, path= instruction['dropping'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         arrived = True
-        send_action_client(arrived, path_droppin_bat1, goal, start_time, client, speed=3)
+        send_action_client(arrived, instruction['dropping'], goal, start_time, client, speed=3)
 
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 280))
