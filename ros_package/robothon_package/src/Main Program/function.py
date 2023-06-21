@@ -470,4 +470,150 @@ def combine_trajectories(qlist):
     return total_q
        
             
+
+def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_there = '12'):
+    # '1': only battery 1,'2': only battery 2, '12': both batteries
     
+    TCC = T_coin
+
+    # Data belong to battery 1:
+    battery_1_position = [45.52, -68.18, 27.30, -47.27, -87.16, 315.94]
+    battery_1_position = [math.radians(joint_home_degree) for joint_home_degree in battery_1_position]
+
+    # Data belong to battery 2:
+    battery_2_position = [56.25, -73.65, 35.65, -53.94, -89.34, 324.05]
+    battery_2_position = [math.radians(joint_home_degree) for joint_home_degree in battery_2_position]
+
+    # Dropping data
+    #-> For coin
+    q_drop = [99.23, -75.10, 45.56, -66.99, -85.81, 351.35]
+    q_drop_radian = [math.radians(joint_home_degree) for joint_home_degree in q_drop]
+
+    #-> For batteries
+    q_droppin_1 = [78.65, -96.40, 64.17, -58.12, -88.22, 252.57]
+    q_droppin_1 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_1]
+    q_droppin_2 = [70.67, -97.03, 61.32, -54.39, -88.19, 242.99]
+    q_droppin_2 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_2]    
+
+
+    # ROUTE FOR MOVING BATTERY 1:
+    #-> From coin position to picking position
+    pick1_way1 = [36.05, -63.35, 24.29, -48.96, -86.55, 217.81]
+    pick1_way1 = [math.radians(joint_home_degree) for joint_home_degree in pick1_way1]
+    pick1_way2 = [26.63, -49.31, 19.13, -27.04, -68.63, 203.57]
+    pick1_way2 = [math.radians(joint_home_degree) for joint_home_degree in pick1_way2]
+
+    pick1_path1 = rtb.mstraj(viapoints=np.array([q_drop_radian, pick1_way1, pick1_way2]),dt=0.01,tacc=0.05,qdmax = pi)
+
+    #-> From picking position taking out
+    pick1_way3 = [56.74, -86.43, 46.07, -51.44, -88.32, 234.33]
+    pick1_way3 = [math.radians(joint_home_degree) for joint_home_degree in pick1_way3]
+
+    path_up_pickway1 = move_up_down(robot, pick1_path1.q[-1], lift = 0.005) 
+    path_to_pickway1 = rtb.jtraj(path_up_pickway1.q[-1], pick1_way3, 30)
+
+    pick1_path2 = combine_trajectories([path_up_pickway1, path_to_pickway1])
+
+    #-> To dropping position 1
+    path1_droppin1 = rtb.jtraj(pick1_path2[-1], q_droppin_1, 30)
+    path1_droppin2 = move_up_down(robot, path1_droppin1.q[-1], 'down', lift = 0.02)
+
+    path_droppin_bat1 = combine_trajectories([path1_droppin1, path1_droppin2])
+
+    #-> Combine route for battery 1
+    path1_instruction ={'picking': pick1_path1.q, 'taking': pick1_path2, 'dropping': path_droppin_bat1}
+
+    # ROUTE FOR MOVING BATTERY 2:
+    #-> From current position to picking position
+    pick2_way1 = [94.24, -79.7, 61.95, -74.67, -118.79, 84.73 + 360]
+    pick2_way1 = [math.radians(joint_home_degree) for joint_home_degree in pick2_way1]
+
+    pick2_way2 = [82.72, -69.40, 56.97, -72.54, -120.00, 82.96 + 360]
+    pick2_way2 = [math.radians(joint_home_degree) for joint_home_degree in pick2_way2]
+
+    q_pick2_start = path_droppin_bat1[-1] # default if is_batery_there == '12' or '1'
+    if is_battery_there == '2': # if only battery 2 is put in, taking from the coin drop position
+        q_pick2_start = q_drop_radian
+
+    pick2_path1 = rtb.mstraj(viapoints=np.array([q_pick2_start, joint_home_radian, pick2_way1, pick2_way2]),dt=0.01,tacc=0.05,qdmax = pi)
+
+    #-> From picking position taking out
+    drag_pose = SE3(-0.06, 0, 0.005) * robot.fkine(pick2_way2)
+    q_sol_1 = solve_for_valid_ik(robot= robot, obj_pose = drag_pose, q_guess = pick2_way2)
+    q_sol_1[-1] = pick2_way2[-1]
+
+    down_pose = SE3(0.008, 0, -0.008) * robot.fkine(q_sol_1)
+    q_sol_2 = solve_for_valid_ik(robot= robot, obj_pose = down_pose, q_guess = list(q_sol_1))
+    q_sol_2[-1] = q_sol_1[-1]
+
+    final_ee_pose = SE3(0.055, 0, 0.06)*robot.fkine(q_sol_2)
+    q_sol_3 = solve_for_valid_ik(robot= robot, obj_pose = final_ee_pose, q_guess = list(q_sol_2))
+    q_sol_3[-1] = q_sol_2[-1]
+
+    pick2_path2 = rtb.mstraj(viapoints=np.array([pick2_way2, q_sol_1, q_sol_2, q_sol_3]),dt=0.01,tacc=0.05,qdmax = pi) 
+
+    #->  To dropping position 2
+    path2_droppin1 = rtb.jtraj(pick2_path2.q[-1], q_droppin_2, 30)
+    path2_droppin2 = move_up_down(robot, path2_droppin1.q[-1], 'down', lift = 0.04)
+
+    path_droppin_bat2 = combine_trajectories([path2_droppin1, path2_droppin2])
+
+    #-> Combine route for battery 2
+    path2_instruction ={'picking': pick2_path1.q, 'taking': pick2_path2.q, 'dropping': path_droppin_bat2}
+
+    # LISTS FOR HOLDING DATA
+    flip_coin_data = []
+    rot_coin = []
+    path_instruction = []
+
+    if is_battery_there == '1': # if only battery 1 is put in 
+        flip_coin_data.append(battery_1_position)
+        rot_coin.append([-0.002,0,0.0043,14])
+        path_instruction.append(path1_instruction)
+
+    if is_battery_there == '2': # if only battery 2 is put in
+        flip_coin_data.append(battery_2_position)
+        rot_coin.append([0.002,0,0.0043,-14])
+        path_instruction.append(path2_instruction)
+
+    if is_battery_there == '12': # if both batteries are put in
+        flip_coin_data.append(battery_1_position)
+        flip_coin_data.append(battery_2_position)
+        rot_coin.append([-0.002,0,0.0043,14])
+        rot_coin.append([0.002,0,0.0043,-14])
+        path_instruction.append(path1_instruction)
+        path_instruction.append(path2_instruction)
+
+    # ROUTE FOR FLICKING BATTERY:
+    flick_instruction = []
+    path_flick_instruction = {}
+
+    for i in range(len(flip_coin_data)):
+        q_ini = lift_coin_up
+        if i == 1:  q_ini = flick_instruction[0]['flick'][-1]
+
+        #-> From current position to above battery 
+        battery_position = flip_coin_data[i]
+        path_to_battery = rtb.jtraj(q_ini, battery_position, 30) 
+        path_down_battery = move_up_down(robot, path_to_battery.q[-1], 'down', lift = 0.05)
+        
+        path_flick_instruction['reach'] = combine_trajectories([path_to_battery, path_down_battery])
+
+        ## Start flipping the battery
+        q_start = list(path_down_battery.q[-1])
+        coin_T = robot.fkine(path_down_battery.q[-1]) * TCC
+        coin_desired_T = transl(rot_coin[i][0],0,0.0043) @ coin_T.A @ troty(rot_coin[i][3]*pi/180) # apply lifting and rotation
+        
+        q_coin_end = solve_for_valid_ik(robot=robot, obj_pose= SE3(coin_desired_T), relative_pose = TCC.inv(), q_guess = q_start)
+        q_coin_end[-1] = q_start[-1]
+
+        # Create a trajectory to flip the battery
+        path_coin_rot = rtb.jtraj(q_start, q_coin_end, 20)
+        path_coin_up = rtb.jtraj(path_coin_rot.q[-1], battery_position, 20)
+        
+        path_flick_instruction['flick'] = combine_trajectories([path_coin_rot, path_coin_up])
+        
+        # Add instruction to list of instruction
+        flick_instruction.append(path_flick_instruction.copy())
+
+    return flick_instruction, path_instruction
