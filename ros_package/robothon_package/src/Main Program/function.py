@@ -17,16 +17,16 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-import imutils
+# import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
-import moveit_msgs.msg
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-from gripperFunction import*
+# import moveit_commander
+# import moveit_msgs.msg
+# from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+# from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+# from gripperFunction import*
 import time
-import actionlib
+# import actionlib
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
@@ -451,7 +451,7 @@ def combine_trajectory(q1, q2):
 
 def combine_3_trajectory(q1, q2, q3):
     total_q = []
-
+    
     for q in q1.q:
         total_q.append(q)
     for q in q2.q:
@@ -460,3 +460,14 @@ def combine_3_trajectory(q1, q2, q3):
         total_q.append(q)
 
     return total_q
+
+def combine_trajectories(qlist):
+    total_q = []
+
+    for trajectory in qlist:
+       for q in trajectory.q:
+            total_q.append(q)
+    return total_q
+       
+            
+    
