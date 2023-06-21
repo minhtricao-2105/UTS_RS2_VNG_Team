@@ -560,7 +560,7 @@ while running_ == True:
     if is_battery_there == '12': # if both batteries are put in
         flip_coin_data.append(battery_1_position)
         flip_coin_data.append(battery_2_position)
-        rot_coin.append([0.002,0,0.0043,-14])
+        rot_coin.append([-0.002,0,0.0043,14])
         rot_coin.append([0.002,0,0.0043,-14])
         path_instruction.append(path1_instruction)
         path_instruction.append(path2_instruction)
