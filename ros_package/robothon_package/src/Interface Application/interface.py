@@ -38,67 +38,66 @@ window = tk.Tk()
 window.title("Autonomous E-Waste Sorting System")
 window.geometry("1400x800")
 
-# Background here:
+### 1. Background here:
 background = tk.Frame(window, bg = "#4E9C81")
 text_frame = tk.Frame(window, bg = "#4E9C81")
 text_mid = tk.Label(text_frame, text="AUTONOMOUS DETECTING AND SORTING E-WASTE SYSTEM", font=("Calibri", 24, "bold"), foreground='white',bg="#4E9C81")
 text_mid.place(relx=0.5, rely=0.55, anchor="center")
 
-# Menu frame:
+### 2. Menu frame:
 menu_frame = tk.Frame(window, bg = "#207567")
 
-# Create a menu bar
-menu_bar = tk.Menu(window)
+#### 2.1 Button Menu Frame:
+button_menu_1_frame = Canvas(window, bg="#207567", borderwidth=0, highlightthickness=0)
+button_menu_2_frame = Canvas(window, bg="#207567", borderwidth=0, highlightthickness=0)
+button_menu_3_frame = Canvas(window, bg="#207567", borderwidth=0, highlightthickness=0)
 
 # UnderBackground:
 frame_1 = tk.Frame(window, bg="#DFEAE2")
 
-#button Frame:
-frame_2 = tk.Frame(window, bg="#DFEAE2")
-# LEFT FRAME:
-inner_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 
-# Create the text on that frame:
+### 3. CLOCK FRAME:
+frame_2 = tk.Frame(window, bg="#207567")
+
+### 4. LEFT FRAME:
+inner_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 decore_left = tk.Frame(window, bg="#207567", highlightbackground="#207567")
 text_left = tk.Label(decore_left, text="ROBOT CONTROL", font=("Calibri", 16, "bold"), foreground='white',bg="#207567")
 text_left.place(relx=0.5, rely=0.55, anchor="center")
 
-# MIDDLE FRAME:
+### 5. MIDDLE FRAME:
 middle_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 decore_mid = tk.Frame(window, bg="#207567", highlightbackground="#DFEAE2")
 text_mid = tk.Label(decore_mid, text="ROBOT SIMULATION", font=("Calibri", 16, "bold"), foreground='white',bg="#207567")
 text_mid.place(relx=0.5, rely=0.55, anchor="center")
 
-# RIGHT FRAME:
+### 6. RIGHT FRAME:
 right_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2", relief="groove")
-
-# Create the text on that frame:
 decore_right = tk.Frame(window, bg="#207567", highlightbackground="#DFEAE2")
 text_right = tk.Label(decore_right, text="COMPUTER VISION", font=("Calibri", 16, "bold"), foreground='white',bg="#207567")
 text_right.place(relx=0.5, rely=0.55, anchor="center")
 
-# Clock Frame:
-# Create a canvas to draw the clock
+### 7. CLOCK FRAME:
 frame_3 = tk.Frame(window, bg="#B4D6C1")
 
-# create a frame to display figure:
+### 8. Image Frame to display figure from Vision Node:
 figure_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2", highlightthickness=0,highlightcolor="#DFEAE2")
 image_label = tk.Label(figure_frame, bg="#B4D6C1")
 image_label.pack()
 
-# Create a Frame to display the motion of the robot:
+### 9. CAPTURE FRAME:
 capture_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 image_capture = tk.Label(capture_frame, bg="#B4D6C1", highlightbackground="#DFEAE2")
 image_capture.pack()
 
-# Create a button to run the ROS drivers
-# Create a frame for the button
+### 10. BUTTON FRAME:
 button_frame_1 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 button_frame_2 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 button_frame_3 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 button_frame_4 = Canvas(window, bg="#B4D6C1", borderwidth=0, highlightthickness=0)
 
-#Clock and date here:
+### 11. LOGO FRAME:
+logo_frame = tk.Frame(window, bg="#B4D6C1", highlightbackground="#DFEAE2")
 
 # Create a frame for grouping widgets
 def adjust_frame(event):
@@ -107,9 +106,14 @@ def adjust_frame(event):
     text_frame.place(x=0, y=0, relwidth=1, relheight=0.25)
     #Menu Frame:
     menu_frame.place(x=window.winfo_width()*0.4714, y = window.winfo_height()*0.185, relwidth=0.5, relheight=0.045)
-
+    button_menu_1_frame.place(x=window.winfo_width()*0.475, y = window.winfo_height()*0.185, relwidth=0.1, relheight=0.045)
+    button_menu_2_frame.place(x=window.winfo_width()*0.575, y = window.winfo_height()*0.185, relwidth=0.1, relheight=0.045)
+    button_menu_3_frame.place(x=window.winfo_width()*0.675, y = window.winfo_height()*0.185, relwidth=0.1, relheight=0.045)
+    #Logo Frame:
+    logo_frame.place(x=window.winfo_width()*0.1, y = window.winfo_height()*0.875, relwidth=0.1, relheight=0.1)
+    
     frame_1.place(x=0, y=window.winfo_height()*0.25, relwidth=1, relheight=1)
-    frame_2.place(x=window.winfo_width() - 180, y = window.winfo_height()*0.0375, relwidth=0.08, relheight=0.05)
+    frame_2.place(x=window.winfo_width()* 0.825, y = window.winfo_height()*0.0275, relwidth=0.15, relheight=0.078)
     #Left Frame:
     inner_frame.place(x=window.winfo_width()*0.0214, y=window.winfo_height()*0.2875, relwidth=0.28, relheight=0.5)
     decore_left.place(x=window.winfo_width()*0.0214, y=window.winfo_height()*0.2875, relwidth=0.28, relheight=0.08)
@@ -131,7 +135,7 @@ def adjust_frame(event):
 
 # Function to update the clock and date
 def update_time():
-    current_time = datetime.datetime.now().strftime("%H:%M:%S")
+    current_time = datetime.datetime.now().strftime("%H : %M : %S")
     clock_label.config(text=current_time)
     window.after(1000, update_time)  # Update every 1 second (1000 milliseconds)
 
@@ -142,19 +146,17 @@ window.bind("<Configure>", adjust_frame)
 # Pack the frame to fill the window horizontally
 frame_2.pack(expand=True, fill="x")
 
-clock_label = tk.Label(frame_2, font=("Arial", 15), fg="black")
+clock_label = tk.Label(frame_2, font=("CALIBRI", 20, "bold"), fg="white", bg="#207567")
 
 # Pack the labels
-clock_label.pack()
+clock_label.place(relx=0.5, rely=0.5, anchor="center")
 
 # Call the update_time function to start updating the clock and date
 update_time()
 
 # Apply some formatting options to the clock label
-clock_label.config(borderwidth=2, relief="solid", padx=10, pady=5)
+clock_label.config(borderwidth=0, relief="solid", padx=10, pady=5)
 
-# Pack the clock label to fill the frame
-clock_label.pack(fill="both", expand=True)
 
 def update_clock():
 
@@ -243,10 +245,19 @@ button_2 = tk.Button(button_frame_2, text="RESET", command=lambda: [reset_clock(
 button_3 = tk.Button(button_frame_3, text="RUN VISION", command=lambda: [vision_button(), run_vision_node()], bg="#207567", fg="#DFEAE2",
                      font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5)
 
+# Buttton of the menu
+button_menu_1 = tk.Button(button_menu_1_frame, text="Github", command=open_github_link, bg="#207567", fg="white",
+                     font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5, highlightthickness=0)
+button_menu_2 = tk.Button(button_menu_2_frame, text="Youtube", command=open_youtube, bg="#207567", fg="white",
+                     font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5, highlightthickness=0)
+button_menu_3 = tk.Button(button_menu_3_frame, text="Close", command=lambda: [close_terminal(), window.quit()], bg="#207567", fg="white",
+                     font=("Calibri", 12, "bold"), borderwidth=0, relief="raised", padx=10, pady=5, highlightthickness=0)
 # Pack the button
 button_1.place(relx=0.5, rely=0.5, anchor="center")
 button_2.place(relx=0.5, rely=0.5, anchor="center")
 button_3.place(relx=0.5, rely=0.5, anchor="center")
-
+button_menu_1.place(relx=0.5, rely=0.5, anchor="center")
+button_menu_2.place(relx=0.5, rely=0.5, anchor="center")
+button_menu_3.place(relx=0.5, rely=0.5, anchor="center")
 # Start the Tkinter event loop
 window.mainloop()

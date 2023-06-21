@@ -601,7 +601,7 @@ while running_ == True:
         path_coin_up = rtb.jtraj(path_coin.q[-1], battery_position, 20)
         path_back_home = rtb.jtraj(path_coin_up.q[-1], lift_coin_up[-1],30)
 
-        # combine_path = combine_3_trajectory(path_coin, path_coin_up, path_back_home)
+        # Combine three trajectories:
         combine_path = combine_trajectories([path_coin, path_coin_up, path_back_home])
 
         # Simulate and send command:

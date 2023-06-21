@@ -201,6 +201,8 @@ def calculate_numBa():
     else:
         print("There is 1 pin")
         for i in new_contours:
+            filter =[]
+            
 
      # Create a copy of the original image to draw contours on
     image_with_contours = image.copy()
