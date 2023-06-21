@@ -2,6 +2,7 @@ import os,sys,rospy,datetime,subprocess
 import tkinter as tk
 import cv2 as cv
 import pyautogui
+import webbrowser
 
 from tkinter import Label, ttk, Canvas
 from cv_bridge import CvBridge
@@ -39,4 +40,9 @@ def run_vision_node():
 def close_terminal():
     os.system("pkill gnome-terminal")
 
+def open_github_link():
+    github_link = "https://github.com/minhtricao-2105/UTS_RS2_VNG_Team.git"
+    webbrowser.open_new(github_link)
 
+def open_youtube():
+    webbrowser.open_new("https://www.youtube.com/watch?v=iCPoGm3XHzU&t=56s")

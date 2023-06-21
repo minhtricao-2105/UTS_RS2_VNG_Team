@@ -458,6 +458,8 @@ while running_ == True:
 
     flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
 
+    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
+
     for instruction in flick_instruction:
         # Move coin to the battery
         move_simulation_robot(robot = robot, path = instruction['reach'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
@@ -467,8 +469,8 @@ while running_ == True:
         move_simulation_robot(robot = robot, path= instruction['flick'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
         arrived = True
         send_action_client(arrived, instruction['flick'], goal, start_time, client, speed=6)
-        
-    #-> Move to the position to drop the coin
+
+    #-> Move to the position to drop the coin:
     q_drop = [99.23, -75.10, 45.56, -66.99, -85.81, 351.35]
     q_drop_radian = [math.radians(joint_home_degree) for joint_home_degree in q_drop]
     path_drop = rtb.jtraj(flick_instruction[-1]['flick'][-1], q_drop_radian, 30)
