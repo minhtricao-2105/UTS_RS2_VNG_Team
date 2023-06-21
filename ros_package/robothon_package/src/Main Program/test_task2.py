@@ -102,7 +102,7 @@ q_droppin_1 = [math.radians(joint_home_degree) for joint_home_degree in q_droppi
 q_droppin_2 = [70.67, -97.03, 61.32, -54.39, -88.19, 242.99]
 q_droppin_2 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_2]    
 
-# ROUTE FOR BATTERY 1:
+# ROUTE FOR MOVING BATTERY 1:
 #-> From coin position to picking position
 pick1_way1 = [36.05, -63.35, 24.29, -48.96, -86.55, 217.81]
 pick1_way1 = [math.radians(joint_home_degree) for joint_home_degree in pick1_way1]
@@ -129,7 +129,7 @@ path_droppin_bat1 = combine_trajectories([path1_droppin1, path1_droppin2])
 #-> Combine route for battery 1
 path1_instruction ={'picking': pick1_path1.q, 'taking': pick1_path2, 'dropping': path_droppin_bat1}
 
-# ROUTE FOR BATTERY 2:
+# ROUTE FOR MOVING BATTERY 2:
 #-> From current position to picking position
 pick2_way1 = [94.24, -79.7, 61.95, -74.67, -118.79, 84.73 + 360]
 pick2_way1 = [math.radians(joint_home_degree) for joint_home_degree in pick2_way1]
@@ -164,7 +164,7 @@ path2_droppin2 = move_up_down(robot, path2_droppin1.q[-1], 'down', lift = 0.04)
 
 path_droppin_bat2 = combine_trajectories([path2_droppin1, path2_droppin2])
 
-    #-> Combine route for battery 2
+#-> Combine route for battery 2
 path2_instruction ={'picking': pick2_path1.q, 'taking': pick2_path2.q, 'dropping': path_droppin_bat2}
 
 # LISTS FOR HOLDING DATA
@@ -185,12 +185,11 @@ if is_battery_there == '2': # if only battery 2 is put in
 if is_battery_there == '12': # if both batteries are put in
     flip_coin_data.append(battery_1_position)
     flip_coin_data.append(battery_2_position)
-    rot_coin.append([0.002,0,0.0043,-14])
+    rot_coin.append([-0.002,0,0.0043,14])
     rot_coin.append([0.002,0,0.0043,-14])
     path_instruction.append(path1_instruction)
     path_instruction.append(path2_instruction)
 
-print(flip_coin_data)
 
 for i in range(len(flip_coin_data)):
 
