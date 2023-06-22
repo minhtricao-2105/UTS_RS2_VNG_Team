@@ -196,20 +196,52 @@ def calculate_numBa():
 
     if len(new_contours) == 1:
         print("No Pin Found")
-    elif len(filtered_points) > 65 or len(new_contours) > 3:
+    elif len(filtered_points) > 62 and len(new_contours) >= 3:
         print("There are 2 pins")
     else:
         print("There is 1 pin")
-        for i in new_contours:
-            filter =[]
-            
+        # Create a variable and threshhold
+        threshhold_area = 1000
+        contour_1 = None
+        contour_2 = None
+        for i in range(len(new_contours) - 1):
+            if cv.contourArea(new_contours[i]) > threshhold_area:
+                if cv.contourArea(new_contours[i]) < cv.contourArea(new_contours[i+1]):
+                    contour_1 = new_contours[i]
+                    contour_2 = new_contours[i+1]
+                else:
+                    contour_1 = new_contours[i+1]
+                    contour_2 = new_contours[i]
+                break
+        
+        # Calculate the moments of the contour_1:
+        M_1 = cv.moments(contour_1)
+
+        # Calculate the centroid coordinates
+        cx = int(M_1['m10'] / M_1['m00'])
+        cy = int(M_1['m01'] / M_1['m00'])
+
+        # Print the coordinates of the centroid
+        print("Centroid: ({}, {})".format(cx, cy))
+
+        # Calculate the moments of the contour_2:
+        M_2 = cv.moments(contour_2)
+
+        # Calculate the centroid coordinates
+        cx_1 = int(M_2['m10'] / M_2['m00'])
+        cy_1 = int(M_2['m01'] / M_2['m00'])
+
+        # Print the coordinates of the centroid
+        print("Centroid: ({}, {})".format(cx_1, cy_1))
+        
 
      # Create a copy of the original image to draw contours on
     image_with_contours = image.copy()
 
     # Draw contours on the image
     cv.drawContours(image_with_contours,  new_contours, -1, (0, 255, 0), 2)
-    
+    cv.circle(image_with_contours, (cx, cy), 5, (255, 255, 0), -10)
+    cv.circle(image_with_contours, (cx_1, cy_1), 5, (0, 255, 0), -10)
     cv.imshow('CV Part', image_with_contours)
 
     
@@ -437,6 +469,8 @@ while running_ == True:
 
     # Publish the image to another node:
     publisher_4 = rospy.Publisher('Image_Vision',SensorImage, queue_size=10)
+
+    # Publish number of batteries in the slider to other nodes:
 
     input("[INPUT]: Press any key to capture a second image\n")
 
