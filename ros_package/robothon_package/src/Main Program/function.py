@@ -10,10 +10,10 @@
 
 #   @date May 9, 2023
 
-# import rospy
+# Import Library:
 import numpy as np
-import sys
 import cv2 as cv
+<<<<<<< HEAD
 import math
 from math import sqrt, pow
 from colorLibrary import*
@@ -27,6 +27,26 @@ from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryG
 # from gripperFunction import*
 import time
 import actionlib
+=======
+import rospy, time, actionlib, moveit_msgs.msg, moveit_commander, math, sys, imutils, swift
+import roboticstoolbox as rtb 
+
+# User Library:
+from colorLibrary import*
+from ur3module import *
+from gripperFunction import*
+
+# Python Library:
+from math import sqrt, pow, pi, degrees
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+from sensor_msgs.msg import Image as SensorImage
+from sensor_msgs.msg import Image, JointState
+from std_msgs.msg import String, Float32MultiArray, Int32
+from cv_bridge import CvBridge
+from spatialmath import SE3
+from onrobot_rg_control.msg import OnRobotRGOutput
+>>>>>>> refs/remotes/origin/main
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized
@@ -382,10 +402,10 @@ def hole_cordinate():
     # Apply the position of each hole
     ## DONE
     # position 1
-    coordinates.append((245,35,1.0))
+    coordinates.append((242,35,1.0))
 
     #position 2
-    coordinates.append((245,135,1.0))
+    coordinates.append((242,135,1.0))
 
     #position 3
     coordinates.append((630,35,1.0))
@@ -394,7 +414,7 @@ def hole_cordinate():
     coordinates.append((630,135,1.0))
 
     # position 5
-    coordinates.append((660,825,0.0))
+    coordinates.append((660,820,0.0))
 
     return coordinates
 
@@ -459,7 +479,7 @@ def combine_trajectories(qlist):
        
             
 
-def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_there = '12'):
+def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_there = '12', num_AA = 2):
     # '1': only battery 1,'2': only battery 2, '12': both batteries
     
     TCC = T_coin
@@ -469,12 +489,12 @@ def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_t
     battery_1_position = [math.radians(joint_home_degree) for joint_home_degree in battery_1_position]
 
     # Data belong to battery 2:
-    battery_2_position = [56.25, -73.65, 35.65, -53.94, -89.34, 324.05]
+    battery_2_position = [56.25, -75.63, 41.35, -57.66, -89.34, 324.05]
     battery_2_position = [math.radians(joint_home_degree) for joint_home_degree in battery_2_position]
 
     # Dropping data
     #-> For coin
-    q_drop = [99.23, -75.10, 45.56, -66.99, -85.81, 351.35]
+    q_drop = [99.21, -67.98, 25.29, -53.84, -85.79, 351.35]
     q_drop_radian = [math.radians(joint_home_degree) for joint_home_degree in q_drop]
 
     #-> For batteries
@@ -483,6 +503,14 @@ def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_t
     q_droppin_2 = [70.67, -97.03, 61.32, -54.39, -88.19, 242.99]
     q_droppin_2 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_2]    
 
+    if num_AA >= 4:
+        q_droppin_1 = list(q_drop_radian)
+        q_droppin_2 = list(q_drop_radian)
+    elif num_AA == 3 and (is_battery_there == '1' or is_battery_there == '2'):
+        q_droppin_1 = list(q_droppin_2)
+    elif num_AA == 3 and is_battery_there == '12':
+        q_droppin_1 = list(q_droppin_2)
+        q_droppin_2 = list(q_drop_radian)    
 
     # ROUTE FOR MOVING BATTERY 1:
     #-> From coin position to picking position
@@ -530,11 +558,11 @@ def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_t
     q_sol_1 = solve_for_valid_ik(robot= robot, obj_pose = drag_pose, q_guess = pick2_way2)
     q_sol_1[-1] = pick2_way2[-1]
 
-    down_pose = SE3(0.008, 0, -0.008) * robot.fkine(q_sol_1)
+    down_pose = SE3(0.008, 0, -0.0068) * robot.fkine(q_sol_1)
     q_sol_2 = solve_for_valid_ik(robot= robot, obj_pose = down_pose, q_guess = list(q_sol_1))
     q_sol_2[-1] = q_sol_1[-1]
 
-    final_ee_pose = SE3(0.055, 0, 0.06)*robot.fkine(q_sol_2)
+    final_ee_pose = SE3(0.058, 0, 0.06)*robot.fkine(q_sol_2)
     q_sol_3 = solve_for_valid_ik(robot= robot, obj_pose = final_ee_pose, q_guess = list(q_sol_2))
     q_sol_3[-1] = q_sol_2[-1]
 

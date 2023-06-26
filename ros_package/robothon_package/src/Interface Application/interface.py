@@ -1,12 +1,13 @@
 from interfaceFunction import*
 
 ### Belong to ROS here ###
+time_len = 0
 
 def image_callback(msg):
     bridge = CvBridge()
     cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
     pil_image = Image.fromarray(cv.cvtColor(cv_image, cv.COLOR_BGR2RGB))
-    resized_image = pil_image.resize((400, 250))
+    resized_image = pil_image.resize((int(window.winfo_width()*0.2857),  int(window.winfo_height()*0.3125)))
     tk_image = ImageTk.PhotoImage(resized_image)
     # Create the image label widget
     image_label.configure(image=tk_image)
@@ -28,9 +29,14 @@ def screenshot_callback(msg):
     image_capture.configure(image=tk_image)
     image_capture.image = tk_image  # Keep a reference to avoid garbage collection
 
+def time_callback(msg):
+    global time_len
+    time_len = msg.data
+
 rospy.init_node("interface_node")
 sub_1 = rospy.Subscriber('Image_Vision', SensorImage, image_callback)
 sub_2 = rospy.Subscriber("screenshot", SensorImage, screenshot_callback)
+sub_3 = rospy.Subscriber('Calculate_time',Int32, time_callback)
 ### Belong to ROS here ###
 
 # Create the Tkinter application window
@@ -161,7 +167,7 @@ clock_label.config(borderwidth=0, relief="solid", padx=10, pady=5)
 def update_clock():
 
     global remaining_time
-    remaining_time -= 0.1
+    remaining_time -= 1
 
     # Calculate the percentage of work completed
     percentage = (10 - remaining_time) / 10 * 100
@@ -214,6 +220,7 @@ def reset_clock():
 # Define a function to disable the button after it is clicked
 def disable_button():
     global remaining_time
+    global time_len
     remaining_time = 10
     button_1.config(state="disabled")
 

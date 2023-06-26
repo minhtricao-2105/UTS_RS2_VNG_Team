@@ -9,6 +9,7 @@ from cv_bridge import CvBridge
 from ttkthemes import ThemedStyle
 from sensor_msgs.msg import Image as SensorImage  # Importing the Image class from sensor_msgs.msg
 from PIL import ImageTk, Image
+from std_msgs.msg import String, Float32MultiArray, Int32
 
 # Function to add logo:
 def add_logo(window, location):
