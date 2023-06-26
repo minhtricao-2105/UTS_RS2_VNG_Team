@@ -23,22 +23,8 @@
 # @author Minh Tri Cao
 # @date May 9, 2023
 
-
-
-# THESE LIBRARY IS USED FOR COMPUTER VISION:
-import rospy
-import cv2 as cv
-import numpy as np
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+# Import Library:
 from function import*
-from colorLibrary import*
-import imutils
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import Image as SensorImage  # Importing the Image class from sensor_msgs.msg
-from std_msgs.msg import String
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import Int32
 
 # Create a CvBridge object to convert ROS messages to OpenCV Images
 bridge = CvBridge()
@@ -47,6 +33,8 @@ bridge_1 = CvBridge()
 # Create global variables:
 image = None
 image_1 = None
+
+data_numba = ''
 
 #Setting the flag so that the image only take once time only
 flag = 1
@@ -66,17 +54,32 @@ running_ = False
 # @param data The depth image message
 # @return None
 
+# def depth_callback():
+    
+#     global image
+#     global flag
+
+#     #At the begining flag is false, so take the first figure:
+#     if flag == 1:
+#         # Convert ROS image message to OpenCV image
+#         image =cv.imread('/home/minhtricao/robothon2023/ros_package/robothon_package/src/Main Program/media/captured_image.jpg')
+        
+#         # # Save the image to a file
+#         # cv.imwrite("captured_image.jpg", image)
+
+#         # flag +=1
+
 def depth_callback(data):
     
     global image
     global flag
-    global red_flag
 
     #At the begining flag is false, so take the first figure:
     if flag == 1:
         # Convert ROS image message to OpenCV image
         image = bridge.imgmsg_to_cv2(data, "bgr8")
         
+        # cv.imwrite("captured_image.jpg", image)
         flag +=1
 
 ##  @Brief Callback function for processing battery images
@@ -91,20 +94,18 @@ def batteries_callback(data):
     global flag
     
     if flag == 2:
-        print("Take the second figure")
-        # Convert ROS image message to OpenCV image
+        # # Convert ROS image message to OpenCV image
+        # depth_callback()
         image_1 = bridge_1.imgmsg_to_cv2(data, "bgr8")
 
-        flag +=1
-
-        # Detect the container to store the batteries first:
-        colour_detection()
-
-        # Calculate how many:
+        # Determine how many batteries in the slider:
         calculate_numBa()
-
+        rospy.sleep(0.5)
+        
         # Detect the location of the batteries and the type of the batteries:
         perform_computervision()
+
+        flag +=1
 
 ##  @brief  Apply Canny edge detection on an image
 #   This function takes an input image and applies Canny edge detection to find edges within the image. The function returns the resulting image with the edges highlighted.
@@ -113,13 +114,13 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=140)
+    img = cv.convertScaleAbs(img, alpha=1, beta=100)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    # grey = cv.GaussianBlur(grey, (5,5),1)
+    grey = cv.GaussianBlur(grey, (5,5),1)
 
-    grey = crop(grey,1.8)
+    grey = crop(grey,1.7)
 
     T, thresh = cv.threshold(grey, 40, 255, 0)
 
@@ -142,7 +143,7 @@ def crop(img,factor):
     height, width = img.shape[:2]
 
     # Calculate the dimensions of the rectangle to crop
-    w = int(width / (factor*2.2))
+    w = int(width / (factor*1.6))
     h = int(height / (factor))
 
 
@@ -165,8 +166,10 @@ def crop(img,factor):
     return black
 
 def calculate_numBa():
-    global image
-    grey = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    
+    global data_numba 
+
+    grey = cv.cvtColor(image_1, cv.COLOR_BGR2GRAY)
 
     grey = cv.GaussianBlur(grey, (5,5),1)
 
@@ -181,8 +184,14 @@ def calculate_numBa():
     max_x = 200  # Maximum x-coordinate limit
     min_y = 100  # Minimum y-coordinate limit
     max_y = 400  # Maximum y-coordinate limit
+
+    # Create a variable and threshhold
+    threshhold_area = 1000
+    contour_1 = None
+    contour_2 = None
+
     for contour in contours:
-        if cv.contourArea(contour) > 50:
+        if cv.contourArea(contour) > 1000:
             filtered_points = []
             for point in contour:
                 if len(point) == 1:
@@ -196,14 +205,53 @@ def calculate_numBa():
 
     if len(new_contours) == 1:
         print("No Pin Found")
-    elif len(filtered_points) > 62 and len(new_contours) >= 3:
+    elif len(new_contours) >= 3:
         print("There are 2 pins")
+        data_numba = '12'
+        # Begin to draw 2 pin:
+        for i in range(len(new_contours) - 1):
+            if cv.contourArea(new_contours[i]) > threshhold_area and cv.contourArea(new_contours[i]) < 5000:
+                if cv.contourArea(new_contours[i]) < cv.contourArea(new_contours[i+1]):
+                    contour_1 = new_contours[i]
+                    contour_2 = new_contours[i+1]
+                else:
+                    contour_1 = new_contours[i+1]
+                    contour_2 = new_contours[i]
+                break
+                # Calculate the moments of the contour_1:
+        M_1 = cv.moments(contour_1)
+
+        # Calculate the centroid coordinates
+        cx = int(M_1['m10'] / M_1['m00'])
+        cy = int(M_1['m01'] / M_1['m00'])
+
+        # Calculate the moments of the contour_2:
+        M_2 = cv.moments(contour_2)
+
+        # Calculate the centroid coordinates
+        cx_1 = int(M_2['m10'] / M_2['m00'])
+        cy_1 = int(M_2['m01'] / M_2['m00'])
+
+        # Draw a rectangle to display the battery:
+        # Width and height of the rectangle
+        width = 150
+        height = 40
+
+        # Calculate the top-left and bottom-right corners of the rectangle
+        top_left = (int(cx - width / 2), int(cy - height / 2))
+        bottom_right = (int(cx + width / 2), int(cy + height / 2))
+
+        # Calculate the top-left and bottom-right corners of the rectangle
+        top_left_1 = (int(cx_1 - width / 2), int(cy_1 - height / 2))
+        bottom_right_1 = (int(cx_1 + width / 2), int(cy_1 + height / 2))
+
+        # Draw the rectangle on the image
+        cv.rectangle(image_1, top_left, bottom_right, (255, 0, 0), 5)
+        cv.rectangle(image_1, top_left_1, bottom_right_1, (0, 0, 255), 5)
+
     else:
         print("There is 1 pin")
-        # Create a variable and threshhold
-        threshhold_area = 1000
-        contour_1 = None
-        contour_2 = None
+
         for i in range(len(new_contours) - 1):
             if cv.contourArea(new_contours[i]) > threshhold_area:
                 if cv.contourArea(new_contours[i]) < cv.contourArea(new_contours[i+1]):
@@ -221,9 +269,6 @@ def calculate_numBa():
         cx = int(M_1['m10'] / M_1['m00'])
         cy = int(M_1['m01'] / M_1['m00'])
 
-        # Print the coordinates of the centroid
-        print("Centroid: ({}, {})".format(cx, cy))
-
         # Calculate the moments of the contour_2:
         M_2 = cv.moments(contour_2)
 
@@ -231,18 +276,26 @@ def calculate_numBa():
         cx_1 = int(M_2['m10'] / M_2['m00'])
         cy_1 = int(M_2['m01'] / M_2['m00'])
 
-        # Print the coordinates of the centroid
-        print("Centroid: ({}, {})".format(cx_1, cy_1))
-        
+        if cy < cy_1:
+            data_numba = '1'
+        elif cy > cy_1:
+            data_numba = '2'
 
-     # Create a copy of the original image to draw contours on
-    image_with_contours = image.copy()
+        # Draw a rectangle to display the battery:
+        # Width and height of the rectangle
+        width = 150
+        height = 40
 
+        # Calculate the top-left and bottom-right corners of the rectangle
+        top_left = (int(cx - width / 2), int(cy - height / 2))
+        bottom_right = (int(cx + width / 2), int(cy + height / 2))
+
+        # Draw the rectangle on the image
+        cv.rectangle(image_1, top_left, bottom_right, (255, 0, 0), 4)
+    
     # Draw contours on the image
-    cv.drawContours(image_with_contours,  new_contours, -1, (0, 255, 0), 2)
-    cv.circle(image_with_contours, (cx, cy), 5, (255, 255, 0), -10)
-    cv.circle(image_with_contours, (cx_1, cy_1), 5, (0, 255, 0), -10)
-    cv.imshow('CV Part', image_with_contours)
+
+    # cv.imshow('CV Part', image_with_contours)
 
     
 
@@ -296,6 +349,8 @@ def compare_two_image():
 
         print(center)
 
+        # print(area)
+
         if(area > 30 and perimeter > 150):
 
             for (x, y, r, index) in coordinates:
@@ -309,6 +364,7 @@ def compare_two_image():
                     elif(r>20):
                         result.append((x1,y,1,index))
 
+    cv.imshow('hello', thresh)
     return result
 
 ## @brief Perform computer vision to detect the position of objects in an image
@@ -322,6 +378,8 @@ def compare_two_image():
 
 def perform_computervision():
     
+    global data_numba 
+
     # Canny Edge Detection when we have the figure:
     rospy.loginfo('[UPDATE]: Processing COMPUTER VISION PART')
 
@@ -364,6 +422,11 @@ def perform_computervision():
     ros_image = bridge.cv2_to_imgmsg(image_1, encoding="bgr8")
 
     publisher_4.publish(ros_image)
+
+    # Send message to robot node:
+    mess_numba = String()
+    mess_numba.data = data_numba
+    publisher_5.publish(mess_numba)
 
     cv.waitKey(0)
 
@@ -442,8 +505,8 @@ rospy.init_node('Realsense')
 
 subcriber = rospy.Subscriber('Move_home', Int32, move_home)
 
-move_home = 1
-running_ = True
+# move_home = 1
+# running_ = True
 
 while move_home != 1:
     rospy.loginfo("[WARNING]: Waiting for the robot to move home!")
@@ -454,12 +517,17 @@ while move_home != 1:
 # # delete this one
 # running_ = True
 
+rospy.sleep(1)
+
 while running_ == True: 
 
-    rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
+    # Subcriber Declaration:
+    # sub_1 = rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
+
+    sub_3 = rospy.Subscriber('First_Picture', Image, depth_callback)
 
     # Create a first publisher to publish a message to a robot nodes
-    sub_1 = publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)
+    publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)
 
     # A secondary publisher will be established to transmit data obtained after performing computer vision tasks.
     publisher_2 = rospy.Publisher('Image_Data',Float32MultiArray, queue_size = 20)
@@ -471,8 +539,9 @@ while running_ == True:
     publisher_4 = rospy.Publisher('Image_Vision',SensorImage, queue_size=10)
 
     # Publish number of batteries in the slider to other nodes:
+    publisher_5 = rospy.Publisher('Numba', String, queue_size=20)
 
-    input("[INPUT]: Press any key to capture a second image\n")
+    # input("[INPUT]: Press any key to capture a second image\n")
 
     sub_2 = rospy.Subscriber("/camera/color/image_raw", Image, batteries_callback)
 

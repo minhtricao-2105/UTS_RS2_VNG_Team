@@ -10,29 +10,8 @@
 #   @date May 9, 2023
 
 
-#Library Belongs to ROS:
-from std_msgs.msg import String
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import Int32
-import moveit_commander
-import moveit_msgs.msg
-import numpy as np
+#Import Library:
 from function import *
-
-#Library Belongs to Robot Toolbox:
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from sensor_msgs.msg import JointState
-import roboticstoolbox as rtb 
-from spatialmath import SE3
-from math import pi
-from math import degrees
-import swift
-import time
-from ur3module import *
-
-#Library Belongs to Gripper
-from onrobot_rg_control.msg import OnRobotRGOutput
-from gripperFunction import *
 
 # Array to store the position of the yellow container (AAA Batteries) from the Vision Nodes
 colour_array_yellow = []
@@ -51,6 +30,17 @@ running_ = False
 
 # Create a flag variable moveit commander
 moveIt = False
+
+# Create a global variables:
+image = None
+
+# Create a string message
+numba_messange = None
+
+def image_callback(data):
+    global image
+    bridge = CvBridge()
+    image = bridge.imgmsg_to_cv2(data, "bgr8")
 
 def cam_to_global(pixel_x, pixel_y, camera_transform):
     # Define the camera parameters
@@ -118,10 +108,20 @@ def callback_3(msg):
         colour_array_orange = [msg.data[i:i+2] for i in range(0, len(msg.data), 2)]
         
         # rospy.loginfo('Orange array: %s', colour_array_orange)
-   
+
+def callback_numba(msg):
+    
+    global numba_messange
+
+    numba_messange = msg.data
+
 rospy.init_node('robot_node')
 
+# Publisher Declaration:
+pub   = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
 pub_1 = rospy.Publisher('Move_home',Int32,queue_size=1)
+pub_2 = rospy.Publisher('First_Picture', Image, queue_size=10)
+pub_3 = rospy.Publisher('Calculate_time',Int32, queue_size=10)
 
 ############## BELONG TO THE ROBOT OVER HERE ###########################
 
@@ -139,19 +139,28 @@ while moveIt == False:
     break
 
 # Subcribe Declaration:
+subscriber_1 = rospy.Subscriber("/camera/color/image_raw", Image, image_callback)
 subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
-
 subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
+subscriber_4 = rospy.Subscriber('Numba', String, callback_numba)
 
-pub = rospy.Publisher('OnRobotRGOutput', OnRobotRGOutput, queue_size=1)
+rospy.sleep(1)
+while len(location_array) == 0:
+    # Publish the first image to the computer vision node:
+    bridge_1 = CvBridge()
+    ros_image = bridge_1.cv2_to_imgmsg(image, encoding="bgr8")
+    pub_2.publish(ros_image)
 
-# while len(location_array) == 0:
-#     rospy.loginfo("[WARNING]: Waiting for Computer Vision Part")
-#     if(len(location_array) != 0):
-#         rospy.loginfo("[UPDATE]: Robot recevieved data from Vision Node!")
-#         rospy.loginfo('[UPDATE]: BATTERIES LOCATION: %s', location_array)
-#         running_ = True
-#         break
+    # Wait for the message from the computer vision node:
+    rospy.loginfo("[WARNING]: Waiting for Computer Vision Part")
+    if(len(location_array) != 0):
+        rospy.loginfo("[UPDATE]: Robot recevieved data from Vision Node!")
+        rospy.loginfo('[UPDATE]: BATTERIES LOCATION: %s', location_array)
+        running_ = True
+        break
+    # elif numba_messange != "":
+    #     running_ = True
+    #     break
 
 rospy.loginfo("Wait 5 seconds")
 
@@ -163,9 +172,16 @@ position = hole_cordinate()
 
 location_array = sort_battery(location_array)
 
-print("Battery Order: ", sort_battery(location_array))
+# Publish to the interface:
+num_mess = Int32()
+num_mess.data = len(location_array)
+pub_3.publish(num_mess)
 
 ## DROPPING ORDER ---------------------------------------------- #
+
+# Calculate number of num_AA
+num_AA = 0
+
 for i in location_array:
     if i[2] == 0.0:
         for j in position: 
@@ -178,14 +194,16 @@ for i in location_array:
         for j in position: 
             if j[2] == 1.0  and j not in hole:
                 hole.append(j)
+                num_AA += 1
                 break
             else:
                 continue
   
-rospy.loginfo('Hole Location: %s', hole)
+# rospy.loginfo('Hole Location: %s', hole)
+rospy.loginfo(num_AA)
+
 ## DROPPING ORDER - DONE ---------------------------------------- #   
 
-running_ = True
 ## MAIN EXECUTION ------------------------------------------------------------------------------------------------------------ #   
 while running_ == True:
     ## INITIAL SET UP -------------------------------------------------------------------------------------------------------- #
@@ -260,7 +278,7 @@ while running_ == True:
         ## GRIPPER OPEN ---------------------------------- #
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 280))
-            rospy.sleep(0.25)
+            rospy.sleep(0.5)
             break
         ## GRIPPER OPEN - DONE ---------------------------------- #
         
@@ -312,8 +330,8 @@ while running_ == True:
 
         # Close the gripper:
         while not rospy.is_shutdown():
-            pub.publish(moveGripperToPosition(400, 50))
-            rospy.sleep(0.25)
+            pub.publish(closeGripper(400))
+            rospy.sleep(0.55)
             break
         ## 1. MOVE TO BATTERY POSITION IN GREEN BLOCK- DONE ---------------------------------------------------------------------------------- #
             
@@ -378,9 +396,9 @@ while running_ == True:
         
         # Move down
         if hole[i][0] == 630 and hole[i][1] == 135:
-             path_4 = move_up_down(robot, q_start,'down',lift = 0.028)
+             path_4 = move_up_down(robot, q_start,'down',lift = 0.026)
         else:
-            path_4 = move_up_down(robot, q_start,'down',lift = 0.035)
+            path_4 = move_up_down(robot, q_start,'down',lift = 0.040)
 
         move_simulation_robot(robot = robot, path= path_4.q, env= env, dt = dt, gripper = gripper, cam = cam, pin = pin[i], TCR = TCR, TGR = TGR, TCP = TCP)
         
@@ -391,8 +409,8 @@ while running_ == True:
 
         # Open the gripper
         while not rospy.is_shutdown():
-            pub.publish(moveGripperToPosition(400, 180))
-            rospy.sleep(0.25)
+            pub.publish(moveGripperToPosition(400, 250))
+            rospy.sleep(0.55)
             break
         ## 4. MOVE DOWN AND DROP BATTERY - DONE -------------------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -454,21 +472,19 @@ while running_ == True:
     #### 3.1 MOVE TO ROBOT TO THE POSITION BEFORE FLIPPING THE BATTERY 1:
 
                 # TEST ADDING BATTERY INFO AND DROPPING INFO
-    is_battery_there = '12' # '1': only battery 1,'2': only battery 2, '12': both batteries 
-
-    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
-
-    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
+    is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
+    # is_battery_there = '12'
+    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there, num_AA=num_AA)
 
     for instruction in flick_instruction:
         # Move coin to the battery
         move_simulation_robot(robot = robot, path = instruction['reach'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
         arrived = True
-        send_action_client(arrived, instruction['reach'], goal, start_time, client, speed=1)
+        send_action_client(arrived, instruction['reach'], goal, start_time, client, speed=4)
         
         move_simulation_robot(robot = robot, path= instruction['flick'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
         arrived = True
-        send_action_client(arrived, instruction['flick'], goal, start_time, client, speed=6)
+        send_action_client(arrived, instruction['flick'], goal, start_time, client, speed=4)
 
     #-> Move to the position to drop the coin:
     q_drop = [99.23, -75.10, 45.56, -66.99, -85.81, 351.35]
@@ -476,40 +492,56 @@ while running_ == True:
     path_drop = rtb.jtraj(flick_instruction[-1]['flick'][-1], q_drop_radian, 30)
     move_simulation_robot(robot = robot, path= path_drop.q, env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
     arrived = True
-    send_action_client(arrived, path_drop.q, goal, start_time, client, speed=2)
+    send_action_client(arrived, path_drop.q, goal, start_time, client, speed=1)
 
     while not rospy.is_shutdown():
-        pub.publish(moveGripperToPosition(400, 280))
+        pub.publish(moveGripperToPosition(400, 350))
         rospy.sleep(0.25)
         break
 
     ########################## 5. BEGIN TO PLACE THE BATTERY IN A CORRECT ORDER ###########################
+    count = 0
+
     for instruction in path_instruction:
         # Move to picking battery
         move_simulation_robot(robot = robot, path= instruction['picking'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         arrived = True
-        send_action_client(arrived, instruction['picking'], goal, start_time, client, speed=1)
+        send_action_client(arrived, instruction['picking'], goal, start_time, client, speed=4)
 
+        force = 250
+        speed_taking = 5
+
+        if is_battery_there == "12" and count == 0:
+            force = 400
+            speed_taking = 2
+        elif is_battery_there == "1":
+            force = 400
+            speed_taking = 2
+        
         while not rospy.is_shutdown():
-            pub.publish(closeGripper(400))
+            pub.publish(closeGripper(force))
             rospy.sleep(0.5)
             break
 
         # Move the battery out
         move_simulation_robot(robot = robot, path= instruction['taking'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         arrived = True
-        send_action_client(arrived, instruction['taking'], goal, start_time, client, speed=2)
+        send_action_client(arrived, instruction['taking'], goal, start_time, client, speed=speed_taking)
 
         # Move to drop battery
         move_simulation_robot(robot = robot, path= instruction['dropping'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
         arrived = True
-        send_action_client(arrived, instruction['dropping'], goal, start_time, client, speed=3)
+        send_action_client(arrived, instruction['dropping'], goal, start_time, client, speed=4)
 
         while not rospy.is_shutdown():
             pub.publish(moveGripperToPosition(400, 280))
             rospy.sleep(0.25)
             break
         
+        count += 1
+
+    arm.go(joint_home_radian)
+    
     running_ = False
     
 rospy.spin()
