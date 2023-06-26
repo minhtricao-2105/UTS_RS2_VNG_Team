@@ -54,22 +54,7 @@ running_ = False
 # @param data The depth image message
 # @return None
 
-# def depth_callback():
-    
-#     global image
-#     global flag
-
-#     #At the begining flag is false, so take the first figure:
-#     if flag == 1:
-#         # Convert ROS image message to OpenCV image
-#         image =cv.imread('/home/minhtricao/robothon2023/ros_package/robothon_package/src/Main Program/media/captured_image.jpg')
-        
-#         # # Save the image to a file
-#         # cv.imwrite("captured_image.jpg", image)
-
-#         # flag +=1
-
-def depth_callback(data):
+def depth_callback():
     
     global image
     global flag
@@ -77,10 +62,25 @@ def depth_callback(data):
     #At the begining flag is false, so take the first figure:
     if flag == 1:
         # Convert ROS image message to OpenCV image
-        image = bridge.imgmsg_to_cv2(data, "bgr8")
+        image =cv.imread('/home/minhtricao/robothon2023/ros_package/robothon_package/src/Main Program/media/captured_image.jpg')
         
+        # # Save the image to a file
         # cv.imwrite("captured_image.jpg", image)
-        flag +=1
+
+        # flag +=1
+
+# def depth_callback(data):
+    
+#     global image
+#     global flag
+
+#     #At the begining flag is false, so take the first figure:
+#     if flag == 1:
+#         # Convert ROS image message to OpenCV image
+#         image = bridge.imgmsg_to_cv2(data, "bgr8")
+        
+#         # cv.imwrite("captured_image.jpg", image)
+#         flag +=1
 
 ##  @Brief Callback function for processing battery images
 #   This function is a callback for processing battery images received from a ROS node. 
@@ -93,9 +93,10 @@ def batteries_callback(data):
     global image_1
     global flag
     
-    if flag == 2:
-        # # Convert ROS image message to OpenCV image
-        # depth_callback()
+    if flag == 1:
+        # Convert ROS image message to OpenCV image
+        depth_callback()
+        
         image_1 = bridge_1.imgmsg_to_cv2(data, "bgr8")
 
         # Determine how many batteries in the slider:
@@ -114,7 +115,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=100)
+    img = cv.convertScaleAbs(img, alpha=1, beta=120)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -524,7 +525,7 @@ while running_ == True:
     # Subcriber Declaration:
     # sub_1 = rospy.Subscriber("/camera/color/image_raw", Image, depth_callback)
 
-    sub_3 = rospy.Subscriber('First_Picture', Image, depth_callback)
+    # sub_3 = rospy.Subscriber('First_Picture', Image, depth_callback)
 
     # Create a first publisher to publish a message to a robot nodes
     publisher_1 = rospy.Publisher('Computer_Vision', String, queue_size = 20)

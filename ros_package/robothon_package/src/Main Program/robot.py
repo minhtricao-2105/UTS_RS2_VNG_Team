@@ -31,16 +31,8 @@ running_ = False
 # Create a flag variable moveit commander
 moveIt = False
 
-# Create a global variables:
-image = None
-
 # Create a string message
 numba_messange = None
-
-def image_callback(data):
-    global image
-    bridge = CvBridge()
-    image = bridge.imgmsg_to_cv2(data, "bgr8")
 
 def cam_to_global(pixel_x, pixel_y, camera_transform):
     # Define the camera parameters
@@ -139,18 +131,12 @@ while moveIt == False:
     break
 
 # Subcribe Declaration:
-subscriber_1 = rospy.Subscriber("/camera/color/image_raw", Image, image_callback)
 subscriber_2 = rospy.Subscriber('Image_Data', Float32MultiArray, callback_2)
 subscriber_3 = rospy.Subscriber('Color_data', Float32MultiArray, callback_3)
 subscriber_4 = rospy.Subscriber('Numba', String, callback_numba)
 
 rospy.sleep(1)
 while len(location_array) == 0:
-    # Publish the first image to the computer vision node:
-    bridge_1 = CvBridge()
-    ros_image = bridge_1.cv2_to_imgmsg(image, encoding="bgr8")
-    pub_2.publish(ros_image)
-
     # Wait for the message from the computer vision node:
     rospy.loginfo("[WARNING]: Waiting for Computer Vision Part")
     if(len(location_array) != 0):
