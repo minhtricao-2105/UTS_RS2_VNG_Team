@@ -13,6 +13,21 @@
 # Import Library:
 import numpy as np
 import cv2 as cv
+<<<<<<< HEAD
+import math
+from math import sqrt, pow
+from colorLibrary import*
+# import imutils
+from colorLibrary import*
+from ur3module import *
+# import moveit_commander
+# import moveit_msgs.msg
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+# from gripperFunction import*
+import time
+import actionlib
+=======
 import rospy, time, actionlib, moveit_msgs.msg, moveit_commander, math, sys, imutils, swift
 import roboticstoolbox as rtb 
 
@@ -31,6 +46,7 @@ from std_msgs.msg import String, Float32MultiArray, Int32
 from cv_bridge import CvBridge
 from spatialmath import SE3
 from onrobot_rg_control.msg import OnRobotRGOutput
+>>>>>>> refs/remotes/origin/main
 
 ##  @brief Rescales the input frame with the given scale factor
 #   @param frame The input frame to be resized

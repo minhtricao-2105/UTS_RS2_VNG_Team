@@ -214,7 +214,13 @@ while running_ == True:
     env._send_socket
     # Clone
     robot = rtb.models.UR3()
-  
+    
+    # Box 
+    box_path = "/home/minhtricao/robothon2023/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
+    box = collisionObj.Mesh(filename= box_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = [0.4,0.4,0.4,1])
+    box.T = trotx(pi/2) @ troty(pi)
+    box.T = transl(0.207,-0.0084,-0.140) @ box.T  
+
     # Gripper
     gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
     gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
@@ -239,9 +245,10 @@ while running_ == True:
 
     # Add to environment
     env.add(robot)
-    env.add(cam)
+    # env.add(cam)
     env.add(gripper)
     env.add(coin)
+    env.add(box)
 
     pin = [] # List of pins
     TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) # pin pose in ee frame
@@ -449,7 +456,7 @@ while running_ == True:
     
     ### 2. Lift coin up
     lift_coin_up = list(reversed(path_move_down2_pick_coin.q))
-    move_simulation_robot(robot = robot, path = lift_coin_up, env= env, dt = dt, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+    move_simulation_robot(robot = robot, path = lift_coin_up, env= env, dt = dt, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
     arrived = True
     send_action_client(arrived, lift_coin_up, goal, start_time, client)
     
@@ -458,9 +465,15 @@ while running_ == True:
     #### 3.1 MOVE TO ROBOT TO THE POSITION BEFORE FLIPPING THE BATTERY 1:
 
                 # TEST ADDING BATTERY INFO AND DROPPING INFO
+<<<<<<< HEAD
+    is_battery_there = '12' # '1': only battery 1,'2': only battery 2, '12': both batteries 
+
+    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
+=======
     is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
     # is_battery_there = '12'
     flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there, num_AA=num_AA)
+>>>>>>> refs/remotes/origin/main
 
     for instruction in flick_instruction:
         # Move coin to the battery
