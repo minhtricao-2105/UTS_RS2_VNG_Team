@@ -249,16 +249,34 @@ while running_ == True:
     q_start = [x*pi/180 for x in q_deg]
     robot.q = q_start
 
+    # Pin p1, p2 task 2
+    pin1 = collisionObj.Cylinder(radius = 0.007, length= 0.048, pose = SE3(0.13796 - 0.048/2,0.3229,0.1535-0.008)*SE3.Ry(pi/2), color = (0.2,0.2,0.5,1))
+    pin2 = collisionObj.Cylinder(radius = 0.007, length= 0.048, pose = SE3(0.13796 - 0.048/2,0.3409,0.1535-0.008)*SE3.Ry(pi/2), color = (0.2,0.2,0.5,1))
+
     # Add to environment
     env.add(robot)
     # env.add(cam)
     env.add(gripper)
     env.add(coin)
+<<<<<<< HEAD
     env.add(coin_holder)
     env.add(box)
 
 
     pin = [] # List of pins
+=======
+    env.add(box) 
+
+    if numba_messange == '1':
+        env.add(pin1)
+    if numba_messange == '2':
+        env.add(pin2)
+    if numba_messange == '12':
+        env.add(pin1)
+        env.add(pin2)
+
+    pin = [] # List of pins task 1
+>>>>>>> 537241e56d54e61c7ec4afb1d3b3a0857467039a
     TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) # pin pose in ee frame
 
     cam_move(cam, robot, TCR)
@@ -474,10 +492,16 @@ while running_ == True:
     #### 3.1 MOVE TO ROBOT TO THE POSITION BEFORE FLIPPING THE BATTERY 1:
 
                 # TEST ADDING BATTERY INFO AND DROPPING INFO
+<<<<<<< HEAD
     # is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
     is_battery_there = '12'
+=======
+    is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
+    # is_battery_there = '12'
+>>>>>>> 537241e56d54e61c7ec4afb1d3b3a0857467039a
     flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there, num_AA=num_AA)
 
+    count = 0
     for instruction in flick_instruction:
         # Move coin to the battery
         move_simulation_robot(robot = robot, path = instruction['reach'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
@@ -487,6 +511,22 @@ while running_ == True:
         move_simulation_robot(robot = robot, path= instruction['flick'], env= env, dt = 0.05, gripper = gripper, cam = cam, pin = coin, TCR = TCR, TGR = TGR, TCP = TCC)
         arrived = True
         send_action_client(arrived, instruction['flick'], goal, start_time, client, speed=4)
+
+        pin1_cen = [pin1.T[0,3] - 0.048/2, pin1.T[1,3], pin1.T[2,3]]
+        pin2_cen = [pin2.T[0,3] + 0.048/2, pin2.T[1,3], pin2.T[2,3]]
+    
+        if is_battery_there == '1':
+            pin1.T = transl(pin1_cen) @ troty(-10*pi/180) @ linalg.inv(transl(pin1_cen)) @ pin1.T 
+        
+        if is_battery_there == '2':
+            pin2.T = transl(pin2_cen) @ troty(10*pi/180) @ linalg.inv(transl(pin2_cen)) @ pin2.T
+
+        if is_battery_there == '12':
+            if count == 0: 
+                pin1.T = transl(pin1_cen) @ troty(-15*pi/180) @ linalg.inv(transl(pin1_cen)) @ pin1.T
+            if count == 1:
+                pin2.T = transl(pin2_cen) @ troty(15*pi/180) @ linalg.inv(transl(pin2_cen)) @ pin2.T
+        count +=1
 
     #-> Move to the position to drop the coin:
     q_drop = [99.23, -75.10, 45.56, -66.99, -85.81, 351.35]
@@ -503,7 +543,6 @@ while running_ == True:
 
     ########################## 5. BEGIN TO PLACE THE BATTERY IN A CORRECT ORDER ###########################
     count = 0
-
     for instruction in path_instruction:
         # Move to picking battery
         move_simulation_robot(robot = robot, path= instruction['picking'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
@@ -525,13 +564,26 @@ while running_ == True:
             rospy.sleep(0.5)
             break
 
+        if count == 0 and is_battery_there == '1':
+            battery = pin1
+        if count == 0 and is_battery_there == '2':
+            battery = pin2
+        if is_battery_there == '12':
+            if count == 0: 
+                battery = pin1
+            if count == 1:
+                battery = pin2
+
         # Move the battery out
-        move_simulation_robot(robot = robot, path= instruction['taking'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+        move_simulation_robot(robot = robot, path= instruction['taking'], env= env, dt = 0.05, 
+                          gripper = gripper, cam = cam, pin = battery, TCR = TCR, TGR = TGR, TCP = TCP)
         arrived = True
         send_action_client(arrived, instruction['taking'], goal, start_time, client, speed=speed_taking)
 
+
         # Move to drop battery
-        move_simulation_robot(robot = robot, path= instruction['dropping'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
+        move_simulation_robot(robot = robot, path= instruction['dropping'], env= env, dt = 0.05, 
+                          gripper = gripper, cam = cam, pin = battery, TCR = TCR, TGR = TGR, TCP = TCP)
         arrived = True
         send_action_client(arrived, instruction['dropping'], goal, start_time, client, speed=4)
 
@@ -539,7 +591,6 @@ while running_ == True:
             pub.publish(moveGripperToPosition(400, 280))
             rospy.sleep(0.25)
             break
-        
         count += 1
 
     arm.go(joint_home_radian)

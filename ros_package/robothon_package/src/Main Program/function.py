@@ -15,7 +15,8 @@ import numpy as np
 import cv2 as cv
 import rospy, time, actionlib, moveit_msgs.msg, moveit_commander, math, sys, imutils, swift
 import roboticstoolbox as rtb 
-
+# import math
+from numpy import linalg
 # User Library:
 from colorLibrary import*
 from ur3module import *
@@ -325,6 +326,7 @@ def RMRC_motion(robot, path, threshold = 0.01):
     print("FINAL ERROR: ", np.linalg.norm(robot.fkine(robot.q).A[0:3,3] - pose_list[-1].A[0:3,3]))
 
 def move_simulation_robot(robot, path, env, dt, gripper = False, cam = False, pin = False, TCR = SE3(0,0,0), TGR = SE3(0,0,0), TCP = SE3(0,0,0)):
+    dt = 0.02
     for q in path:
         robot.q = q
         if not isinstance(cam,bool): cam_move(cam,robot,TCR)
