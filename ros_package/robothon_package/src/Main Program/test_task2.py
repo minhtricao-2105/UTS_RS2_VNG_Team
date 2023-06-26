@@ -4,6 +4,27 @@ from ur3module import *
 # import time
 from function import *
 
+def cam_to_global(pixel_x, pixel_y, camera_transform):
+    # Define the camera parameters
+    pixel_width = 640  # Width of the image in pixels
+    pixel_height = 480  # Height of the image in pixels
+    focal_length = 848  # Focal length of the camera in pixels
+    
+    # Compute the normalized coordinates of the point
+    normalized_x = (pixel_x - pixel_width / 2) / focal_length
+    normalized_y = (pixel_height / 2 - pixel_y) / focal_length
+
+    # Compute the distance from the camera to the global point
+    distance = 0.18  # Distance from the camera to the global point in meters
+
+    # Compute the position of the point in the camera frame
+    camera_position = np.array([distance * normalized_x, distance * normalized_y, distance, 1])
+
+    # Map the point from the camera frame to the global frame
+    global_position = np.matmul(camera_transform, camera_position)
+
+    return global_position
+
 # Enviroment
 env = swift.Swift()
 env.launch(realtime=True)
@@ -11,6 +32,12 @@ dt = 0.05
 env._send_socket
 # Clone
 robot = rtb.models.UR3()
+
+# Box 
+box_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
+box = collisionObj.Mesh(filename= box_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = [0.4,0.4,0.4,0.5])
+box.T = trotx(pi/2) @ troty(pi)
+box.T = transl(0.207,-0.0084,-0.140) @ box.T  
 
 # Gripper
 gripper_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
@@ -36,10 +63,19 @@ robot.q = joint_home_radian
 
 # Add to environment
 env.add(robot)
-env.add(cam)
+env.add(box)
+# env.add(cam)
 env.add(gripper)
 env.add(coin)
 
+# Test hole:
+hole = [660,825]
+cam_move(cam, robot, TCR)
+camera_transform = cam.T
+global_pin2 = cam_to_global(660,825, camera_transform)
+pin_test = collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pin2[0], global_pin2[1], global_pin2[2]-0.05), color = [0.2,0.5,0.2,1])
+env.add(pin_test)
+# q to pick coin
 q_coin_position = [33.95, -75.09, 53.02, -67.54, -89.51, 304.66]
 q_coin_position = [math.radians(joint_home_degree) for joint_home_degree in q_coin_position]
 
@@ -104,4 +140,4 @@ for instruction in path_instruction:
     move_simulation_robot(robot = robot, path= instruction['dropping'], env= env, dt = 0.05, gripper = gripper, cam = cam, TCR = TCR, TGR = TGR)
     arrived = True
 
-    
+env.hold()

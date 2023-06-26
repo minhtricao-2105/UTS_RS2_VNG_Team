@@ -17,14 +17,14 @@ import cv2 as cv
 import math
 from math import sqrt, pow
 from colorLibrary import*
-import imutils
+# import imutils
 from colorLibrary import*
 from ur3module import *
-import moveit_commander
-import moveit_msgs.msg
+# import moveit_commander
+# import moveit_msgs.msg
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-from gripperFunction import*
+# from gripperFunction import*
 import time
 import actionlib
 
