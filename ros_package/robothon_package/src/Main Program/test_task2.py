@@ -33,14 +33,20 @@ env._send_socket
 # Clone
 robot = rtb.models.UR3()
 
+# Coin holder
+coin_holder_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/Coin Holder Final x 1.STL"
+coin_holder = collisionObj.Mesh(filename=coin_holder_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001])
+coin_holder.T = trotz(pi/2) @ coin_holder.T
+coin_holder.T = transl(0.2231 + 0.024,0.2865 - 0.03, 0.023) @ coin_holder.T
+
 # Box 
-box_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
+box_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
 box = collisionObj.Mesh(filename= box_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = [0.4,0.4,0.4,0.5])
 box.T = trotx(pi/2) @ troty(pi)
 box.T = transl(0.207,-0.0084,-0.140) @ box.T  
 
 # Gripper
-gripper_path = "/home/quangngo/Robotics Studio 2/GroupGit/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
+gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
 gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
 TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175) # gripper pose in ee frame
 
@@ -49,7 +55,7 @@ cam = collisionObj.Cuboid(scale=[0.03,0.06,0.015], pose = SE3(0,0,0), color = [0
 TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) # cam pose in ee frame
 
 # Coin
-coin = collisionObj.Cylinder(radius = 0.01, length= 0.005, pose = SE3(0, 0, 0), color = [0.3,0.3,0.1,1])
+coin = collisionObj.Cylinder(radius = 0.01, length= 0.002, pose = SE3(0, 0, 0), color = [0.3,0.3,0.1,1])
 TCC = SE3(0.23,0,0) * SE3.Rx(pi/2) #coin pose in ee frame
 coin.T = np.array([[-0.01042, -0.9999, 0.01244, 0.2231],
                    [0.003293, 0.0124, 0.9999, 0.2865],
@@ -67,6 +73,7 @@ env.add(box)
 # env.add(cam)
 env.add(gripper)
 env.add(coin)
+env.add(coin_holder)
 
 # Test hole:
 hole = [660,825]

@@ -100,7 +100,7 @@ def batteries_callback(data):
         image_1 = bridge_1.imgmsg_to_cv2(data, "bgr8")
 
         # Determine how many batteries in the slider:
-        calculate_numBa()
+        # calculate_numBa()
         rospy.sleep(0.5)
         
         # Detect the location of the batteries and the type of the batteries:
@@ -115,7 +115,7 @@ def batteries_callback(data):
 
 def canny_edge(img):
 
-    img = cv.convertScaleAbs(img, alpha=1, beta=120)
+    img = cv.convertScaleAbs(img, alpha=1, beta=110)
 
     grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 

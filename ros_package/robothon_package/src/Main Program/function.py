@@ -482,7 +482,7 @@ def get_task2_param(robot, joint_home_radian, lift_coin_up, T_coin, is_battery_t
     q_drop_radian = [math.radians(joint_home_degree) for joint_home_degree in q_drop]
 
     #-> For batteries
-    q_droppin_1 = [78.65, -96.40, 64.17, -58.12, -88.22, 252.57]
+    q_droppin_1 = [78.1, -96.71, 64.42, -58.05, -88.22, 252.02]
     q_droppin_1 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_1]
     q_droppin_2 = [70.67, -97.03, 61.32, -54.39, -88.19, 242.99]
     q_droppin_2 = [math.radians(joint_home_degree) for joint_home_degree in q_droppin_2]    

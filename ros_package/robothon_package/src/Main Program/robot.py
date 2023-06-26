@@ -216,14 +216,14 @@ while running_ == True:
     robot = rtb.models.UR3()
     
     # Box 
-    box_path = "/home/minhtricao/robothon2023/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
-    box = collisionObj.Mesh(filename= box_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = [0.4,0.4,0.4,1])
+    box_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/BOX_FINAL.STL"
+    box = collisionObj.Mesh(filename= box_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = [0,0.5,0,1])
     box.T = trotx(pi/2) @ troty(pi)
-    box.T = transl(0.207,-0.0084,-0.140) @ box.T  
+    box.T = transl(0.207 - 0.0025,-0.0084+0.02,-0.143) @ box.T  
 
     # Gripper
     gripper_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/CAMGRIPPER.STL"
-    gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.5,0.1,0.1,1])
+    gripper = collisionObj.Mesh(filename=gripper_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001],color = [0.0,0.0,0.0,1])
     TGR = SE3.Rx(pi)*SE3(0,-0.105,-0.175) # gripper pose in ee frame
 
     # Camera
@@ -231,12 +231,18 @@ while running_ == True:
     TCR = SE3(0.085,0,0.09)*SE3.Ry(pi/2) # cam pose in ee frame
 
     # Coin
-    coin = collisionObj.Cylinder(radius = 0.01, length= 0.005, pose = SE3(0, 0, 0), color = [0.3,0.3,0.1,1])
+    coin = collisionObj.Cylinder(radius = 0.01, length= 0.002, pose = SE3(0, 0, 0), color = [0.3,0.3,0.1,1])
     TCC = SE3(0.23,0,0) * SE3.Rx(pi/2) #coin pose in ee frame
     coin.T = np.array([[-0.01042, -0.9999, 0.01244, 0.2231],
                    [0.003293, 0.0124, 0.9999, 0.2865],
                    [-0.9999, 0.01046, 0.003163, 0.34],
                    [0, 0, 0, 1]]) @ TCC.A
+    
+    # Coin holder
+    coin_holder_path = "/home/minhtricao/robothon2023/RTB-P Test Files/SomeApplications/Coin Holder Final x 1.STL"
+    coin_holder = collisionObj.Mesh(filename=coin_holder_path,pose = SE3(0,0,0),scale=[0.001, 0.001, 0.001], color = (0.5,0,0.5,1))
+    coin_holder.T = trotz(pi/2) @ coin_holder.T
+    coin_holder.T = transl(0.2231 + 0.024,0.2865 - 0.03, 0.023) @ coin_holder.T
     
     # Set initial position
     q_deg = [57.11, -106.32, 56.84, -44.7, -85.81, 328.40]
@@ -248,7 +254,9 @@ while running_ == True:
     # env.add(cam)
     env.add(gripper)
     env.add(coin)
+    env.add(coin_holder)
     env.add(box)
+
 
     pin = [] # List of pins
     TCP = SE3(0.23,0,0)*SE3.Ry(pi/2) # pin pose in ee frame
@@ -260,8 +268,9 @@ while running_ == True:
     for i in range(len(location_array)):
         global_pos = cam_to_global(location_array[i][0],location_array[i][1], camera_transform)
         color = (0.2,0.2,0.5,1)
-        if location_array[i][2] == 0 : color = (0.2,0.5,0.2,1)
-        pin.append(collisionObj.Cylinder(radius = 0.005, length= 0.06, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = color))
+        if location_array[i][2] == 0 : color = (0.5,0.0,0.2,1)
+        pin.append(collisionObj.Cylinder(radius = 0.007, length= 0.050, pose = SE3(global_pos[0], global_pos[1], global_pos[2]-0.05), color = color))
+        pin[i].T = transl(-0.004,0.016,0) @ pin[i].T 
         env.add(pin[i])
     ## INITIAL SET UP- DONE ------------------------------------------------------------------------------------------------------------------------------------ #
     
@@ -465,15 +474,9 @@ while running_ == True:
     #### 3.1 MOVE TO ROBOT TO THE POSITION BEFORE FLIPPING THE BATTERY 1:
 
                 # TEST ADDING BATTERY INFO AND DROPPING INFO
-<<<<<<< HEAD
-    is_battery_there = '12' # '1': only battery 1,'2': only battery 2, '12': both batteries 
-
-    flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there)
-=======
-    is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
-    # is_battery_there = '12'
+    # is_battery_there = numba_messange # '1': only battery 1,'2': only battery 2, '12': both batteries 
+    is_battery_there = '12'
     flick_instruction, path_instruction = get_task2_param(robot, joint_home_radian, lift_coin_up[-1], TCC, is_battery_there, num_AA=num_AA)
->>>>>>> refs/remotes/origin/main
 
     for instruction in flick_instruction:
         # Move coin to the battery
