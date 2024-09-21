@@ -1,4 +1,7 @@
 # University of Technology Sydney -Robotics Studio 2 - Robothon Team 
+Video: 
+https://youtu.be/iCPoGm3XHzU 
+https://youtu.be/kTsTLy-ijzU
 
 ## Description of the project
 The problem statement for the Robothon Competition is centred around the issue of e-waste, which poses a significant threat to the environment and human health due to hazardous materials like lead, mercury, and cadmium. With the increased usage of electronic devices worldwide, it has become crucial to find an efficient and safe way to disassemble e-waste. Therefore, the competition aims to develop autonomous robotic solutions to handle e-waste more sustainably and efficiently, promoting ecologically responsible e-waste management practices
